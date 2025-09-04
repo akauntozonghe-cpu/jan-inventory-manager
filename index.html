@@ -2,17 +2,33 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ログイン画面</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <script src="js/main.js" defer></script>
+  <title>責任者ログイン</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <form id="loginForm">
-    <h2>責任者番号でログイン</h2>
-    <input type="text" id="managerNumber" placeholder="番号を入力" required>
-    <button type="submit">ログイン</button>
-  </form>
+  <h2>責任者番号でログイン</h2>
+  <input type="text" id="numberInput" placeholder="番号を入力">
+  <button id="loginBtn">ログイン</button>
+
+  <script src="main.js" defer></script>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    console.log("Firebase 初期化完了");
+  </script>
 </body>
 </html>
