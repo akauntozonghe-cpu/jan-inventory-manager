@@ -1,58 +1,49 @@
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+// Firebase設定（実際の値に置き換え）
 const firebaseConfig = {
-  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.firebasestorage.app",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "SENDER_ID",
+  appId: "APP_ID"
 };
 
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// 初期化
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+console.log("Firebase 初期化完了");
 
 // ログイン処理
-if (document.getElementById("loginForm")) {
-  document.getElementById("loginForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const inputNumber = document.getElementById("managerNumber").value.trim();
-
-    const q = db.collection("users").where("number", "==", inputNumber);
-    const snapshot = await q.get();
-
-    if (snapshot.empty) {
-      alert("番号が登録されていません");
-      return;
-    }
-
-    const data = snapshot.docs[0].data();
-    sessionStorage.setItem("role", data.role);
-    sessionStorage.setItem("number", data.number);
-
-    if (data.role === "admin") {
-      window.location.href = "admin.html";
-    } else {
-      window.location.href = "user.html";
-    }
-  });
-}
-
-// 管理者画面のアクセス制御とデータ表示
-if (location.pathname.includes("admin.html")) {
-  const role = sessionStorage.getItem("role");
-  if (role !== "admin") {
-    alert("管理者以外はアクセスできません");
-    window.location.href = "index.html";
-  } else {
-    const docRef = db.collection("adminData").doc("testDoc");
-    docRef.get().then((doc) => {
-      if (doc.exists) {
-        document.getElementById("adminData").innerText = JSON.stringify(doc.data(), null, 2);
-      } else {
-        document.getElementById("adminData").innerText = "データが存在しません";
-      }
-    });
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  const number = document.getElementById("numberInput").value.trim();
+  if (!number) {
+    alert("番号を入力してください");
+    return;
   }
-}
+
+  try {
+    // Firestoreの "responsibleNumbers" コレクションに番号があるか確認
+    const docRef = doc(db, "responsibleNumbers", number);
+    const docSnap = await getDoc(docRef);
+
+    if (docSnap.exists()) {
+      const role = docSnap.data().role; // 例: { role: "admin" }
+      if (role === "admin") {
+        alert("管理者としてログイン成功");
+        window.location.href = "admin.html";
+      } else {
+        alert("ユーザーとしてログイン成功");
+        window.location.href = "system.html";
+      }
+    } else {
+      alert("番号が見つかりません");
+    }
+  } catch (error) {
+    console.error("ログインエラー:", error);
+    alert("ログイン処理中にエラーが発生しました");
+  }
+});

@@ -10,25 +10,7 @@
   <input type="text" id="numberInput" placeholder="番号を入力">
   <button id="loginBtn">ログイン</button>
 
-  <script src="main.js" defer></script>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    console.log("Firebase 初期化完了");
-  </script>
+  <!-- v9モジュール形式で読み込む -->
+  <script type="module" src="main.js"></script>
 </body>
 </html>
