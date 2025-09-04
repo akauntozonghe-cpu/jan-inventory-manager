@@ -193,4 +193,3 @@ el("btnCreate").addEventListener("click", async () => {
   const owner = el("newOwner").value.trim();
   const qty = parseInt(el("newQty").value) || 0;
   if (!id) return alert("バーコード必須");
-  await setDoc(doc(db, "items",
