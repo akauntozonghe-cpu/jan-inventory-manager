@@ -2,498 +2,195 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <title>在庫・責任者管理（デモ）</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>在庫・責任者管理</title>
   <style>
-    :root {
-      --bg:#0f1218; --panel:#171b22; --ink:#e8eefc; --muted:#aab3c5; --accent:#4da3ff; --ok:#2ecc71; --warn:#ffb020; --err:#ff5d5d;
-      --radius:12px;
-    }
-    html,body { margin:0; padding:0; background:var(--bg); color:var(--ink); font-family:system-ui,-apple-system,'Segoe UI',Roboto,'Hiragino Sans','Noto Sans JP',sans-serif; }
-    header { padding:16px; position:sticky; top:0; background:linear-gradient(180deg,rgba(15,18,24,.98),rgba(15,18,24,.6) 70%,rgba(15,18,24,0)); backdrop-filter: blur(6px); z-index:10; }
-    h1 { font-size:18px; margin:0 0 6px; }
-    .sub { color:var(--muted); font-size:12px; }
-    main { padding:16px; display:grid; gap:16px; }
-    section { background:var(--panel); border-radius:var(--radius); padding:14px; box-shadow: 0 0 0 1px rgba(255,255,255,.03) inset; }
-    h2 { font-size:15px; margin:0 0 10px; }
-    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    input, select, button, textarea {
-      background:#10141b; color:var(--ink); border:1px solid #242a34; border-radius:10px; padding:10px 12px; font-size:14px; outline:none;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(77,163,255,.15); }
-    button { background:#142033; border-color:#223148; cursor:pointer; }
-    button.primary { background: linear-gradient(180deg,#2b6cff,#1a5ae6); border-color:#1b4fb8; }
-    button.ok { background: linear-gradient(180deg,#35c978,#2aae67); border-color:#1d7d4a; }
-    button.warn { background: linear-gradient(180deg,#ffb347,#ff9820); border-color:#cc7c18; color:#1d1200; }
-    button.danger { background: linear-gradient(180deg,#ff6b6b,#ff4a4a); border-color:#b01919; }
-    button:disabled { opacity:.5; cursor:not-allowed; }
-    .grid { display:grid; gap:8px; }
-    .cols-2 { grid-template-columns: 1fr 1fr; }
-    .item { display:grid; grid-template-columns: auto 1fr auto; gap:8px; align-items:center; padding:10px; border:1px solid #232a35; border-radius:10px; }
-    .item .name { font-weight:600; }
-    .item .meta { color:var(--muted); font-size:12px; }
-    .qty { display:flex; align-items:center; gap:6px; }
-    .pill { padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #2a3342; color:var(--muted); }
-    .admin-only { border:1px dashed #38517a; padding:10px; border-radius:10px; }
-    .hint { color:var(--muted); font-size:12px; }
-    video { width:100%; max-height:240px; background:#000; border-radius:12px; }
-    .hr { height:1px; background:#242b36; margin:10px 0; }
-    .right { margin-left:auto; }
-    .list { display:grid; gap:8px; max-height:360px; overflow:auto; }
-    .kbd { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background:#0c1016; border:1px solid #1b2230; padding:2px 6px; border-radius:6px; font-size:12px; color:#cfe0ff; }
-    .tag { padding:2px 8px; border-radius:999px; font-size:12px; border:1px solid #2a3342; }
-    .tag.admin { border-color:#2f6fe0; color:#9ec0ff; }
-    .tag.user { border-color:#2f8f60; color:#aee8c8; }
-    .hide { display:none !important; }
-    footer { padding:24px; color:var(--muted); font-size:12px; text-align:center; }
+    body { font-family: sans-serif; background: #0f1218; color: #e8eefc; margin: 0; }
+    header { padding: 10px; background: #171b22; position: sticky; top: 0; }
+    h1 { margin: 0; font-size: 18px; }
+    main { padding: 10px; }
+    section { background: #171b22; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    input, button, select { padding: 6px; margin: 2px; border-radius: 4px; border: 1px solid #333; }
+    button { cursor: pointer; }
+    .hide { display: none; }
+    .list { display: grid; gap: 6px; }
+    .item { background: #10141b; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
   </style>
 </head>
 <body>
 <header>
   <h1>在庫・責任者管理</h1>
-  <div class="sub" id="headerStatus">未サインイン</div>
+  <div id="headerStatus">未サインイン</div>
 </header>
-
 <main>
   <!-- サインイン -->
   <section id="signinSection">
-    <h2>サインイン（責任者番号）</h2>
-    <div class="grid">
-      <div class="row">
-        <input id="respNumber" inputmode="numeric" pattern="[0-9]*" placeholder="責任者番号（例: 1234）" />
-        <input id="respName" placeholder="表示名（初回または変更時）" />
-        <button id="btnSignIn" class="primary">サインイン</button>
-        <button id="btnSignOut">サインアウト</button>
-      </div>
-      <div class="hint">管理者は 1234（初期値）。サインイン後、権限に応じて画面が切替わります。</div>
-    </div>
+    <h2>サインイン</h2>
+    <input id="respNumber" placeholder="責任者番号（例: 1234）" />
+    <input id="respName" placeholder="表示名（任意）" />
+    <button id="btnSignIn">サインイン</button>
+    <button id="btnSignOut">サインアウト</button>
   </section>
 
-  <!-- バーコード読取・検索 -->
-  <section id="scanSection" class="hide">
-    <h2>バーコード読取・検索</h2>
-    <div class="grid">
-      <div id="scanControls" class="row">
-        <button id="btnStartScan" class="primary">カメラでスキャン</button>
-        <button id="btnStopScan">停止</button>
-        <span id="scanSupport" class="pill">端末サポート確認中...</span>
-      </div>
-      <video id="video" playsinline class="hide"></video>
-      <div class="row">
-        <input id="barcodeInput" placeholder="バーコードを手入力（JAN 等）" />
-        <button id="btnSearch" class="primary">検索</button>
-      </div>
-      <div class="hint">スキャン成功時は自動で検索します。未対応端末は手入力をご利用ください。</div>
-    </div>
-  </section>
-
-  <!-- 在庫一覧・数量変更 -->
+  <!-- 在庫一覧 -->
   <section id="inventorySection" class="hide">
-    <h2>在庫一覧・数量変更</h2>
-    <div class="row">
-      <input id="filterText" placeholder="商品名でフィルタ" />
-      <button id="btnReload">再読込</button>
-      <span class="right pill" id="whoAmI"></span>
-    </div>
+    <h2>在庫一覧</h2>
+    <input id="filterText" placeholder="商品名でフィルタ" />
+    <button id="btnReload">再読込</button>
     <div class="list" id="itemsList"></div>
   </section>
 
-  <!-- 管理者：在庫の新規追加・基本情報編集 -->
+  <!-- 管理者：在庫追加/削除 -->
   <section id="adminItemsSection" class="hide">
-    <h2>管理者：在庫の新規追加・削除</h2>
-    <div class="admin-only grid">
-      <div class="row">
-        <input id="newBarcode" placeholder="バーコード（ドキュメントIDに使用）" />
-        <input id="newName" placeholder="商品名" />
-        <input id="newOwner" placeholder="所有者/責任者番号（任意）" />
-        <input id="newQty" type="number" inputmode="numeric" placeholder="数量（初期）" value="0" />
-        <button id="btnCreate" class="ok">新規追加</button>
-      </div>
-      <div class="row">
-        <input id="delBarcode" placeholder="削除するバーコード" />
-        <button id="btnDelete" class="danger">削除</button>
-      </div>
-      <div class="hint">基本情報（商品名・所有者）は管理者のみ編集可能。数量は誰でも変更可。</div>
-    </div>
+    <h2>管理者：在庫追加/削除</h2>
+    <input id="newBarcode" placeholder="バーコード" />
+    <input id="newName" placeholder="商品名" />
+    <input id="newOwner" placeholder="所有者番号" />
+    <input id="newQty" type="number" value="0" />
+    <button id="btnCreate">追加</button>
+    <br>
+    <input id="delBarcode" placeholder="削除バーコード" />
+    <button id="btnDelete">削除</button>
   </section>
 
   <!-- 管理者：責任者管理 -->
   <section id="adminRolesSection" class="hide">
     <h2>管理者：責任者管理</h2>
-    <div class="admin-only grid">
-      <div class="row">
-        <input id="roleNumber" placeholder="責任者番号（例: 5678）" />
-        <input id="roleName" placeholder="氏名/表示名" />
-        <select id="roleRole">
-          <option value="user">一般</option>
-          <option value="admin">管理者</option>
-        </select>
-        <button id="btnUpsertRole" class="ok">追加/更新</button>
-        <button id="btnRemoveRole" class="danger">削除</button>
-      </div>
-      <div class="hr"></div>
-      <div class="list" id="rolesList"></div>
-    </div>
+    <input id="roleNumber" placeholder="責任者番号" />
+    <input id="roleName" placeholder="氏名" />
+    <select id="roleRole">
+      <option value="user">一般</option>
+      <option value="admin">管理者</option>
+    </select>
+    <button id="btnUpsertRole">追加/更新</button>
+    <button id="btnRemoveRole">削除</button>
+    <div class="list" id="rolesList"></div>
   </section>
 </main>
 
-<footer>デモ用途。実運用では Firestore セキュリティルールを必ず設定してください。</footer>
-
-<!-- Firebase SDK (Modular) -->
 <script type="module">
-  // ===== Enterキーでサインイン（404防止） =====
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let session = { number: null, name: null, role: "user" };
+const el = id => document.getElementById(id);
+
+function refreshUI() {
+  const signedIn = !!session.number;
+  el("inventorySection").classList.toggle("hide", !signedIn);
+  const isAdmin = session.role === "admin";
+  el("adminItemsSection").classList.toggle("hide", !(signedIn && isAdmin));
+  el("adminRolesSection").classList.toggle("hide", !(signedIn && isAdmin));
+  el("headerStatus").textContent = signedIn
+    ? `${session.name ?? "名無し"}（番号:${session.number} / ${session.role}）`
+    : "未サインイン";
+}
+
+async function ensureInitialAdmin() {
+  const ref = doc(db, "roles", "1234");
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    await setDoc(ref, { name: "管理者", role: "admin" });
+  }
+}
+ensureInitialAdmin();
+
+el("btnSignIn").addEventListener("click", async () => {
+  const number = el("respNumber").value.trim();
+  const nameInput = el("respName").value.trim();
+  if (!number) return alert("番号を入力");
+  const ref = doc(db, "roles", number);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) {
+    await setDoc(ref, { name: nameInput || "新規ユーザー", role: "user" });
+  } else if (nameInput) {
+    await updateDoc(ref, { name: nameInput });
+  }
+  const roleData = (await getDoc(ref)).data();
+  session = { number, name: roleData.name, role: roleData.role };
+  localStorage.setItem("session", JSON.stringify(session));
+  refreshUI();
+  loadItems();
+  loadRoles();
+});
+
+el("btnSignOut").addEventListener("click", () => {
+  session = { number: null, name: null, role: "user" };
+  localStorage.removeItem("session");
+  refreshUI();
+});
+
+(function restoreSession() {
+  const raw = localStorage.getItem("session");
+  if (raw) {
+    try { session = JSON.parse(raw); } catch {}
+  }
+  refreshUI();
+  if (session.number) { loadItems(); loadRoles(); }
+})();
+
+// Enterキー対応（404防止）
 ["respNumber", "respName"].forEach(id => {
-  document.getElementById(id).addEventListener("keydown", function(e) {
+  el(id).addEventListener("keydown", e => {
     if (e.key === "Enter") {
-      e.preventDefault(); // ページ遷移を防ぐ
-      document.getElementById("btnSignIn").click(); // サインイン処理を呼び出す
+      e.preventDefault();
+      el("btnSignIn").click();
     }
   });
 });
-  // ===== Firebase 初期化（自分のプロジェクト情報に置き換え） =====
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-  import {
-    getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, onSnapshot, query, orderBy, where
-  } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.firebasestorage.app",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
-};
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+async function loadItems() {
+  const q = query(collection(db, "items"), orderBy("name"));
+  const snap = await getDocs(q);
+  const arr = [];
+  snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
+  renderItems(arr);
+}
 
-  // ===== 状態 =====
-  let session = {
-    number: null,   // 責任者番号（文字列）
-    name: null,     // 表示名
-    role: "user"    // "admin" | "user"
-  };
-
-  // ===== DOM 参照 =====
-  const el = (id) => document.getElementById(id);
-  const headerStatus = el("headerStatus");
-  const whoAmI = el("whoAmI");
-
-  // ===== UI 切替 =====
-  function refreshUI() {
-    const signedIn = !!session.number;
-    el("scanSection").classList.toggle("hide", !signedIn);
-    el("inventorySection").classList.toggle("hide", !signedIn);
-    const isAdmin = session.role === "admin";
-    el("adminItemsSection").classList.toggle("hide", !(signedIn && isAdmin));
-    el("adminRolesSection").classList.toggle("hide", !(signedIn && isAdmin));
-    headerStatus.textContent = signedIn
-      ? `サインイン中：${session.name ?? "名無し"}（番号: ${session.number} / 権限: ${session.role}）`
-      : "未サインイン";
-    whoAmI.textContent = signedIn ? `あなた：${session.name ?? "名無し"} / ${session.number} / ${session.role}` : "";
-  }
-
-  // ===== 初期データ（初回にだけ実行したい場合は手動呼び） =====
-  async function ensureInitialAdmin() {
-    const ref = doc(db, "roles", "1234");
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      await setDoc(ref, { name: "管理者", role: "admin", createdAt: Date.now() });
-    }
-  }
-  ensureInitialAdmin().catch(console.error);
-
-  // ===== サインイン/アウト（超簡易：番号だけで識別） =====
-  el("btnSignIn").addEventListener("click", async () => {
-    const number = (el("respNumber").value || "").trim();
-    const nameInput = (el("respName").value || "").trim();
-    if (!number) { alert("責任者番号を入力してください"); return; }
-    // 役割取得 or 新規作成（一般）
-    const ref = doc(db, "roles", number);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      // まだ存在しない番号は一般として作成（管理者のみ本来作成可能だが、デモの利便性のため）
-      await setDoc(ref, { name: nameInput || "新規ユーザー", role: "user", createdAt: Date.now() });
-    } else if (nameInput && snap.data().name !== nameInput) {
-      // 表示名更新（本人でも可にしている。厳密運用では管理者限定に）
-      await updateDoc(ref, { name: nameInput });
-    }
-    const roleData = (await getDoc(ref)).data();
-    session.number = number;
-    session.name = roleData.name || nameInput || "";
-    session.role = roleData.role || "user";
-    localStorage.setItem("session", JSON.stringify(session));
-    refreshUI();
-    loadItems();
-    loadRoles();
+function renderItems(items) {
+  const list = el("itemsList");
+  list.innerHTML = "";
+  items.forEach(it => {
+    const div = document.createElement("div");
+    div.className = "item";
+    div.innerHTML = `
+      <span>${it.name || "(無題)"} / 在庫:${it.quantity ?? 0}</span>
+      <span>
+        <button data-act="decr" data-id="${it.id}">-</button>
+        <button data-act="incr" data-id="${it.id}">+</button>
+      </span>`;
+    list.appendChild(div);
   });
+}
 
-  el("btnSignOut").addEventListener("click", () => {
-    session = { number: null, name: null, role: "user" };
-    localStorage.removeItem("session");
-    refreshUI();
-  });
+el("itemsList").addEventListener("click", async e => {
+  const btn = e.target.closest("button");
+  if (!btn) return;
+  const id = btn.dataset.id;
+  const act = btn.dataset.act;
+  const ref = doc(db, "items", id);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  let qty = snap.data().quantity ?? 0;
+  if (act === "incr") qty++;
+  if (act === "decr") qty = Math.max(0, qty - 1);
+  await updateDoc(ref, { quantity: qty });
+  loadItems();
+});
 
-  // 復元
-  (function restoreSession() {
-    const raw = localStorage.getItem("session");
-    if (raw) {
-      try {
-        const s = JSON.parse(raw);
-        if (s && s.number) session = s;
-      } catch {}
-    }
-    refreshUI();
-    if (session.number) {
-      loadItems();
-      loadRoles();
-    }
-  })();
-
-  // ===== 在庫（items） =====
-  const itemsList = el("itemsList");
-  const filterText = el("filterText");
-  filterText.addEventListener("input", renderItemsFiltered);
-
-  async function loadItems() {
-    const q = query(collection(db, "items"), orderBy("name"));
-    const snap = await getDocs(q);
-    const arr = [];
-    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-    window._items = arr;
-    renderItemsFiltered();
-  }
-
-  function renderItemsFiltered() {
-    const q = (filterText.value || "").toLowerCase();
-    const arr = (window._items || []).filter(it => (it.name||"").toLowerCase().includes(q));
-    renderItems(arr);
-  }
-
-  function renderItems(items) {
-    itemsList.innerHTML = "";
-    if (!items.length) { itemsList.innerHTML = `<div class="hint">該当なし</div>`; return; }
-    items.forEach(it => {
-      const row = document.createElement("div");
-      row.className = "item";
-      row.innerHTML = `
-        <div>
-          <div class="name">${escapeHtml(it.name || "(無題)")}</div>
-          <div class="meta">バーコード: <span class="kbd">${it.id}</span>　所有者: ${escapeHtml(it.owner || "-")}</div>
-        </div>
-        <div class="right qty">
-          <button data-act="decr" data-id="${it.id}">-</button>
-          <span class="pill">在庫: <b>${Number(it.quantity ?? 0)}</b></span>
-          <button data-act="incr" data-id="${it.id}">+</button>
-        </div>
-      `;
-      itemsList.appendChild(row);
-    });
-  }
-
-  itemsList.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    const act = btn.dataset.act;
-    const id = btn.dataset.id;
-    const it = (window._items || []).find(x => x.id === id);
-    if (!it) return;
-    let newQty = Number(it.quantity ?? 0);
-    if (act === "incr") newQty++;
-    if (act === "decr") newQty = Math.max(0, newQty - 1);
-    try {
-      await updateDoc(doc(db, "items", id), { quantity: newQty });
-      it.quantity = newQty;
-      renderItemsFiltered();
-    } catch (err) {
-      alert("数量の更新に失敗しました。権限またはルールを確認してください。");
-      console.error(err);
-    }
-  });
-
-  // ===== 管理者：在庫の新規追加/削除 =====
-  el("btnCreate").addEventListener("click", async () => {
-    if (session.role !== "admin") return alert("管理者のみ可能です");
-    const id = (el("newBarcode").value || "").trim();
-    const name = (el("newName").value || "").trim();
-    const owner = (el("newOwner").value || "").trim();
-    const qty = Number(el("newQty").value || 0);
-    if (!id || !name) { alert("バーコードと商品名は必須です"); return; }
-    try {
-      await setDoc(doc(db, "items", id), { name, owner: owner || session.number, quantity: qty, updatedAt: Date.now() }, { merge: true });
-      el("newBarcode").value = ""; el("newName").value = ""; el("newOwner").value = ""; el("newQty").value = "0";
-      await loadItems();
-      alert("作成/更新しました");
-    } catch (err) {
-      alert("作成に失敗しました"); console.error(err);
-    }
-  });
-
-  el("btnDelete").addEventListener("click", async () => {
-    if (session.role !== "admin") return alert("管理者のみ可能です");
-    const id = (el("delBarcode").value || "").trim();
-    if (!id) return alert("バーコードを入力してください");
-    if (!confirm(`在庫 ${id} を削除します。よろしいですか？`)) return;
-    try {
-      await deleteDoc(doc(db, "items", id));
-      el("delBarcode").value = "";
-      await loadItems();
-      alert("削除しました");
-    } catch (err) {
-      alert("削除に失敗しました"); console.error(err);
-    }
-  });
-
-  // ===== 検索/スキャン =====
-  async function searchByBarcode(code) {
-    if (!code) return;
-    el("barcodeInput").value = code;
-    // items は docId=barcode で管理
-    const ref = doc(db, "items", code);
-    const snap = await getDoc(ref);
-    if (snap.exists()) {
-      // ヒット → 一覧のフィルタをその商品名にあわせる
-      const item = { id: snap.id, ...snap.data() };
-      filterText.value = item.name || "";
-      await loadItems();
-      // 同名多数ある場合は手動で確認
-    } else {
-      if (session.role === "admin") {
-        // 未登録 → 管理者はすぐ作成できるようフォームに流し込む
-        el("newBarcode").value = code;
-        el("newName").focus();
-        alert("未登録のバーコードです。商品名を入力し、新規追加してください。");
-      } else {
-        alert("未登録のバーコードです（管理者に登録を依頼してください）");
-      }
-    }
-  }
-
-  el("btnSearch").addEventListener("click", () => searchByBarcode((el("barcodeInput").value || "").trim()));
-  el("btnReload").addEventListener("click", loadItems);
-
-  // BarcodeDetector（対応端末のみ）
-  const video = el("video");
-  const btnStartScan = el("btnStartScan");
-  const btnStopScan = el("btnStopScan");
-  const scanSupport = el("scanSupport");
-  let mediaStream = null, scanning = false, detectTimer = null, detector = null;
-
-  async function initDetector() {
-    if ("BarcodeDetector" in window) {
-      const formats = ["ean_13", "ean_8", "upc_a", "upc_e", "code_128", "code_39", "qr_code"];
-      detector = new window.BarcodeDetector({ formats });
-      scanSupport.textContent = "スキャン対応: OK";
-      scanSupport.classList.remove("pill"); scanSupport.classList.add("tag","admin"); // ちょい青表示
-    } else {
-      scanSupport.textContent = "スキャン非対応（手入力をご利用ください）";
-      scanSupport.classList.remove("pill"); scanSupport.classList.add("tag","user");
-      btnStartScan.disabled = true;
-    }
-  }
-  initDetector();
-
-  btnStartScan.addEventListener("click", async () => {
-    if (!detector) return;
-    try {
-      mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false });
-      video.srcObject = mediaStream;
-      video.classList.remove("hide");
-      await video.play();
-      scanning = true;
-      loopDetect();
-    } catch (err) {
-      alert("カメラにアクセスできませんでした"); console.error(err);
-    }
-  });
-
-  btnStopScan.addEventListener("click", stopScan);
-  function stopScan() {
-    scanning = false;
-    if (detectTimer) cancelAnimationFrame(detectTimer);
-    if (video) { video.pause(); video.classList.add("hide"); }
-    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
-  }
-
-  async function loopDetect() {
-    if (!scanning) return;
-    try {
-      const codes = await detector.detect(video);
-      if (codes && codes.length) {
-        stopScan();
-        const code = codes[0].rawValue || codes[0].rawValue;
-        await searchByBarcode(code);
-        return;
-      }
-    } catch (e) { /* ignore */ }
-    detectTimer = requestAnimationFrame(loopDetect);
-  }
-
-  // ===== 役割（roles） =====
-  const rolesList = el("rolesList");
-  async function loadRoles() {
-    if (session.role !== "admin") { rolesList.innerHTML = ""; return; }
-    const snap = await getDocs(collection(db, "roles"));
-    const arr = [];
-    snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-    rolesList.innerHTML = "";
-    arr.sort((a,b) => (a.role === b.role ? a.id.localeCompare(b.id) : a.role === "admin" ? -1 : 1));
-    arr.forEach(r => {
-      const div = document.createElement("div");
-      div.className = "item";
-      div.innerHTML = `
-        <div>
-          <div class="name">${escapeHtml(r.name || "(無名)")} <span class="tag ${r.role === "admin" ? "admin" : "user"}">${r.role}</span></div>
-          <div class="meta">番号: <span class="kbd">${r.id}</span></div>
-        </div>
-        <div class="right row">
-          <button data-act="role-edit" data-id="${r.id}" class="warn">編集</button>
-          <button data-act="role-del" data-id="${r.id}" class="danger">削除</button>
-        </div>
-      `;
-      rolesList.appendChild(div);
-    });
-  }
-
-  rolesList.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button"); if (!btn) return;
-    const id = btn.dataset.id;
-    if (btn.dataset.act === "role-del") {
-      if (!confirm(`責任者 ${id} を削除しますか？`)) return;
-      try { await deleteDoc(doc(db, "roles", id)); await loadRoles(); alert("削除しました"); } catch (err) { alert("削除に失敗"); console.error(err); }
-    } else if (btn.dataset.act === "role-edit") {
-      const name = prompt("表示名を入力");
-      const role = prompt("role を入力（admin または user）", "user");
-      if (!name || !role) return;
-      try { await setDoc(doc(db, "roles", id), { name, role }, { merge: true }); await loadRoles(); alert("更新しました"); } catch (err) { alert("更新に失敗"); console.error(err); }
-    }
-  });
-
-  el("btnUpsertRole").addEventListener("click", async () => {
-    if (session.role !== "admin") return alert("管理者のみ可能です");
-    const number = (el("roleNumber").value || "").trim();
-    const name = (el("roleName").value || "").trim();
-    const role = el("roleRole").value;
-    if (!number || !name) return alert("番号と名前は必須です");
-    try { await setDoc(doc(db, "roles", number), { name, role, updatedAt: Date.now() }, { merge: true }); el("roleNumber").value=""; el("roleName").value=""; await loadRoles(); alert("追加/更新しました"); }
-    catch (err) { alert("追加/更新に失敗"); console.error(err); }
-  });
-
-  el("btnRemoveRole").addEventListener("click", async () => {
-    if (session.role !== "admin") return alert("管理者のみ可能です");
-    const number = (el("roleNumber").value || "").trim();
-    if (!number) return alert("番号を入力してください");
-    if (!confirm(`番号 ${number} を削除しますか？`)) return;
-    try { await deleteDoc(doc(db, "roles", number)); el("roleNumber").value=""; el("roleName").value=""; await loadRoles(); alert("削除しました"); }
-    catch (err) { alert("削除に失敗"); console.error(err); }
-  });
-
-  // ===== ユーティリティ =====
-  function escapeHtml(s){ return (s??"").replace(/[&<>"']/g, c=>({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
-
-</script>
-</body>
-</html>
+el("btnCreate").addEventListener("click", async () => {
+  if (session.role !== "admin") return alert("管理者のみ");
+  const id = el("newBarcode").value.trim();
+  const name = el("newName").value.trim();
+  const owner = el("newOwner").value.trim();
+  const qty = parseInt(el("newQty").value) || 0;
+  if (!id) return alert("バーコード必須");
+  await setDoc(doc(db, "items",
