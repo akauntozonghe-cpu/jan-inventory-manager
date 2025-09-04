@@ -1,195 +1,168 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>在庫・責任者管理</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在庫管理</title>
   <style>
-    body { font-family: sans-serif; background: #0f1218; color: #e8eefc; margin: 0; }
-    header { padding: 10px; background: #171b22; position: sticky; top: 0; }
-    h1 { margin: 0; font-size: 18px; }
-    main { padding: 10px; }
-    section { background: #171b22; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
-    input, button, select { padding: 6px; margin: 2px; border-radius: 4px; border: 1px solid #333; }
-    button { cursor: pointer; }
-    .hide { display: none; }
-    .list { display: grid; gap: 6px; }
-    .item { background: #10141b; padding: 6px; border-radius: 4px; display: flex; justify-content: space-between; align-items: center; }
+    body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
+    input, button { margin: 0.5em 0; padding: 0.5em; width: 100%; }
+    .admin-only { background: #f9f9f9; padding: 1em; border: 1px solid #ccc; }
+    .item { border-bottom: 1px solid #ddd; padding: 0.5em 0; }
   </style>
 </head>
 <body>
-<header>
-  <h1>在庫・責任者管理</h1>
-  <div id="headerStatus">未サインイン</div>
-</header>
-<main>
-  <!-- サインイン -->
+  <h1>在庫管理</h1>
+
   <section id="signinSection">
-    <h2>サインイン</h2>
     <input id="respNumber" placeholder="責任者番号（例: 1234）" />
-    <input id="respName" placeholder="表示名（任意）" />
     <button id="btnSignIn">サインイン</button>
     <button id="btnSignOut">サインアウト</button>
   </section>
 
-  <!-- 在庫一覧 -->
-  <section id="inventorySection" class="hide">
+  <section id="sessionInfo"></section>
+
+  <section id="itemsSection" style="display:none;">
     <h2>在庫一覧</h2>
-    <input id="filterText" placeholder="商品名でフィルタ" />
-    <button id="btnReload">再読込</button>
-    <div class="list" id="itemsList"></div>
+    <div id="itemsList"></div>
+
+    <div class="admin-only" id="adminItemControls" style="display:none;">
+      <h3>在庫追加</h3>
+      <input id="itemId" placeholder="バーコードID" />
+      <input id="itemName" placeholder="商品名" />
+      <input id="itemOwner" placeholder="責任者番号" />
+      <input id="itemQty" type="number" placeholder="数量" />
+      <button id="btnAddItem">追加</button>
+    </div>
   </section>
 
-  <!-- 管理者：在庫追加/削除 -->
-  <section id="adminItemsSection" class="hide">
-    <h2>管理者：在庫追加/削除</h2>
-    <input id="newBarcode" placeholder="バーコード" />
-    <input id="newName" placeholder="商品名" />
-    <input id="newOwner" placeholder="所有者番号" />
-    <input id="newQty" type="number" value="0" />
-    <button id="btnCreate">追加</button>
-    <br>
-    <input id="delBarcode" placeholder="削除バーコード" />
-    <button id="btnDelete">削除</button>
+  <section id="rolesSection" style="display:none;">
+    <h2>責任者一覧（管理者のみ）</h2>
+    <div id="rolesList"></div>
   </section>
 
-  <!-- 管理者：責任者管理 -->
-  <section id="adminRolesSection" class="hide">
-    <h2>管理者：責任者管理</h2>
-    <input id="roleNumber" placeholder="責任者番号" />
-    <input id="roleName" placeholder="氏名" />
-    <select id="roleRole">
-      <option value="user">一般</option>
-      <option value="admin">管理者</option>
-    </select>
-    <button id="btnUpsertRole">追加/更新</button>
-    <button id="btnRemoveRole">削除</button>
-    <div class="list" id="rolesList"></div>
-  </section>
-</main>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
-import { getFirestore, doc, getDoc, setDoc, updateDoc, deleteDoc, collection, getDocs, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
 
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-let session = { number: null, name: null, role: "user" };
-const el = id => document.getElementById(id);
+    const el = id => document.getElementById(id);
+    let session = null;
 
-function refreshUI() {
-  const signedIn = !!session.number;
-  el("inventorySection").classList.toggle("hide", !signedIn);
-  const isAdmin = session.role === "admin";
-  el("adminItemsSection").classList.toggle("hide", !(signedIn && isAdmin));
-  el("adminRolesSection").classList.toggle("hide", !(signedIn && isAdmin));
-  el("headerStatus").textContent = signedIn
-    ? `${session.name ?? "名無し"}（番号:${session.number} / ${session.role}）`
-    : "未サインイン";
-}
-
-async function ensureInitialAdmin() {
-  const ref = doc(db, "roles", "1234");
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { name: "管理者", role: "admin" });
-  }
-}
-ensureInitialAdmin();
-
-el("btnSignIn").addEventListener("click", async () => {
-  const number = el("respNumber").value.trim();
-  const nameInput = el("respName").value.trim();
-  if (!number) return alert("番号を入力");
-  const ref = doc(db, "roles", number);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    await setDoc(ref, { name: nameInput || "新規ユーザー", role: "user" });
-  } else if (nameInput) {
-    await updateDoc(ref, { name: nameInput });
-  }
-  const roleData = (await getDoc(ref)).data();
-  session = { number, name: roleData.name, role: roleData.role };
-  localStorage.setItem("session", JSON.stringify(session));
-  refreshUI();
-  loadItems();
-  loadRoles();
-});
-
-el("btnSignOut").addEventListener("click", () => {
-  session = { number: null, name: null, role: "user" };
-  localStorage.removeItem("session");
-  refreshUI();
-});
-
-(function restoreSession() {
-  const raw = localStorage.getItem("session");
-  if (raw) {
-    try { session = JSON.parse(raw); } catch {}
-  }
-  refreshUI();
-  if (session.number) { loadItems(); loadRoles(); }
-})();
-
-// Enterキー対応（404防止）
-["respNumber", "respName"].forEach(id => {
-  el(id).addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      el("btnSignIn").click();
+    async function ensureInitialAdmin() {
+      const ref = doc(db, "roles", "1234");
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref, { name: "悠気", role: "admin" });
+      }
     }
-  });
-});
 
-async function loadItems() {
-  const q = query(collection(db, "items"), orderBy("name"));
-  const snap = await getDocs(q);
-  const arr = [];
-  snap.forEach(d => arr.push({ id: d.id, ...d.data() }));
-  renderItems(arr);
-}
+    async function loadItems() {
+      const list = el("itemsList");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "items"));
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.className = "item";
+        div.innerHTML = `
+          <strong>${data.name}</strong><br>
+          所有者: ${data.owner} / 数量: ${data.quantity}
+          <br><input type="number" value="${data.quantity}" />
+          <button>更新</button>
+        `;
+        const input = div.querySelector("input");
+        const btn = div.querySelector("button");
+        btn.onclick = async () => {
+          await updateDoc(doc(db, "items", docSnap.id), { quantity: Number(input.value) });
+          loadItems();
+        };
+        list.appendChild(div);
+      });
+    }
 
-function renderItems(items) {
-  const list = el("itemsList");
-  list.innerHTML = "";
-  items.forEach(it => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <span>${it.name || "(無題)"} / 在庫:${it.quantity ?? 0}</span>
-      <span>
-        <button data-act="decr" data-id="${it.id}">-</button>
-        <button data-act="incr" data-id="${it.id}">+</button>
-      </span>`;
-    list.appendChild(div);
-  });
-}
+    async function loadRoles() {
+      if (session?.role !== "admin") return;
+      const list = el("rolesList");
+      list.innerHTML = "";
+      const snap = await getDocs(collection(db, "roles"));
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.textContent = `${docSnap.id} - ${data.name} (${data.role})`;
+        list.appendChild(div);
+      });
+    }
 
-el("itemsList").addEventListener("click", async e => {
-  const btn = e.target.closest("button");
-  if (!btn) return;
-  const id = btn.dataset.id;
-  const act = btn.dataset.act;
-  const ref = doc(db, "items", id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return;
-  let qty = snap.data().quantity ?? 0;
-  if (act === "incr") qty++;
-  if (act === "decr") qty = Math.max(0, qty - 1);
-  await updateDoc(ref, { quantity: qty });
-  loadItems();
-});
+    function refreshUI() {
+      el("sessionInfo").textContent = session ? `ログイン中: ${session.name} (${session.role})` : "";
+      el("itemsSection").style.display = session ? "block" : "none";
+      el("rolesSection").style.display = session?.role === "admin" ? "block" : "none";
+      el("adminItemControls").style.display = session?.role === "admin" ? "block" : "none";
+    }
 
-el("btnCreate").addEventListener("click", async () => {
-  if (session.role !== "admin") return alert("管理者のみ");
-  const id = el("newBarcode").value.trim();
-  const name = el("newName").value.trim();
-  const owner = el("newOwner").value.trim();
-  const qty = parseInt(el("newQty").value) || 0;
-  if (!id) return alert("バーコード必須");
+    el("btnSignIn").onclick = async () => {
+      const number = el("respNumber").value.trim();
+      if (!number) return alert("番号を入力してください");
+      const ref = doc(db, "roles", number);
+      const snap = await getDoc(ref);
+      if (!snap.exists()) {
+        await setDoc(ref, { name: "新規ユーザー", role: "user" });
+        session = { number, name: "新規ユーザー", role: "user" };
+      } else {
+        const data = snap.data();
+        session = { number, name: data.name, role: data.role };
+      }
+      localStorage.setItem("session", JSON.stringify(session));
+      refreshUI();
+      loadItems();
+      loadRoles();
+    };
+
+    el("btnSignOut").onclick = () => {
+      session = null;
+      localStorage.removeItem("session");
+      refreshUI();
+    };
+
+    el("btnAddItem").onclick = async () => {
+      const id = el("itemId").value.trim();
+      const name = el("itemName").value.trim();
+      const owner = el("itemOwner").value.trim();
+      const qty = Number(el("itemQty").value);
+      if (!id || !name || !owner || isNaN(qty)) return alert("すべて入力してください");
+      await setDoc(doc(db, "items", id), { name, owner, quantity: qty });
+      loadItems();
+    };
+
+    ["respNumber"].forEach(id => {
+      el(id).addEventListener("keydown", e => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          el("btnSignIn").click();
+        }
+      });
+    });
+
+    ensureInitialAdmin();
+    const saved = localStorage.getItem("session");
+    if (saved) {
+      session = JSON.parse(saved);
+      refreshUI();
+      loadItems();
+      loadRoles();
+    }
+  </script>
+</body>
+</html>
