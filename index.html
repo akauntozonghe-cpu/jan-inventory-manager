@@ -141,6 +141,15 @@
 
 <!-- Firebase SDK (Modular) -->
 <script type="module">
+  // ===== Enterキーでサインイン（404防止） =====
+["respNumber", "respName"].forEach(id => {
+  document.getElementById(id).addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      e.preventDefault(); // ページ遷移を防ぐ
+      document.getElementById("btnSignIn").click(); // サインイン処理を呼び出す
+    }
+  });
+});
   // ===== Firebase 初期化（自分のプロジェクト情報に置き換え） =====
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
   import {
