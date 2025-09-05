@@ -2,117 +2,85 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>責任者ログイン</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    .view { display: none; margin-top: 20px; }
-    #logoutBtn { margin-top: 20px; }
-  </style>
+  <title>サインイン</title>
 </head>
 <body>
   <h2>責任者番号でログイン</h2>
-  <input type="text" id="responsibilityInput" placeholder="責任者番号を入力">
-  <button onclick="handleLogin()">ログイン</button>
+  <input type="text" id="numberInput" placeholder="責任者番号を入力">
+  <button id="loginBtn" type="button">サインイン</button>
 
-  <div id="adminView" class="view">
-    <h3>🔧 管理者画面</h3>
-    <p>在庫管理や責任者登録ができます。</p>
-  </div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      where,
+      getDocs,
+      addDoc,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-  <div id="userView" class="view">
-    <h3>📦 一般ユーザー画面</h3>
-    <p>在庫の閲覧や登録ができます。</p>
-  </div>
-
-  <button id="logoutBtn" class="view" onclick="handleLogout()">ログアウト</button>
-
-  <!-- ✅ Firebase CDN互換版 SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-
-  <script>
-    // ✅ Firebase設定（トさんのプロジェクト用）
     const firebaseConfig = {
       apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
       authDomain: "inventory-app-312ca.firebaseapp.com",
       databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
       projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.firebasestorage.app",
+      storageBucket: "inventory-app-312ca.appspot.com",
       messagingSenderId: "245219344089",
       appId: "1:245219344089:web:e46105927c302e6a5788c8",
       measurementId: "G-TRH31MJCE3"
     };
 
-    // ✅ 初期化
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    // ログイン処理
-    async function handleLogin() {
-      const input = document.getElementById("responsibilityInput").value.trim();
-      if (!input) return alert("責任者番号を入力してください");
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+      let number = document.getElementById("numberInput").value
+        .replace(/\s/g, "") // 全角・半角スペース除去
+        .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0)); // 全角数字→半角
 
-      try {
-        const ref = db.collection("responsible-users").doc(input);
-        const snap = await ref.get();
-
-        if (!snap.exists) {
-          alert("該当する責任者が見つかりません");
-          return;
-        }
-
-        const data = snap.data();
-        sessionStorage.setItem("responsibilityNumber", input);
-
-        if (data.role === "admin") {
-          showView("adminView");
-        } else {
-          showView("userView");
-        }
-      } catch (err) {
-        console.error("ログイン失敗:", err);
-        alert("Firestore接続に失敗しました。ネットワークまたは設定を確認してください。");
+      if (!number) {
+        alert("番号を入力してください");
+        return;
       }
-    }
-
-    // セッション復元
-    window.addEventListener("DOMContentLoaded", async () => {
-      const saved = sessionStorage.getItem("responsibilityNumber");
-      if (!saved) return;
 
       try {
-        const ref = db.collection("responsible-users").doc(saved);
-        const snap = await ref.get();
-        if (!snap.exists) return;
+        // numberフィールドで検索
+        const q = query(collection(db, "users"), where("number", "==", number));
+        const querySnapshot = await getDocs(q);
 
-        const data = snap.data();
-        if (data.role === "admin") {
-          showView("adminView");
+        if (!querySnapshot.empty) {
+          const docSnap = querySnapshot.docs[0];
+          const role = docSnap.data().role;
+
+          // ログイン情報を保存
+          sessionStorage.setItem("responsibilityNumber", number);
+
+          // ログイン履歴を記録
+          await addDoc(collection(db, "logs"), {
+            action: "login",
+            userId: number,
+            role: role,
+            timestamp: serverTimestamp()
+          });
+
+          // 画面遷移
+          if (role === "admin") {
+            alert("管理者としてログイン成功");
+            window.location.href = "admin.html";
+          } else {
+            alert("ユーザーとしてログイン成功");
+            window.location.href = "system.html";
+          }
         } else {
-          showView("userView");
+          alert("該当する責任者が見つかりません");
         }
       } catch (err) {
-        console.warn("セッション復元失敗:", err);
+        console.error(err);
+        alert("エラーが発生しました");
       }
     });
-
-    // UI切り替え
-    function showView(viewId) {
-      document.getElementById("adminView").style.display = "none";
-      document.getElementById("userView").style.display = "none";
-      document.getElementById("logoutBtn").style.display = "block";
-      document.getElementById(viewId).style.display = "block";
-    }
-
-    // ログアウト
-    function handleLogout() {
-      sessionStorage.clear();
-      document.getElementById("adminView").style.display = "none";
-      document.getElementById("userView").style.display = "none";
-      document.getElementById("logoutBtn").style.display = "none";
-      document.getElementById("responsibilityInput").value = "";
-    }
   </script>
 </body>
 </html>
