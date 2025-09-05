@@ -1,7 +1,15 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  updateDoc,
+  addDoc,
+  collection,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -18,6 +26,7 @@ const db = getFirestore(app);
 
 console.log("Firebase 初期化完了");
 
+// ログイン処理
 document.getElementById("loginBtn").addEventListener("click", async () => {
   const number = document.getElementById("numberInput").value.trim();
   if (!number) {
@@ -31,6 +40,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 
     if (docSnap.exists()) {
       const role = docSnap.data().role;
+      sessionStorage.setItem("responsibilityNumber", number); // ← ログ記録用に保存
+
       if (role === "admin") {
         alert("管理者としてログイン成功");
         window.location.href = "admin.html";
@@ -44,5 +55,38 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   } catch (err) {
     console.error(err);
     alert("エラーが発生しました");
+  }
+});
+
+// 在庫更新＋履歴記録処理
+document.getElementById("updateBtn").addEventListener("click", async () => {
+  const itemId = document.getElementById("itemIdInput").value.trim();
+  const quantity = parseInt(document.getElementById("quantityInput").value, 10);
+  const userId = sessionStorage.getItem("responsibilityNumber");
+
+  if (!itemId || isNaN(quantity)) {
+    alert("JANコードと数量を入力してください");
+    return;
+  }
+
+  try {
+    // 在庫更新
+    await updateDoc(doc(db, "items", itemId), {
+      quantity: quantity,
+      updatedAt: serverTimestamp()
+    });
+
+    // 操作履歴を記録
+    await addDoc(collection(db, "logs"), {
+      action: "update",
+      itemId: itemId,
+      userId: userId,
+      timestamp: serverTimestamp()
+    });
+
+    alert("在庫更新と履歴記録が完了しました");
+  } catch (err) {
+    console.error("更新エラー:", err);
+    alert("在庫の更新に失敗しました");
   }
 });

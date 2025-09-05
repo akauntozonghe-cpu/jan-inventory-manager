@@ -1,167 +1,117 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理</title>
+  <meta charset="UTF-8">
+  <title>責任者ログイン</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
-    body { font-family: sans-serif; padding: 1em; max-width: 600px; margin: auto; }
-    input, button { margin: 0.5em 0; padding: 0.5em; width: 100%; }
-    .admin-only { background: #f9f9f9; padding: 1em; border: 1px solid #ccc; }
-    .item { border-bottom: 1px solid #ddd; padding: 0.5em 0; }
+    body { font-family: sans-serif; padding: 20px; }
+    .view { display: none; margin-top: 20px; }
+    #logoutBtn { margin-top: 20px; }
   </style>
 </head>
 <body>
-  <h1>在庫管理</h1>
+  <h2>責任者番号でログイン</h2>
+  <input type="text" id="responsibilityInput" placeholder="責任者番号を入力">
+  <button onclick="handleLogin()">ログイン</button>
 
-  <section id="signinSection">
-    <input id="respNumber" placeholder="責任者番号（例: 1234）" />
-    <button id="btnSignIn">サインイン</button>
-    <button id="btnSignOut">サインアウト</button>
-  </section>
+  <div id="adminView" class="view">
+    <h3>🔧 管理者画面</h3>
+    <p>在庫管理や責任者登録ができます。</p>
+  </div>
 
-  <section id="sessionInfo"></section>
+  <div id="userView" class="view">
+    <h3>📦 一般ユーザー画面</h3>
+    <p>在庫の閲覧や登録ができます。</p>
+  </div>
 
-  <section id="itemsSection" style="display:none;">
-    <h2>在庫一覧</h2>
-    <div id="itemsList"></div>
+  <button id="logoutBtn" class="view" onclick="handleLogout()">ログアウト</button>
 
-    <div class="admin-only" id="adminItemControls" style="display:none;">
-      <h3>在庫追加</h3>
-      <input id="itemId" placeholder="バーコードID" />
-      <input id="itemName" placeholder="商品名" />
-      <input id="itemOwner" placeholder="責任者番号" />
-      <input id="itemQty" type="number" placeholder="数量" />
-      <button id="btnAddItem">追加</button>
-    </div>
-  </section>
+  <!-- ✅ Firebase CDN互換版 SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
 
-  <section id="rolesSection" style="display:none;">
-    <h2>責任者一覧（管理者のみ）</h2>
-    <div id="rolesList"></div>
-  </section>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-    import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-
+  <script>
+    // ✅ Firebase設定（トさんのプロジェクト用）
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.firebasestorage.app",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8",
+      measurementId: "G-TRH31MJCE3"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    // ✅ 初期化
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
 
-    const el = id => document.getElementById(id);
-    let session = null;
+    // ログイン処理
+    async function handleLogin() {
+      const input = document.getElementById("responsibilityInput").value.trim();
+      if (!input) return alert("責任者番号を入力してください");
 
-    async function ensureInitialAdmin() {
-      const ref = doc(db, "roles", "1234");
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
-        await setDoc(ref, { name: "悠気", role: "admin" });
-      }
-    }
+      try {
+        const ref = db.collection("responsible-users").doc(input);
+        const snap = await ref.get();
 
-    async function loadItems() {
-      const list = el("itemsList");
-      list.innerHTML = "";
-      const snap = await getDocs(collection(db, "items"));
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.className = "item";
-        div.innerHTML = `
-          <strong>${data.name}</strong><br>
-          所有者: ${data.owner} / 数量: ${data.quantity}
-          <br><input type="number" value="${data.quantity}" />
-          <button>更新</button>
-        `;
-        const input = div.querySelector("input");
-        const btn = div.querySelector("button");
-        btn.onclick = async () => {
-          await updateDoc(doc(db, "items", docSnap.id), { quantity: Number(input.value) });
-          loadItems();
-        };
-        list.appendChild(div);
-      });
-    }
-
-    async function loadRoles() {
-      if (session?.role !== "admin") return;
-      const list = el("rolesList");
-      list.innerHTML = "";
-      const snap = await getDocs(collection(db, "roles"));
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.textContent = `${docSnap.id} - ${data.name} (${data.role})`;
-        list.appendChild(div);
-      });
-    }
-
-    function refreshUI() {
-      el("sessionInfo").textContent = session ? `ログイン中: ${session.name} (${session.role})` : "";
-      el("itemsSection").style.display = session ? "block" : "none";
-      el("rolesSection").style.display = session?.role === "admin" ? "block" : "none";
-      el("adminItemControls").style.display = session?.role === "admin" ? "block" : "none";
-    }
-
-    el("btnSignIn").onclick = async () => {
-      const number = el("respNumber").value.trim();
-      if (!number) return alert("番号を入力してください");
-      const ref = doc(db, "roles", number);
-      const snap = await getDoc(ref);
-      if (!snap.exists()) {
-        await setDoc(ref, { name: "新規ユーザー", role: "user" });
-        session = { number, name: "新規ユーザー", role: "user" };
-      } else {
-        const data = snap.data();
-        session = { number, name: data.name, role: data.role };
-      }
-      localStorage.setItem("session", JSON.stringify(session));
-      refreshUI();
-      loadItems();
-      loadRoles();
-    };
-
-    el("btnSignOut").onclick = () => {
-      session = null;
-      localStorage.removeItem("session");
-      refreshUI();
-    };
-
-    el("btnAddItem").onclick = async () => {
-      const id = el("itemId").value.trim();
-      const name = el("itemName").value.trim();
-      const owner = el("itemOwner").value.trim();
-      const qty = Number(el("itemQty").value);
-      if (!id || !name || !owner || isNaN(qty)) return alert("すべて入力してください");
-      await setDoc(doc(db, "items", id), { name, owner, quantity: qty });
-      loadItems();
-    };
-
-    ["respNumber"].forEach(id => {
-      el(id).addEventListener("keydown", e => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          el("btnSignIn").click();
+        if (!snap.exists) {
+          alert("該当する責任者が見つかりません");
+          return;
         }
-      });
+
+        const data = snap.data();
+        sessionStorage.setItem("responsibilityNumber", input);
+
+        if (data.role === "admin") {
+          showView("adminView");
+        } else {
+          showView("userView");
+        }
+      } catch (err) {
+        console.error("ログイン失敗:", err);
+        alert("Firestore接続に失敗しました。ネットワークまたは設定を確認してください。");
+      }
+    }
+
+    // セッション復元
+    window.addEventListener("DOMContentLoaded", async () => {
+      const saved = sessionStorage.getItem("responsibilityNumber");
+      if (!saved) return;
+
+      try {
+        const ref = db.collection("responsible-users").doc(saved);
+        const snap = await ref.get();
+        if (!snap.exists) return;
+
+        const data = snap.data();
+        if (data.role === "admin") {
+          showView("adminView");
+        } else {
+          showView("userView");
+        }
+      } catch (err) {
+        console.warn("セッション復元失敗:", err);
+      }
     });
 
-    ensureInitialAdmin();
-    const saved = localStorage.getItem("session");
-    if (saved) {
-      session = JSON.parse(saved);
-      refreshUI();
-      loadItems();
-      loadRoles();
+    // UI切り替え
+    function showView(viewId) {
+      document.getElementById("adminView").style.display = "none";
+      document.getElementById("userView").style.display = "none";
+      document.getElementById("logoutBtn").style.display = "block";
+      document.getElementById(viewId).style.display = "block";
+    }
+
+    // ログアウト
+    function handleLogout() {
+      sessionStorage.clear();
+      document.getElementById("adminView").style.display = "none";
+      document.getElementById("userView").style.display = "none";
+      document.getElementById("logoutBtn").style.display = "none";
+      document.getElementById("responsibilityInput").value = "";
     }
   </script>
 </body>
