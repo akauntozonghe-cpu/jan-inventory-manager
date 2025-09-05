@@ -3,13 +3,101 @@
 <head>
   <meta charset="UTF-8">
   <title>管理者画面</title>
-  <link rel="stylesheet" href="css/style.css">
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js"></script>
-  <script src="js/main.js" defer></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>管理者専用ページ</h2>
-  <div id="adminData"></div>
+  <div id="header">
+    <span id="loginUser"></span>
+    <button id="logoutBtn">ログアウト</button>
+  </div>
+
+  <h2>📜 ログイン・操作履歴</h2>
+
+  <div id="filters">
+    <label>責任者名: <input type="text" id="filterName" placeholder="例: 山田太郎"></label>
+    <label>操作内容: <input type="text" id="filterAction" placeholder="例: 在庫を更新しました"></label>
+    <label>日付: <input type="date" id="filterDate"></label>
+    <button id="applyFilters">絞り込み</button>
+  </div>
+
+  <div id="logsList">読み込み中...</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      query,
+      orderBy,
+      getDocs
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8",
+      measurementId: "G-TRH31MJCE3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+
+    if (name && role === "管理者") {
+      document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
+    } else {
+      document.getElementById("logsList").textContent = "ログイン権限がありません";
+      return;
+    }
+
+    document.getElementById("logoutBtn").addEventListener("click", () => {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    });
+
+    document.getElementById("applyFilters").addEventListener("click", async () => {
+      const nameFilter = document.getElementById("filterName").value.trim();
+      const actionFilter = document.getElementById("filterAction").value.trim();
+      const dateFilter = document.getElementById("filterDate").value;
+
+      const logsDiv = document.getElementById("logsList");
+      logsDiv.innerHTML = "読み込み中...";
+
+      try {
+        const q = query(collection(db, "logs"), orderBy("timestamp", "desc"));
+        const snap = await getDocs(q);
+        logsDiv.innerHTML = "";
+
+        snap.forEach(doc => {
+          const data = doc.data();
+          const time = data.timestamp?.toDate();
+          const timeStr = time?.toLocaleString("ja-JP") || "日時不明";
+
+          const matchName = nameFilter === "" || data.userName.includes(nameFilter);
+          const matchAction = actionFilter === "" || data.action.includes(actionFilter);
+          const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
+
+          if (matchName && matchAction && matchDate) {
+            const div = document.createElement("div");
+            div.textContent = `${timeStr} - ${data.userName}（${data.role}）が ${data.target} を ${data.action}`;
+            logsDiv.appendChild(div);
+          }
+        });
+
+        if (logsDiv.innerHTML === "") {
+          logsDiv.textContent = "一致する履歴が見つかりません";
+        }
+      } catch (err) {
+        logsDiv.innerHTML = "履歴の読み込みに失敗しました";
+        console.error(err);
+      }
+    });
+  </script>
 </body>
 </html>

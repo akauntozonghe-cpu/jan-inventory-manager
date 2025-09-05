@@ -1,15 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore,
-  doc,
-  getDoc,
-  updateDoc,
-  addDoc,
   collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -24,69 +23,54 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-console.log("Firebase 初期化完了");
-
-// ログイン処理
-document.getElementById("loginBtn").addEventListener("click", async () => {
-  const number = document.getElementById("numberInput").value.trim();
-  if (!number) {
-    alert("番号を入力してください");
-    return;
+function translateRole(role) {
+  switch (role) {
+    case "admin": return "管理者";
+    case "user": return "責任者";
+    default: return role;
   }
+}
+
+document.getElementById("loginBtn").addEventListener("click", async () => {
+  let number = document.getElementById("numberInput").value
+    .replace(/\s/g, "")
+    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+
+  if (!number) return;
 
   try {
-    const docRef = doc(db, "responsibleNumbers", number);
-    const docSnap = await getDoc(docRef);
+    const q = query(collection(db, "users"), where("number", "==", number));
+    const querySnapshot = await getDocs(q);
 
-    if (docSnap.exists()) {
-      const role = docSnap.data().role;
-      sessionStorage.setItem("responsibilityNumber", number); // ← ログ記録用に保存
+    if (!querySnapshot.empty) {
+      const docSnap = querySnapshot.docs[0];
+      const data = docSnap.data();
+      const role = translateRole(data.role);
+      const name = data.name;
 
-      if (role === "admin") {
-        alert("管理者としてログイン成功");
+      sessionStorage.setItem("responsibilityNumber", number);
+      sessionStorage.setItem("responsibilityRole", role);
+      sessionStorage.setItem("responsibilityName", name);
+
+      await addDoc(collection(db, "logs"), {
+        userId: number,
+        userName: name,
+        role: role,
+        action: "ログインしました",
+        target: "ログイン画面",
+        timestamp: serverTimestamp()
+      });
+
+      if (role === "管理者") {
         window.location.href = "admin.html";
       } else {
-        alert("ユーザーとしてログイン成功");
         window.location.href = "system.html";
       }
     } else {
-      alert("番号が見つかりません");
+      alert("該当する責任者が見つかりません");
     }
   } catch (err) {
     console.error(err);
     alert("エラーが発生しました");
-  }
-});
-
-// 在庫更新＋履歴記録処理
-document.getElementById("updateBtn").addEventListener("click", async () => {
-  const itemId = document.getElementById("itemIdInput").value.trim();
-  const quantity = parseInt(document.getElementById("quantityInput").value, 10);
-  const userId = sessionStorage.getItem("responsibilityNumber");
-
-  if (!itemId || isNaN(quantity)) {
-    alert("JANコードと数量を入力してください");
-    return;
-  }
-
-  try {
-    // 在庫更新
-    await updateDoc(doc(db, "items", itemId), {
-      quantity: quantity,
-      updatedAt: serverTimestamp()
-    });
-
-    // 操作履歴を記録
-    await addDoc(collection(db, "logs"), {
-      action: "update",
-      itemId: itemId,
-      userId: userId,
-      timestamp: serverTimestamp()
-    });
-
-    alert("在庫更新と履歴記録が完了しました");
-  } catch (err) {
-    console.error("更新エラー:", err);
-    alert("在庫の更新に失敗しました");
   }
 });
