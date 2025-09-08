@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     el.classList.toggle("show", !isVisible);
     sessionStorage.setItem("section_" + id, !isVisible);
 
-    // アクティブボタン切り替え（任意）
+    // アクティブボタン切り替え
     document.querySelectorAll(".button-grid button").forEach(btn => btn.classList.remove("active"));
     if (!isVisible) {
       const btnMap = {
@@ -97,7 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ✅ ボタンにイベントを設定（必要に応じて追加）
+  // ✅ ボタンにイベントを設定
   const sectionButtons = {
     "btn-register": "registerSection",
     "btn-search": "searchSection",
