@@ -82,7 +82,6 @@ document.addEventListener("DOMContentLoaded", () => {
     el.classList.toggle("show", !isVisible);
     sessionStorage.setItem("section_" + id, !isVisible);
 
-    // アクティブボタン切り替え
     document.querySelectorAll(".button-grid button").forEach(btn => btn.classList.remove("active"));
     if (!isVisible) {
       const btnMap = {
@@ -112,4 +111,46 @@ document.addEventListener("DOMContentLoaded", () => {
       btn.addEventListener("click", () => toggleSection(sectionId));
     }
   });
+
+  // ✅ QuaggaJS 読み取り処理（商品検索用）
+  const scanSearchBtn = document.getElementById("scanSearchBtn");
+  const scannerWrapper = document.getElementById("scannerWrapper");
+  const scanStatus = document.getElementById("scanStatus");
+  const searchInput = document.getElementById("searchInput");
+
+  if (scanSearchBtn && scannerWrapper && scanStatus && searchInput) {
+    scanSearchBtn.onclick = () => {
+      scannerWrapper.style.display = "block";
+      scanStatus.textContent = "📷 読み取り中...";
+      scanStatus.classList.add("show");
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#scanner")
+        },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+
+      Quagga.onDetected(data => {
+        const code = data.codeResult.code;
+        searchInput.value = code;
+
+        scanStatus.textContent = `✅ 読み取り成功: ${code}`;
+        scanStatus.classList.add("show");
+
+        setTimeout(() => {
+          scanStatus.classList.remove("show");
+          scannerWrapper.style.display = "none";
+          Quagga.stop();
+        }, 1500);
+
+        document.getElementById("searchBtn").click();
+      });
+    };
+  }
 });
