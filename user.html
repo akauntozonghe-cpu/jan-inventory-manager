@@ -37,7 +37,9 @@
   </style>
 </head>
 <body>
-  <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
+  <header><h1>在庫管理 - 責任者画面</h1></header>
+  <div id="loginUser">読み込み中...</div>
+    <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
   <button class="toggle-btn" onclick="toggleSection('searchSection')">🔍 商品検索</button>
   <button class="toggle-btn" onclick="toggleSection('contactSection')">📩 管理者に連絡</button>
   <button class="toggle-btn" onclick="toggleSection('historySection')">📝 自分の履歴</button>
@@ -93,7 +95,26 @@
     <button id="loadAllBtn">📋 一覧を表示</button>
     <div id="allProducts"></div>
   </div>
-    <script type="module">
+    <script>
+    function toggleSection(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const isVisible = el.classList.contains("show");
+      el.classList.toggle("show", !isVisible);
+      sessionStorage.setItem("section_" + id, !isVisible);
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      ["registerSection", "searchSection", "contactSection", "historySection", "listSection"].forEach(id => {
+        if (sessionStorage.getItem("section_" + id) === "true") {
+          const el = document.getElementById(id);
+          if (el) el.classList.add("show");
+        }
+      });
+    });
+  </script>
+
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
       getFirestore, collection, addDoc, getDocs, query, where,
@@ -114,27 +135,14 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
     const name = sessionStorage.getItem("responsibilityName") || "未設定";
+    const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
     const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : roleRaw;
     document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
     if (roleJP === "管理者") document.body.classList.add("admin");
 
-    function toggleSection(id) {
-      const el = document.getElementById(id);
-      const isVisible = el.classList.contains("show");
-      el.classList.toggle("show", !isVisible);
-      sessionStorage.setItem("section_" + id, !isVisible);
-    }
-
-    ["registerSection", "searchSection", "contactSection", "historySection", "listSection"].forEach(id => {
-      if (sessionStorage.getItem("section_" + id) === "true") {
-        document.getElementById(id).classList.add("show");
-      }
-    });
-
-    // 商品登録処理
-    document.getElementById("registerBtn").onclick = async () => {
+    // 商品登録
+    registerBtn.onclick = async () => {
       const data = {
         productId: productId.value,
         productGroupId: productGroupId.value,
@@ -159,42 +167,8 @@
       }
     };
 
-    // QuaggaJS 初期化（登録）
-    document.getElementById("startScanBtn").onclick = () => {
-      scannerWrapper.style.display = "block";
-      Quagga.init({
-        inputStream: { name: "Live", type: "LiveStream", target: scanner },
-        decoder: { readers: ["ean_reader"] }
-      }, err => {
-        if (err) return console.error(err);
-        Quagga.start();
-      });
-      Quagga.onDetected(data => {
-        janCodeInput.value = data.codeResult.code;
-        Quagga.stop();
-        scannerWrapper.style.display = "none";
-      });
-    };
-
-    // QuaggaJS 初期化（検索）
-    document.getElementById("scanSearchBtn").onclick = () => {
-      searchScannerWrapper.style.display = "block";
-      Quagga.init({
-        inputStream: { name: "Live", type: "LiveStream", target: searchScanner },
-        decoder: { readers: ["ean_reader"] }
-      }, err => {
-        if (err) return console.error(err);
-        Quagga.start();
-      });
-      Quagga.onDetected(data => {
-        searchInput.value = data.codeResult.code;
-        Quagga.stop();
-        searchScannerWrapper.style.display = "none";
-      });
-    };
-
-    // 商品検索処理
-    document.getElementById("searchBtn").onclick = async () => {
+    // 商品検索
+    searchBtn.onclick = async () => {
       const keyword = searchInput.value.trim();
       const q = query(collection(db, "products"), where("janCode", "==", keyword));
       const snapshot = await getDocs(q);
@@ -217,8 +191,8 @@
       });
     };
 
-    // 管理者連絡処理
-    document.getElementById("contactSendBtn").onclick = async () => {
+    // 管理者連絡
+    contactSendBtn.onclick = async () => {
       const msg = contactMsg.value.trim();
       if (!msg) return alert("メッセージを入力してください");
       try {
@@ -235,8 +209,8 @@
       }
     };
 
-    // 履歴表示＋CSV出力
-    document.getElementById("exportCsvBtn").onclick = async () => {
+    // CSV出力
+    exportCsvBtn.onclick = async () => {
       const q = query(collection(db, "products"), where("user", "==", name));
       const snapshot = await getDocs(q);
       let csv = "品名,会社名,JANコード,登録日時\n";
@@ -253,8 +227,8 @@
       URL.revokeObjectURL(url);
     };
 
-    // 登録済み一覧表示
-    document.getElementById("loadAllBtn").onclick = async () => {
+    // 一覧表示
+    loadAllBtn.onclick = async () => {
       const snapshot = await getDocs(collection(db, "products"));
       allProducts.innerHTML = "";
       snapshot.forEach(doc => {
@@ -265,8 +239,42 @@
       });
     };
 
+    // JANコードスキャン（登録）
+    startScanBtn.onclick = () => {
+      scannerWrapper.style.display = "block";
+      Quagga.init({
+        inputStream: { name: "Live", type: "LiveStream", target: scanner },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+      Quagga.onDetected(data => {
+        janCodeInput.value = data.codeResult.code;
+        Quagga.stop();
+        scannerWrapper.style.display = "none";
+      });
+    };
+
+    // JANコードスキャン（検索）
+    scanSearchBtn.onclick = () => {
+      searchScannerWrapper.style.display = "block";
+      Quagga.init({
+        inputStream: { name: "Live", type: "LiveStream", target: searchScanner },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+      Quagga.onDetected(data => {
+        searchInput.value = data.codeResult.code;
+        Quagga.stop();
+        searchScannerWrapper.style.display = "none";
+      });
+    };
+
     // 画像プレビュー
-    document.getElementById("photo").onchange = (e) => {
+    photo.onchange = (e) => {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
@@ -279,6 +287,3 @@
   </script>
 </body>
 </html>
-
- 
-
