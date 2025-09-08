@@ -1,32 +1,28 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理 - 責任者画面</title>
   <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
   <style>
     body {
       font-family: "Segoe UI", sans-serif;
-      margin: 0;
+      background: #f8f9fc;
       padding: 16px;
-      background-color: #f8f9fc;
     }
-
     header {
       text-align: center;
-      padding: 20px;
+      padding: 16px;
       background: linear-gradient(to right, #4e73df, #1cc88a);
       color: white;
       border-radius: 12px;
       margin-bottom: 20px;
     }
-
     h1 {
-      font-size: 1.8rem;
+      font-size: 1.6rem;
       margin: 0;
     }
-
     .section {
       max-width: 500px;
       margin: 0 auto 24px;
@@ -35,15 +31,12 @@
       border-radius: 12px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05);
     }
-
     .section h2 {
       font-size: 1.2rem;
       margin-bottom: 12px;
       text-align: center;
     }
-
     input, textarea, button {
-      display: block;
       width: 100%;
       margin: 8px 0;
       padding: 10px;
@@ -52,39 +45,38 @@
       border: 1px solid #ccc;
       box-sizing: border-box;
     }
-
     button {
       background-color: #4e73df;
       color: white;
       border: none;
       cursor: pointer;
     }
-
     button:hover {
       background-color: #2e59d9;
     }
-
-    #scanner {
+    #scannerWrapper, #searchScannerWrapper {
+      display: none;
       width: 100%;
       max-width: 400px;
       height: 240px;
       margin: 12px auto;
       border: 2px solid #4e73df;
       border-radius: 8px;
+      position: relative;
     }
-
+    #scanner, #searchScanner {
+      width: 100%;
+      height: 100%;
+    }
+    canvas.drawingBuffer {
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
     #loginUser {
       text-align: center;
       font-weight: bold;
       margin-bottom: 16px;
-    }
-
-    .admin-only {
-      display: none;
-    }
-
-    body.admin .admin-only {
-      display: block;
     }
   </style>
 </head>
@@ -92,13 +84,12 @@
   <header>
     <h1>在庫管理 - 責任者画面</h1>
   </header>
-
   <div id="loginUser">読み込み中...</div>
 
   <div class="section">
-    <h2>📷 JANコード読み取り</h2>
+    <h2>📷 JANコード読み取り（登録）</h2>
     <button id="startScanBtn">読み取り開始</button>
-    <div id="scanner"></div>
+    <div id="scannerWrapper"><div id="scanner"></div></div>
     <input type="text" id="janCodeInput" placeholder="JANコード">
     <div id="scanStatus"></div>
   </div>
@@ -113,6 +104,8 @@
 
   <div class="section">
     <h2>🔍 商品検索</h2>
+    <button id="scanSearchBtn">JANコード読み取り</button>
+    <div id="searchScannerWrapper"><div id="searchScanner"></div></div>
     <input type="text" id="searchInput" placeholder="商品名またはJANコード">
     <button id="searchBtn">検索する</button>
     <div id="searchResults"></div>
@@ -133,7 +126,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, serverTimestamp
+      getFirestore, collection, addDoc, getDocs, query, where,
+      updateDoc, deleteDoc, doc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -147,17 +141,16 @@
 
     const role = sessionStorage.getItem("responsibilityRole");
     const name = sessionStorage.getItem("responsibilityName");
-
     document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
-    if (role === "管理者") {
-      document.body.classList.add("admin");
-    }
 
-    document.getElementById("startScanBtn").onclick = () => {
+    function startScanner(targetId, inputId, wrapperId, type) {
+      const wrapper = document.getElementById(wrapperId);
+      wrapper.style.display = "block";
+
       Quagga.init({
         inputStream: {
           type: "LiveStream",
-          target: document.querySelector("#scanner"),
+          target: document.querySelector(`#${targetId}`),
           constraints: { facingMode: "environment" }
         },
         decoder: { readers: ["ean_reader"] },
@@ -169,11 +162,27 @@
 
       Quagga.onDetected(result => {
         const code = result.codeResult.code;
-        document.getElementById("janCodeInput").value = code;
-        document.getElementById("scanStatus").textContent = `✅ 読み取り成功: ${code}`;
+        document.getElementById(inputId).value = code;
         Quagga.stop();
+        wrapper.style.display = "none";
+
+        addDoc(collection(db, "scanLogs"), {
+          type,
+          jan: code,
+          scannedBy: name,
+          timestamp: serverTimestamp()
+        });
+
+        if (type === "検索") document.getElementById("searchBtn").click();
+        if (type === "登録") document.getElementById("scanStatus").textContent = `✅ 読み取り成功: ${code}`;
       });
-    };
+    }
+
+    document.getElementById("startScanBtn").onclick = () =>
+      startScanner("scanner", "janCodeInput", "scannerWrapper", "登録");
+
+    document.getElementById("scanSearchBtn").onclick = () =>
+      startScanner("searchScanner", "searchInput", "searchScannerWrapper", "検索");
 
     document.getElementById("registerBtn").onclick = async () => {
       const data = {
@@ -191,7 +200,7 @@
 
     document.getElementById("searchBtn").onclick = async () => {
       const keyword = document.getElementById("searchInput").value.trim();
-      const q = query(collection(db, "products"), where("name", ">=", keyword));
+      const q = query(collection(db, "products"), where("jan", "==", keyword));
       const snap = await getDocs(q);
       const area = document.getElementById("searchResults");
       area.innerHTML = "";
@@ -219,12 +228,4 @@
       }
     };
 
-    window.deleteProduct = async (id) => {
-      if (confirm("削除しますか？")) {
-        await deleteDoc(doc(db, "products", id));
-        alert("✅ 削除完了");
-        loadHistory();
-      }
-    };
-
-    document.get
+    window.deleteProduct =
