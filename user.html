@@ -16,22 +16,28 @@
   <button onclick="location.href='search-product.html'">🔍 商品検索</button>
   <button onclick="location.href='stock-inout.html'">📥 在庫入出庫</button>
   <button onclick="location.href='register-product.html'">📝 商品登録</button>
-  <button onclick="location.href='admin.html'">🛠 管理者画面へ</button>
+  <div id="adminBtnArea"></div>
 
   <script>
     const name = sessionStorage.getItem("responsibilityName");
     const role = sessionStorage.getItem("responsibilityRole");
-    const number = sessionStorage.getItem("responsibilityNumber");
 
-    if (!name || !role || !number) location.href = "index.html";
+    if (!name || !role) location.href = "index.html";
 
     document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+      `ログイン中: ${name}（${role}）`;
 
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
+
+    if (role === "管理者") {
+      const btn = document.createElement("button");
+      btn.textContent = "🛠 管理者画面へ";
+      btn.onclick = () => location.href = "admin.html";
+      document.getElementById("adminBtnArea").appendChild(btn);
+    }
   </script>
 </body>
 </html>
