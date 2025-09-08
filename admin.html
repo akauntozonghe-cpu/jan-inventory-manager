@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>管理者画面</title>
+  <title>在庫管理 - 管理者画面</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
@@ -24,6 +24,23 @@
   </div>
   <div id="userList">読み込み中...</div>
   <button id="expandUsersBtn" style="display:none;">すべて見る</button>
+
+  <h2>📦 商品一覧</h2>
+  <div id="productFilters">
+    <label>商品名: <input type="text" id="filterName"></label>
+    <label>バーコード: <input type="text" id="filterBarcode"></label>
+    <label>在庫 ≥ <input type="number" id="filterStockMin" value="0"></label>
+    <label>在庫 ≤ <input type="number" id="filterStockMax" value="9999"></label>
+    <button id="applyProductFilters">絞り込み</button>
+  </div>
+  <div id="productList">読み込み中...</div>
+  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
+
+  <h2>📝 操作履歴</h2>
+  <div id="logList">読み込み中...</div>
+  <button id="expandLogsBtn" style="display:none;">すべて見る</button>
+
+  <button onclick="location.href='user.html'">← 責任者画面に戻る</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -52,27 +69,18 @@
       location.href = "index.html";
     };
 
+    // 責任者一覧
     let allUsers = [];
-
-    // 登録処理
     document.getElementById("addUserBtn").onclick = async () => {
       const newName = document.getElementById("newName").value.trim();
       const newNumber = document.getElementById("newNumber").value.trim();
       const newRole = document.getElementById("newRole").value;
-
       if (!newName || !newNumber) return alert("名前と番号を入力してください");
-
-      await addDoc(collection(db, "users"), {
-        name: newName,
-        number: newNumber,
-        role: newRole
-      });
-
+      await addDoc(collection(db, "users"), { name: newName, number: newNumber, role: newRole });
       alert("登録しました");
-      fetchUsers(); // 再読み込み
+      fetchUsers();
     };
 
-    // 削除処理
     async function deleteUser(id) {
       if (confirm("本当に削除しますか？")) {
         await deleteDoc(doc(db, "users", id));
@@ -81,40 +89,83 @@
       }
     }
 
-    // 一覧取得
     async function fetchUsers() {
       const snap = await getDocs(collection(db, "users"));
-      allUsers = snap.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      renderUsers(10); // 初期表示は10件
+      allUsers = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderUsers(10);
     }
 
-    // 表示制限付き描画
     function renderUsers(limit) {
       const userListDiv = document.getElementById("userList");
       userListDiv.innerHTML = "";
-
       allUsers.slice(0, limit).forEach(user => {
         const div = document.createElement("div");
-        div.innerHTML = `
-          ${user.name}（${user.role}） / 番号: ${user.number}
-          <button onclick="deleteUser('${user.id}')">削除</button>
-        `;
+        div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}
+          <button onclick="deleteUser('${user.id}')">削除</button>`;
         userListDiv.appendChild(div);
       });
-
       document.getElementById("expandUsersBtn").style.display =
         allUsers.length > limit ? "inline-block" : "none";
-
       document.getElementById("expandUsersBtn").onclick = () => {
-        renderUsers(allUsers.length); // 全件表示
+        renderUsers(allUsers.length);
         document.getElementById("expandUsersBtn").style.display = "none";
       };
     }
 
-    fetchUsers(); // 初期読み込み
-  </script>
-</body>
-</html>
+    // 商品一覧
+    let allProducts = [];
+    async function fetchProducts() {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => doc.data());
+      applyProductFilters(10);
+    }
+
+    function applyProductFilters(limit = 10) {
+      const nameFilter = document.getElementById("filterName").value.trim().toLowerCase();
+      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
+      const stockMin = parseInt(document.getElementById("filterStockMin").value);
+      const stockMax = parseInt(document.getElementById("filterStockMax").value);
+      const productListDiv = document.getElementById("productList");
+      productListDiv.innerHTML = "";
+
+      const filtered = allProducts.filter(data => {
+        const nameMatch = nameFilter === "" || data.name?.toLowerCase().includes(nameFilter);
+        const barcodeMatch = barcodeFilter === "" || data.barcode?.includes(barcodeFilter);
+        const stockMatch =
+          (!isNaN(stockMin) ? data.stock >= stockMin : true) &&
+          (!isNaN(stockMax) ? data.stock <= stockMax : true);
+        return nameMatch && barcodeMatch && stockMatch;
+      });
+
+      filtered.slice(0, limit).forEach(data => {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.name}</strong><br>
+          バーコード: ${data.barcode}<br>
+          在庫数: ${data.stock}<br><hr>`;
+        productListDiv.appendChild(div);
+      });
+
+      document.getElementById("expandProductsBtn").style.display =
+        filtered.length > limit ? "inline-block" : "none";
+      document.getElementById("expandProductsBtn").onclick = () => {
+        applyProductFilters(filtered.length);
+        document.getElementById("expandProductsBtn").style.display = "none";
+      };
+
+      if (filtered.length === 0) {
+        productListDiv.textContent = "一致する商品が見つかりません";
+      }
+    }
+
+    document.getElementById("applyProductFilters").onclick = () => applyProductFilters(10);
+
+    // 操作履歴
+    async function loadLogs(limit = 10) {
+      const logListDiv = document.getElementById("logList");
+      logListDiv.innerHTML = "読み込み中...";
+      const snap = await getDocs(collection(db, "logs"));
+      const logs = snap.docs.map(doc => doc.data()).sort((a, b) =>
+        b.timestamp?.toDate() - a.timestamp?.toDate()
+      );
+
+      logs.slice(0, limit
