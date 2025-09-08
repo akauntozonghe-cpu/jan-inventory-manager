@@ -2,11 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>在庫管理 - 管理者画面</title>
+  <title>管理者画面</title>
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <header><h1>在庫管理 - 管理者画面</h1></header>
   <div id="userHeader">
     <span id="loginUser"></span>
     <button id="logoutBtn">ログアウト</button>
@@ -14,37 +14,20 @@
 
   <h2>👥 責任者一覧</h2>
   <div id="userList">読み込み中...</div>
-  <button onclick="location.href='register-user.html'">➕ 責任者追加</button>
 
   <h2>📦 商品一覧</h2>
   <div id="productList">読み込み中...</div>
-  <button onclick="location.href='register-product.html'">➕ 商品追加</button>
 
-  <h2>📜 操作履歴</h2>
-  <div id="logsList">読み込み中...</div>
+  <h2>📝 操作履歴</h2>
+  <div id="logList">読み込み中...</div>
 
   <h2>🔍 検索履歴</h2>
-  <div id="searchFilters">
-    <label>責任者名: <input type="text" id="filterName"></label>
-    <label>キーワード: <input type="text" id="filterKeyword"></label>
-    <label>日付: <input type="date" id="filterDate"></label>
-    <button id="applySearchFilters">絞り込み</button>
-  </div>
   <div id="searchLogList">読み込み中...</div>
 
-  <button onclick="location.href='user.html'">← 責任者画面に戻る</button>
-
   <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      initializeApp,
-      getFirestore,
-      collection,
-      getDocs,
-      deleteDoc,
-      doc,
-      updateDoc,
-      query,
-      orderBy
+      getFirestore, collection, getDocs
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -64,79 +47,52 @@
 
     document.getElementById("loginUser").textContent =
       `ログイン中: ${name}（${role}） / 番号: ${number}`;
-
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
-    async function loadUsers() {
-      const snap = await getDocs(collection(db, "users"));
-      const div = document.getElementById("userList");
-      div.innerHTML = "";
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-        const item = document.createElement("div");
-        item.innerHTML = `${data.name}（番号: ${data.number}, 権限: ${data.role}）
-          <button onclick="deleteDoc(doc(db, 'users', '${id}')).then(loadUsers)">削除</button>`;
-        div.appendChild(item);
-      });
-    }
-
-    async function loadProducts() {
-      const snap = await getDocs(collection(db, "products"));
-      const div = document.getElementById("productList");
-      div.innerHTML = "";
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const id = docSnap.id;
-        const item = document.createElement("div");
-        item.innerHTML = `${data.name}（バーコード: ${data.barcode}, 在庫: ${data.stock})
-          <input type="number" id="stock-${id}" value="${data.stock}">
-          <button onclick="updateDoc(doc(db, 'products', '${id}'), { stock: parseInt(document.getElementById('stock-${id}').value) }).then(loadProducts)">更新</button>
-          <button onclick="deleteDoc(doc(db, 'products', '${id}')).then(loadProducts)">削除</button>`;
-        div.appendChild(item);
-      });
-    }
-
-    async function loadLogs() {
-      const snap = await getDocs(query(collection(db, "logs"), orderBy("timestamp", "desc")));
-      const div = document.getElementById("logsList");
-      div.innerHTML = "";
+    // 責任者一覧
+    const userListDiv = document.getElementById("userList");
+    getDocs(collection(db, "users")).then(snap => {
+      userListDiv.innerHTML = "";
       snap.forEach(doc => {
         const data = doc.data();
-        const time = data.timestamp?.toDate().toLocaleString("ja-JP") || "日時不明";
-        div.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が ${data.target} を ${data.action}</div>`;
+        userListDiv.innerHTML += `<div>${data.name}（${data.role}） / 番号: ${data.number}</div>`;
       });
-    }
+    });
 
-    async function loadSearchLogs() {
-      const nameFilter = document.getElementById("filterName").value.trim();
-      const keywordFilter = document.getElementById("filterKeyword").value.trim();
-      const dateFilter = document.getElementById("filterDate").value;
-      const snap = await getDocs(collection(db, "searchLogs"));
-      const div = document.getElementById("searchLogList");
-      div.innerHTML = "";
+    // 商品一覧
+    const productListDiv = document.getElementById("productList");
+    getDocs(collection(db, "products")).then(snap => {
+      productListDiv.innerHTML = "";
       snap.forEach(doc => {
         const data = doc.data();
-        const time = data.timestamp?.toDate();
-        const timeStr = time?.toLocaleString("ja-JP") || "日時不明";
-        const matchName = nameFilter === "" || data.userName.includes(nameFilter);
-        const matchKeyword = keywordFilter === "" || data.keyword.includes(keywordFilter);
-        const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
-        if (matchName && matchKeyword && matchDate) {
-          div.innerHTML += `<div>${timeStr} - ${data.userName}（${data.role}）が「${data.keyword}」を検索</div>`;
-        }
+        productListDiv.innerHTML += `<div>${data.name} / バーコード: ${data.barcode} / 在庫: ${data.stock}</div>`;
       });
-    }
+    });
 
-    document.getElementById("applySearchFilters").onclick = loadSearchLogs;
+    // 操作履歴
+    const logListDiv = document.getElementById("logList");
+    getDocs(collection(db, "logs")).then(snap => {
+      logListDiv.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
+        logListDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が ${data.action}</div>`;
+      });
+    });
 
-    loadUsers();
-    loadProducts();
-    loadLogs();
-    loadSearchLogs();
+    // 検索履歴
+    const searchLogDiv = document.getElementById("searchLogList");
+    getDocs(collection(db, "searchLogs")).then(snap => {
+      searchLogDiv.innerHTML = "";
+      snap.forEach(doc => {
+        const data = doc.data();
+        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
+        searchLogDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が「${data.keyword}」を検索</div>`;
+      });
+    });
   </script>
 </body>
 </html>
