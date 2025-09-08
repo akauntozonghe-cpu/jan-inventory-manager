@@ -73,7 +73,21 @@
       display: block;
     }
 
+    #registerSuccess {
+      display: none;
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-top: 10px;
+      animation: fadeUp 0.6s ease-out;
+    }
+
     @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
@@ -91,42 +105,21 @@
 
   <div class="section" id="productRegister">
     <h2>📦 商品登録</h2>
-    <input type="text" placeholder="管理番号" required>
-    <input type="text" placeholder="管理区別番号" class="admin-only">
-    <input type="text" placeholder="保管場所" required>
-    <input type="text" placeholder="大分類" required>
-    <input type="text" placeholder="小分類" required>
+    <input type="text" id="productId" placeholder="管理番号" required>
+    <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
+    <input type="text" id="location" placeholder="保管場所" required>
+    <input type="text" id="categoryLarge" placeholder="大分類" required>
+    <input type="text" id="categorySmall" placeholder="小分類" required>
     <input type="text" id="janCode" placeholder="JANコード">
     <button id="scanJanBtn">📷 JANコードを読み取る</button>
-    <input type="file" accept="image/*">
-    <input type="text" placeholder="会社名" required>
-    <input type="text" placeholder="品名" required>
-    <input type="text" placeholder="Lot.No・製造番号">
-    <input type="date" placeholder="期限">
-    <input type="text" placeholder="個数単位" required>
-    <button>登録する</button>
-  </div>
-
-  <div class="section" id="productSearch">
-    <h2>🔍 商品検索</h2>
-    <input type="text" placeholder="商品名">
-    <input type="text" placeholder="JANコード">
-    <button>検索する</button>
-  </div>
-
-  <div class="section" id="contactSection">
-    <h2>📩 管理者に連絡</h2>
-    <button id="contactAdminBtn">管理者に連絡する</button>
-    <div id="contactForm" style="display:none;">
-      <textarea rows="3" placeholder="要件を入力してください"></textarea>
-      <button>送信</button>
-      <p id="contactStatus"></p>
-    </div>
-  </div>
-
-  <div class="section" id="logSection">
-    <h2>📝 自分の操作履歴</h2>
-    <div id="selfLogList">読み込み中...</div>
+    <input type="file" id="photo" accept="image/*">
+    <input type="text" id="company" placeholder="会社名" required>
+    <input type="text" id="productName" placeholder="品名" required>
+    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号">
+    <input type="date" id="expiry" placeholder="期限">
+    <input type="text" id="unit" placeholder="個数単位" required>
+    <button id="registerBtn">登録する</button>
+    <div id="registerSuccess">✅ 登録が完了しました！</div>
   </div>
 
   <script>
@@ -135,8 +128,6 @@
     document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
     if (role === "管理者") {
       document.body.classList.add("admin");
-    } else {
-      document.getElementById("contactSection").style.display = "block";
     }
 
     document.getElementById("logoutBtn").onclick = () => {
@@ -144,13 +135,19 @@
       location.href = "index.html";
     };
 
-    document.getElementById("contactAdminBtn").onclick = () => {
-      document.getElementById("contactForm").style.display = "block";
-      document.getElementById("contactStatus").textContent = "";
+    document.getElementById("scanJanBtn").onclick = () => {
+      // 仮の読み取り処理（実装はQuaggaJSやZXingと連携）
+      const dummyCode = "4901234567894";
+      document.getElementById("janCode").value = dummyCode;
+      alert("JANコードを読み取りました: " + dummyCode);
     };
 
-    document.getElementById("scanJanBtn").onclick = () => {
-      alert("JANコード読み取り機能は後ほど実装されます");
+    document.getElementById("registerBtn").onclick = () => {
+      // 仮の登録処理（実際はFirestoreなどに保存）
+      document.getElementById("registerSuccess").style.display = "block";
+      setTimeout(() => {
+        document.getElementById("registerSuccess").style.display = "none";
+      }, 3000);
     };
   </script>
 </body>
