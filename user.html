@@ -174,6 +174,20 @@
   </div>
 </div>
   <script type="module">
+window.addEventListener("DOMContentLoaded", () => {
+  const name = sessionStorage.getItem("responsibilityName") || "未設定";
+  const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
+  const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : "未設定";
+
+  const loginUserEl = document.getElementById("loginUser");
+  if (loginUserEl) {
+    loginUserEl.textContent = `ログイン中: ${name}（${roleJP}）`;
+  }
+
+  if (roleJP === "管理者") {
+    document.body.classList.add("admin");
+  }
+});
   // すでにあるログイン情報取得の直後に追加
   const role = sessionStorage.getItem("responsibilityRole");
 
@@ -359,6 +373,7 @@ tu
   </script>
 </body>
 </html>
+
 
 
 
