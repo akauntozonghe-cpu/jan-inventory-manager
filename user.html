@@ -7,12 +7,14 @@
 </head>
 <body>
   <header><h1>在庫管理 - 責任者画面</h1></header>
+
+  <!-- ログイン情報表示 -->
   <div id="loginUser">読み込み中...</div>
   <button id="btn-admin" style="display:none;">🔧 管理者メニュー</button>
 
   <!-- 商品登録 -->
   <section>
-    <h2>商品登録</h2>
+    <h2>📦 商品登録</h2>
     <input id="productName" placeholder="商品名">
     <input id="janCodeInput" placeholder="JANコード">
     <input id="company" placeholder="会社名">
@@ -27,7 +29,7 @@
 
   <!-- 商品検索 -->
   <section>
-    <h2>商品検索</h2>
+    <h2>🔍 商品検索</h2>
     <input id="searchInput" placeholder="JANコード">
     <button id="searchBtn">検索</button>
     <button id="scanSearchBtn">📷 スキャン検索</button>
@@ -37,7 +39,7 @@
 
   <!-- 管理者連絡 -->
   <section>
-    <h2>管理者に連絡</h2>
+    <h2>📨 管理者に連絡</h2>
     <textarea id="contactMsg" placeholder="メッセージを入力"></textarea>
     <button id="contactSendBtn">送信</button>
     <div id="contactStatus"></div>
@@ -45,23 +47,24 @@
 
   <!-- CSV出力 -->
   <section>
-    <h2>登録履歴のCSV出力</h2>
+    <h2>📁 登録履歴のCSV出力</h2>
     <button id="exportCsvBtn">CSV出力</button>
   </section>
 
-  <!-- 一覧表示 -->
+  <!-- 登録済み一覧 -->
   <section>
-    <h2>登録済み一覧</h2>
+    <h2>📋 登録済み一覧</h2>
     <button id="loadAllBtn">一覧表示</button>
     <div id="allProducts"></div>
   </section>
 
-  <!-- 管理者セクション -->
+  <!-- 管理者専用セクション -->
   <section id="adminSection" style="display:none;">
-    <h2>管理者メニュー</h2>
+    <h2>🛠 管理者メニュー</h2>
 
+    <!-- ユーザー管理 -->
     <div>
-      <h3>ユーザー管理</h3>
+      <h3>👥 ユーザー管理</h3>
       <input id="newUserName" placeholder="名前">
       <input id="newUserNumber" placeholder="番号">
       <select id="newUserRole">
@@ -71,11 +74,12 @@
       <button id="addUserBtn">追加</button>
       <input id="deleteUserNumber" placeholder="削除する番号">
       <button id="deleteUserBtn">削除</button>
-      <div id="userList"></div>
+      <div id="userList">読み込み中...</div>
     </div>
 
+    <!-- 操作履歴 -->
     <div>
-      <h3>操作履歴</h3>
+      <h3>📝 操作履歴</h3>
       <input id="filterUser" placeholder="ユーザー名">
       <input id="filterAction" placeholder="操作種別">
       <button id="applyLogFilter">絞り込み</button>
@@ -84,6 +88,7 @@
     </div>
   </section>
 
+  <!-- スクリプト読み込み -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
