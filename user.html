@@ -36,7 +36,7 @@
       margin-bottom: 12px;
       text-align: center;
     }
-    input, textarea, button {
+    input, textarea, select, button {
       width: 100%;
       margin: 8px 0;
       padding: 10px;
@@ -54,7 +54,7 @@
     button:hover {
       background-color: #2e59d9;
     }
-    #scannerWrapper, #searchScannerWrapper {
+    #scannerWrapper {
       display: none;
       width: 100%;
       max-width: 400px;
@@ -64,7 +64,7 @@
       border-radius: 8px;
       position: relative;
     }
-    #scanner, #searchScanner {
+    #scanner {
       width: 100%;
       height: 100%;
     }
@@ -78,6 +78,12 @@
       font-weight: bold;
       margin-bottom: 16px;
     }
+    .admin-only {
+      display: none;
+    }
+    body.admin .admin-only {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -87,47 +93,36 @@
   <div id="loginUser">読み込み中...</div>
 
   <div class="section">
-    <h2>📷 JANコード読み取り（登録）</h2>
-    <button id="startScanBtn">読み取り開始</button>
-    <div id="scannerWrapper"><div id="scanner"></div></div>
-    <input type="text" id="janCodeInput" placeholder="JANコード">
-    <div id="scanStatus"></div>
-  </div>
-
-  <div class="section">
     <h2>📦 商品登録</h2>
-    <input type="text" id="productName" placeholder="品名">
+    <input type="text" id="productId" placeholder="管理番号">
+    <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
+    <input type="text" id="location" placeholder="保管場所">
+    <input type="text" id="categoryLarge" placeholder="大分類">
+    <input type="text" id="categorySmall" placeholder="小分類">
+
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
+      <button id="startScanBtn" style="flex-shrink:0;">📷 読み取り</button>
+    </div>
+    <div id="scannerWrapper"><div id="scanner"></div></div>
+
+    <input type="file" id="photo" accept="image/*">
     <input type="text" id="company" placeholder="会社名">
-    <input type="text" id="unit" placeholder="個数単位">
+    <input type="text" id="productName" placeholder="品名">
+    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号">
+    <input type="date" id="expiry" placeholder="期">
+    <input list="unitOptions" id="unit" placeholder="個数単位">
+    <datalist id="unitOptions">
+      <option value="個"><option value="枚"><option value="パック"><option value="袋">
+      <option value="セット"><option value="箱"><option value="包"><option value="本"><option value="枚入り">
+    </datalist>
     <button id="registerBtn">登録する</button>
-  </div>
-
-  <div class="section">
-    <h2>🔍 商品検索</h2>
-    <button id="scanSearchBtn">JANコード読み取り</button>
-    <div id="searchScannerWrapper"><div id="searchScanner"></div></div>
-    <input type="text" id="searchInput" placeholder="商品名またはJANコード">
-    <button id="searchBtn">検索する</button>
-    <div id="searchResults"></div>
-  </div>
-
-  <div class="section">
-    <h2>📩 管理者に連絡</h2>
-    <textarea id="contactMsg" rows="3" placeholder="要件を入力してください"></textarea>
-    <button id="contactSendBtn">送信</button>
-    <div id="contactStatus"></div>
-  </div>
-
-  <div class="section">
-    <h2>📝 自分の履歴</h2>
-    <div id="historyList">読み込み中...</div>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, getDocs, query, where,
-      updateDoc, deleteDoc, doc, serverTimestamp
+      getFirestore, collection, addDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -142,15 +137,16 @@
     const role = sessionStorage.getItem("responsibilityRole");
     const name = sessionStorage.getItem("responsibilityName");
     document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
+    if (role === "管理者") document.body.classList.add("admin");
 
-    function startScanner(targetId, inputId, wrapperId, type) {
-      const wrapper = document.getElementById(wrapperId);
+    document.getElementById("startScanBtn").onclick = () => {
+      const wrapper = document.getElementById("scannerWrapper");
       wrapper.style.display = "block";
 
       Quagga.init({
         inputStream: {
           type: "LiveStream",
-          target: document.querySelector(`#${targetId}`),
+          target: document.querySelector("#scanner"),
           constraints: { facingMode: "environment" }
         },
         decoder: { readers: ["ean_reader"] },
@@ -162,70 +158,38 @@
 
       Quagga.onDetected(result => {
         const code = result.codeResult.code;
-        document.getElementById(inputId).value = code;
+        document.getElementById("janCodeInput").value = code;
         Quagga.stop();
         wrapper.style.display = "none";
 
         addDoc(collection(db, "scanLogs"), {
-          type,
+          type: "登録",
           jan: code,
           scannedBy: name,
           timestamp: serverTimestamp()
         });
-
-        if (type === "検索") document.getElementById("searchBtn").click();
-        if (type === "登録") document.getElementById("scanStatus").textContent = `✅ 読み取り成功: ${code}`;
       });
-    }
-
-    document.getElementById("startScanBtn").onclick = () =>
-      startScanner("scanner", "janCodeInput", "scannerWrapper", "登録");
-
-    document.getElementById("scanSearchBtn").onclick = () =>
-      startScanner("searchScanner", "searchInput", "searchScannerWrapper", "検索");
+    };
 
     document.getElementById("registerBtn").onclick = async () => {
       const data = {
+        id: document.getElementById("productId").value,
+        groupId: document.getElementById("productGroupId").value || null,
+        location: document.getElementById("location").value,
+        categoryLarge: document.getElementById("categoryLarge").value,
+        categorySmall: document.getElementById("categorySmall").value,
         jan: document.getElementById("janCodeInput").value,
-        name: document.getElementById("productName").value,
         company: document.getElementById("company").value,
+        name: document.getElementById("productName").value,
+        lot: document.getElementById("lotNumber").value,
+        expiry: document.getElementById("expiry").value,
         unit: document.getElementById("unit").value,
         registeredBy: name,
         timestamp: serverTimestamp()
       };
       await addDoc(collection(db, "products"), data);
       alert("✅ 登録完了");
-      loadHistory();
     };
-
-    document.getElementById("searchBtn").onclick = async () => {
-      const keyword = document.getElementById("searchInput").value.trim();
-      const q = query(collection(db, "products"), where("jan", "==", keyword));
-      const snap = await getDocs(q);
-      const area = document.getElementById("searchResults");
-      area.innerHTML = "";
-
-      snap.forEach(docSnap => {
-        const data = docSnap.data();
-        const div = document.createElement("div");
-        div.innerHTML = `
-          <p>📦 ${data.name}（${data.jan}）</p>
-          ${role === "管理者" ? `
-            <button onclick="editProduct('${docSnap.id}')">✏️ 編集</button>
-            <button onclick="deleteProduct('${docSnap.id}')">🗑️ 削除</button>
-          ` : ""}
-        `;
-        area.appendChild(div);
-      });
-    };
-
-    window.editProduct = async (id) => {
-      const newName = prompt("新しい品名を入力");
-      if (newName) {
-        await updateDoc(doc(db, "products", id), { name: newName });
-        alert("✅ 編集完了");
-        loadHistory();
-      }
-    };
-
-    window.deleteProduct =
+  </script>
+</body>
+</html>
