@@ -6,38 +6,11 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <div id="userHeader">
-    <span id="loginUser"></span>
-    <button id="logoutBtn">ログアウト</button>
-  </div>
+  <!-- ログイン見出しは削除済み -->
 
-  <div id="adminAccess" style="margin-top: 20px;"></div>
-
-  <h2>📦 商品登録</h2>
-  <input type="text" id="newProductName" placeholder="商品名">
-  <input type="text" id="newBarcode" placeholder="バーコード">
-  <input type="number" id="newStock" placeholder="在庫数">
-  <button id="addProductBtn">登録</button>
-
-  <h2>🔍 商品検索</h2>
-  <label>商品名: <input type="text" id="filterProductName"></label>
-  <label>バーコード: <input type="text" id="filterBarcode"></label>
-  <button id="applyProductFilter">絞り込み</button>
-  <div id="productList">読み込み中...</div>
-  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
-
-  <div id="contactSection" style="margin-top: 30px;">
-    <h2>📩 管理者に連絡</h2>
-    <button id="contactAdminBtn">管理者に連絡する</button>
-    <div id="contactForm" style="display:none; margin-top:10px;">
-      <textarea id="contactMessage" rows="3" cols="40" placeholder="要件を入力してください"></textarea><br>
-      <button id="sendContactBtn">送信</button>
-      <p id="contactStatus"></p>
-    </div>
-  </div>
-
-  <h2>📝 自分の操作履歴</h2>
-  <div id="selfLogList">読み込み中...</div>
+  <label>責任者番号: <input type="text" id="loginNumber" placeholder="番号を入力"></label>
+  <button id="loginBtn">ログイン</button>
+  <p id="loginMsg"></p>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -54,133 +27,52 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const name = sessionStorage.getItem("responsibilityName");
-    const rawRole = sessionStorage.getItem("responsibilityRole");
-    const roleMap = { "Admin": "管理者", "責任者": "責任者" };
-    const role = roleMap[rawRole] || rawRole;
+    const loginInput = document.getElementById("loginNumber");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMsg = document.getElementById("loginMsg");
 
-    if (!name || !role) location.href = "index.html";
+    loginInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loginBtn.click();
+    });
 
-    document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}）`;
-    document.getElementById("logoutBtn").onclick = () => {
-      sessionStorage.clear();
-      location.href = "index.html";
-    };
+    loginBtn.onclick = async () => {
+      const inputNumber = loginInput.value.trim();
+      loginMsg.textContent = "";
 
-    if (role === "管理者") {
-      const adminDiv = document.getElementById("adminAccess");
-      const btn = document.createElement("button");
-      btn.textContent = "管理者画面へ";
-      btn.onclick = () => location.href = "admin.html";
-      adminDiv.appendChild(btn);
-      document.getElementById("contactSection").style.display = "none";
-    }
-
-    document.getElementById("addProductBtn").onclick = async () => {
-      const nameInput = document.getElementById("newProductName").value.trim();
-      const barcode = document.getElementById("newBarcode").value.trim();
-      const stock = parseInt(document.getElementById("newStock").value);
-      if (!nameInput || !barcode || isNaN(stock)) {
-        alert("商品名・バーコード・在庫数をすべて入力してください");
+      if (!inputNumber) {
+        loginMsg.textContent = "番号を入力してください";
         return;
       }
-      await addDoc(collection(db, "products"), {
-        name: nameInput,
-        barcode: barcode,
-        stock: stock
-      });
-      await addDoc(collection(db, "logs"), {
-        userName: name,
-        role: role,
-        action: "商品を登録しました",
-        target: nameInput,
-        timestamp: serverTimestamp()
-      });
-      alert(`商品『${nameInput}』を登録しました`);
-      loadProducts(10);
-    };
 
-    let allProducts = [];
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        const match = snap.docs.find(doc => doc.data().number === inputNumber);
 
-    async function loadProducts(limit = 10) {
-      const snap = await getDocs(collection(db, "products"));
-      allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderProducts(limit);
-    }
+        if (match) {
+          const user = match.data();
+          const roleMap = { "Admin": "管理者", "責任者": "責任者" };
+          const role = roleMap[user.role] || user.role;
 
-    function renderProducts(limit) {
-      const productListDiv = document.getElementById("productList");
-      productListDiv.innerHTML = "";
-      const nameFilter = document.getElementById("filterProductName").value.trim().toLowerCase();
-      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
-      const filtered = allProducts.filter(p => {
-        const nameMatch = nameFilter === "" || p.name?.toLowerCase().includes(nameFilter);
-        const barcodeMatch = barcodeFilter === "" || p.barcode?.includes(barcodeFilter);
-        return nameMatch && barcodeMatch;
-      });
-      filtered.slice(0, limit).forEach(data => {
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${data.name}</strong> / バーコード: ${data.barcode} / 在庫: ${data.stock}<hr>`;
-        productListDiv.appendChild(div);
-      });
-      document.getElementById("expandProductsBtn").style.display =
-        filtered.length > limit ? "inline-block" : "none";
-      document.getElementById("expandProductsBtn").onclick = () => {
-        renderProducts(filtered.length);
-        document.getElementById("expandProductsBtn").style.display = "none";
-      };
-    }
+          sessionStorage.setItem("responsibilityName", user.name);
+          sessionStorage.setItem("responsibilityRole", role);
 
-    document.getElementById("applyProductFilter").onclick = () => {
-      renderProducts(10);
-    };
+          await addDoc(collection(db, "logs"), {
+            userName: user.name,
+            role: role,
+            action: "ログインしました",
+            target: user.number,
+            timestamp: serverTimestamp()
+          });
 
-    loadProducts();
-
-    document.getElementById("contactAdminBtn").onclick = () => {
-      document.getElementById("contactForm").style.display = "block";
-      document.getElementById("contactStatus").textContent = "";
-    };
-
-    document.getElementById("sendContactBtn").onclick = async () => {
-      const message = document.getElementById("contactMessage").value.trim();
-      if (!message) {
-        document.getElementById("contactStatus").textContent = "要件を入力してください";
-        return;
+          location.href = role === "管理者" ? "admin.html" : "user.html";
+        } else {
+          loginMsg.textContent = "番号が一致しません";
+        }
+      } catch (e) {
+        console.error("ログインエラー:", e);
+        loginMsg.textContent = "ログイン処理中にエラーが発生しました";
       }
-      await addDoc(collection(db, "logs"), {
-        userName: name,
-        role: role,
-        action: "管理者に連絡しました",
-        target: message,
-        timestamp: serverTimestamp()
-      });
-      document.getElementById("contactStatus").textContent = "連絡しました。対応をお待ちください。";
-      document.getElementById("contactMessage").value = "";
     };
-
-    async function loadSelfLogs() {
-      const snap = await getDocs(collection(db, "logs"));
-      const logs = snap.docs.map(doc => doc.data())
-        .filter(log => log.userName === name)
-        .sort((a, b) => {
-          const timeA = a.timestamp?.toDate?.() ?? new Date(0);
-          const timeB = b.timestamp?.toDate?.() ?? new Date(0);
-          return timeB - timeA;
-        });
-      const logListDiv = document.getElementById("selfLogList");
-      logListDiv.innerHTML = "";
-      logs.slice(0, 10).forEach(data => {
-        const time = data.timestamp?.toDate?.()?.toLocaleString("ja-JP") || "日時不明";
-        logListDiv.innerHTML += `<div>${time} - ${data.action}『${data.target}』</div>`;
-      });
-      if (logs.length === 0) {
-        logListDiv.textContent = "履歴が見つかりません";
-      }
-    }
-
-    loadSelfLogs();
   </script>
 </body>
 </html>
