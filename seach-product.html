@@ -1,55 +1,81 @@
-<input type="text" id="barcodeInput" placeholder="商品名またはバーコード">
-<button id="scanBtn">📷 スキャン</button>
-<canvas id="barcode-canvas" style="width:100%;max-width:400px;"></canvas>
-<div id="searchResults"></div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>商品検索</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/qrcodelib.js"></script>
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/webcodecamjs.js"></script>
+</head>
+<body>
+  <header><h1>商品検索</h1></header>
+  <input type="text" id="barcodeInput" placeholder="商品名またはバーコード">
+  <button id="scanBtn">📷 スキャン</button>
+  <canvas id="barcode-canvas" style="width:100%;max-width:400px;"></canvas>
+  <div id="searchResults"></div>
 
-<script type="module">
-  import { setupBarcodeInput } from "./barcode-handler.js";
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-  import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-  const firebaseConfig = { /* Firebase設定 */ };
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+    const firebaseConfig = { apiKey: "...", authDomain: "...", projectId: "..." };
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-  const name = sessionStorage.getItem("responsibilityName");
-  const role = sessionStorage.getItem("responsibilityRole");
-  const number = sessionStorage.getItem("responsibilityNumber");
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+    const number = sessionStorage.getItem("responsibilityNumber");
 
-  function searchProducts(keyword) {
-    const resultsDiv = document.getElementById("searchResults");
-    resultsDiv.innerHTML = "検索中...";
+    if (!name || !role || !number) location.href = "index.html";
 
-    addDoc(collection(db, "searchLogs"), {
-      userId: number,
-      userName: name,
-      role: role,
-      keyword: keyword,
-      timestamp: serverTimestamp()
-    });
+    function searchProducts(keyword) {
+      const resultsDiv = document.getElementById("searchResults");
+      resultsDiv.innerHTML = "検索中...";
 
-    getDocs(collection(db, "products")).then(snap => {
-      resultsDiv.innerHTML = "";
-      let found = false;
-      snap.forEach(doc => {
-        const data = doc.data();
-        if (data.name?.toLowerCase().includes(keyword) || data.barcode?.includes(keyword)) {
-          found = true;
-          const div = document.createElement("div");
-          div.innerHTML = `
-            <strong>${data.name}</strong><br>
-            バーコード: ${data.barcode}<br>
-            在庫数: ${data.stock}<br>
-            <a href="stock-inout.html?barcode=${data.barcode}">📦 在庫操作</a>
-            ${role === "管理者" ? ` | <a href="register-product.html?edit=${data.barcode}">✏️ 編集</a>` : ""}
-            | <a href="product-history.html?barcode=${data.barcode}">📜 履歴を見る</a>
-          `;
-          resultsDiv.appendChild(div);
-        }
+      addDoc(collection(db, "searchLogs"), {
+        userId: number,
+        userName: name,
+        role: role,
+        keyword: keyword,
+        timestamp: serverTimestamp()
       });
-      if (!found) resultsDiv.innerHTML = "<p>一致する商品が見つかりません</p>";
-    });
-  }
 
-  setupBarcodeInput(searchProducts);
-</script>
+      getDocs(collection(db, "products")).then(snap => {
+        resultsDiv.innerHTML = "";
+        let found = false;
+        snap.forEach(doc => {
+          const data = doc.data();
+          if (data.name?.toLowerCase().includes(keyword.toLowerCase()) || data.barcode?.includes(keyword)) {
+            found = true;
+            const div = document.createElement("div");
+            div.innerHTML = `
+              <strong>${data.name}</strong><br>
+              バーコード: ${data.barcode}<br>
+              在庫数: ${data.stock}<br>
+              <a href="stock-inout.html?barcode=${data.barcode}">📥 在庫操作</a>
+              ${role === "管理者" ? ` | <a href="register-product.html?edit=${data.barcode}">📝 編集</a>` : ""}
+              | <a href="product-history.html?barcode=${data.barcode}">📜 履歴</a>
+            `;
+            resultsDiv.appendChild(div);
+          }
+        });
+        if (!found) resultsDiv.innerHTML = "<p>一致する商品が見つかりません</p>";
+      });
+    }
+
+    document.getElementById("barcodeInput").addEventListener("keydown", e => {
+      if (e.key === "Enter") searchProducts(e.target.value.trim());
+    });
+
+    document.getElementById("scanBtn").onclick = () => {
+      const args = {
+        resultFunction: result => {
+          document.getElementById("barcodeInput").value = result.code;
+          searchProducts(result.code);
+        }
+      };
+      new WebCodeCamJS("#barcode-canvas").init(args).play();
+    };
+  </script>
+</body>
+</html>
