@@ -30,9 +30,9 @@
   <button id="expandProductsBtn" style="display:none;">すべて見る</button>
 
   <h2>📝 操作履歴</h2>
-  <div>
-    <label>ユーザー名: <input type="text" id="filterUser"></label>
-    <label>操作種別: <input type="text" id="filterAction"></label>
+  <div style="margin-bottom: 10px;">
+    <label>ユーザー名: <input type="text" id="filterUser" placeholder="例: 山田太郎"></label>
+    <label>操作種別: <input type="text" id="filterAction" placeholder="例: 登録しました"></label>
     <button id="applyLogFilter">絞り込み</button>
   </div>
   <div id="logList">読み込み中...</div>
@@ -158,9 +158,4 @@
           loadProducts(limit);
         };
         const deleteBtn = document.createElement("button");
-        deleteBtn.textContent = "削除";
-        deleteBtn.onclick = async () => {
-          if (confirm(`商品『${data.name}』を削除しますか？`)) {
-            await deleteDoc(doc(db, "products", data.id));
-            alert(`商品『${data.name}』を削除しました`);
-            await
+        deleteBtn.textContent
