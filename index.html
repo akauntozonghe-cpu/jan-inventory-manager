@@ -4,9 +4,33 @@
   <meta charset="UTF-8">
   <title>在庫管理</title>
   <link rel="stylesheet" href="./style.css">
+  <style>
+    .app-header {
+      text-align: center;
+      padding: 24px 12px;
+      background: linear-gradient(to right, #4e73df, #1cc88a);
+      color: white;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .app-title {
+      font-size: 2rem;
+      margin: 0;
+      font-weight: bold;
+      letter-spacing: 1px;
+    }
+    .app-subtitle {
+      font-size: 1rem;
+      margin-top: 8px;
+      opacity: 0.9;
+    }
+  </style>
 </head>
 <body>
-  <!-- ログイン見出しは削除済み -->
+  <header class="app-header">
+    <h1 class="app-title">在庫管理</h1>
+    <p class="app-subtitle">JANコード対応・スマホ最適化</p>
+  </header>
 
   <label>責任者番号: <input type="text" id="loginNumber" placeholder="番号を入力"></label>
   <button id="loginBtn">ログイン</button>
