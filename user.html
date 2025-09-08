@@ -126,7 +126,52 @@
       });
     });
   </script>
+<div id="adminSection" class="section">
+  <h2>管理者メニュー</h2>
 
+  <!-- ユーザー管理 -->
+  <div class="admin-block">
+    <h3>ユーザー管理</h3>
+    <input type="text" id="newUserName" placeholder="名前">
+    <input type="text" id="newUserNumber" placeholder="番号">
+    <select id="newUserRole">
+      <option value="admin">管理者</option>
+      <option value="manager">責任者</option>
+    </select>
+    <button id="addUserBtn">追加</button>
+
+    <input type="text" id="deleteUserNumber" placeholder="削除する番号">
+    <button id="deleteUserBtn">削除</button>
+
+    <div id="userList"></div>
+  </div>
+
+  <!-- ログ閲覧 -->
+  <div class="admin-block">
+    <h3>操作履歴</h3>
+    <input type="date" id="logDateFilter">
+    <input type="text" id="logUserFilter" placeholder="ユーザー名">
+    <button id="loadLogsBtn">読み込み</button>
+    <button id="exportLogsBtn">CSV出力</button>
+    <div id="logList"></div>
+  </div>
+
+  <!-- 商品データ管理 -->
+  <div class="admin-block">
+    <h3>商品データ管理</h3>
+    <input type="text" id="productFilter" placeholder="商品名またはJANコードで検索">
+    <button id="filterProductsBtn">絞り込み</button>
+    <select id="sortProducts">
+      <option value="nameAsc">商品名昇順</option>
+      <option value="nameDesc">商品名降順</option>
+      <option value="janAsc">JAN昇順</option>
+    </select>
+    <button id="loadProductsBtn">商品一覧を読み込む</button>
+    <button id="exportProductsBtn">CSV出力</button>
+    <div id="productList"></div>
+    <button id="loadMoreProductsBtn" style="display:none;">さらに表示</button>
+  </div>
+</div>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
@@ -221,7 +266,7 @@
         contactStatus.textContent = "送信失敗: " + e.message;
       }
     };
-
+tu
     // CSV出力
     exportCsvBtn.onclick = async () => {
       const q = query(collection(db, "products"), where("user", "==", name));
@@ -300,6 +345,7 @@
   </script>
 </body>
 </html>
+
 
 
 
