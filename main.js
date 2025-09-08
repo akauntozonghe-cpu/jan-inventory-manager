@@ -1,209 +1,181 @@
-// Firebase 初期化
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+const role = sessionStorage.getItem("responsibilityRole");
+const isAdmin = role === "管理者";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  projectId: "inventory-app-312ca"
-};
+if (isAdmin) {
+  // ✅ ユーザー管理
+  const addUserBtn = document.getElementById("addUserBtn");
+  const deleteUserBtn = document.getElementById("deleteUserBtn");
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-document.addEventListener("DOMContentLoaded", () => {
-  // ✅ ログイン処理
-  const loginBtn = document.getElementById("loginBtn");
-  if (loginBtn) {
-    loginBtn.addEventListener("click", async () => {
-      const number = document.getElementById("numberInput").value.trim();
-      const errorMsg = document.getElementById("errorMsg");
-      const loadingMsg = document.getElementById("loadingMsg");
-      errorMsg.textContent = "";
-      loadingMsg.textContent = "ログイン中...";
-
-      try {
-        const q = query(collection(db, "users"), where("number", "==", number));
-        const snap = await getDocs(q);
-
-        if (!snap.empty) {
-          const data = snap.docs[0].data();
-          const name = data.name;
-          const role = data.role === "admin" ? "管理者" : "責任者";
-
-          sessionStorage.setItem("responsibilityNumber", number);
-          sessionStorage.setItem("responsibilityName", name);
-          sessionStorage.setItem("responsibilityRole", role);
-
-          await addDoc(collection(db, "logs"), {
-            userId: number,
-            userName: name,
-            role: role,
-            action: "ログインしました",
-            target: "ログイン画面",
-            timestamp: serverTimestamp()
-          });
-
-          window.location.href = "user.html";
-        } else {
-          errorMsg.textContent = "番号が見つかりません";
-        }
-      } catch (err) {
-        errorMsg.textContent = "エラーが発生しました";
-        console.error(err);
-      } finally {
-        loadingMsg.textContent = "";
-      }
-    });
+  if (addUserBtn) {
+    addUserBtn.onclick = async () => {
+      const name = document.getElementById("newUserName").value.trim();
+      const number = document.getElementById("newUserNumber").value.trim();
+      const role = document.getElementById("newUserRole").value;
+      if (!name || !number) return alert("名前と番号を入力してください");
+      await addDoc(collection(db, "users"), { name, number, role });
+      alert("ユーザーを追加しました");
+    };
   }
 
-  // ✅ セクション排他表示
-  function toggleSection(id) {
-    const allSections = document.querySelectorAll(".section");
-    allSections.forEach(section => {
-      if (section.id !== id) {
-        section.classList.remove("show");
-        sessionStorage.setItem("section_" + section.id, false);
-      }
-    });
-
-    const el = document.getElementById(id);
-    if (!el) return;
-    const isVisible = el.classList.contains("show");
-    el.classList.toggle("show", !isVisible);
-    sessionStorage.setItem("section_" + id, !isVisible);
-
-    document.querySelectorAll(".button-grid button").forEach(btn => btn.classList.remove("active"));
-    if (!isVisible) {
-      const btnMap = {
-        registerSection: "btn-register",
-        searchSection: "btn-search",
-        contactSection: "btn-contact",
-        historySection: "btn-history",
-        listSection: "btn-list"
-      };
-      const activeBtn = document.getElementById(btnMap[id]);
-      if (activeBtn) activeBtn.classList.add("active");
-    }
+  if (deleteUserBtn) {
+    deleteUserBtn.onclick = async () => {
+      const number = document.getElementById("deleteUserNumber").value.trim();
+      if (!number || !confirm("本当に削除しますか？")) return;
+      const q = query(collection(db, "users"), where("number", "==", number));
+      const snap = await getDocs(q);
+      snap.forEach(doc => deleteDoc(doc.ref));
+      alert("削除しました");
+    };
   }
 
-  // ✅ ボタンイベント設定
-  const sectionButtons = {
-    "btn-register": "registerSection",
-    "btn-search": "searchSection",
-    "btn-contact": "contactSection",
-    "btn-history": "historySection",
-    "btn-list": "listSection"
+  // ✅ ログ閲覧・CSV出力
+  const loadLogsBtn = document.getElementById("loadLogsBtn");
+  const exportLogsBtn = document.getElementById("exportLogsBtn");
+
+  if (loadLogsBtn) {
+    loadLogsBtn.onclick = async () => {
+      const date = document.getElementById("logDateFilter").value;
+      const user = document.getElementById("logUserFilter").value.trim();
+      const snap = await getDocs(collection(db, "logs"));
+      const filtered = snap.docs.filter(doc => {
+        const d = doc.data();
+        const matchDate = date ? d.timestamp?.toDate().toISOString().startsWith(date) : true;
+        const matchUser = user ? d.userName.includes(user) : true;
+        return matchDate && matchUser;
+      });
+      document.getElementById("logList").innerHTML = filtered.map(doc => {
+        const d = doc.data();
+        return `<div>${d.timestamp?.toDate().toLocaleString()} - ${d.userName} (${d.role}) - ${d.action}</div>`;
+      }).join("");
+    };
+  }
+
+  if (exportLogsBtn) {
+    exportLogsBtn.onclick = async () => {
+      const snap = await getDocs(collection(db, "logs"));
+      const rows = [["日時", "ユーザー", "ロール", "操作"]];
+      snap.forEach(doc => {
+        const d = doc.data();
+        rows.push([
+          d.timestamp?.toDate().toLocaleString(),
+          d.userName,
+          d.role,
+          d.action
+        ]);
+      });
+      const csv = rows.map(r => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "logs.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  }
+
+  // ✅ 商品データ管理
+  let productOffset = 0;
+  const productLimit = 10;
+  let allProducts = [];
+
+  const loadProductsBtn = document.getElementById("loadProductsBtn");
+  const loadMoreProductsBtn = document.getElementById("loadMoreProductsBtn");
+  const exportProductsBtn = document.getElementById("exportProductsBtn");
+  const filterProductsBtn = document.getElementById("filterProductsBtn");
+  const sortProducts = document.getElementById("sortProducts");
+
+  if (loadProductsBtn) {
+    loadProductsBtn.onclick = async () => {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      productOffset = 0;
+      renderProducts();
+    };
+  }
+
+  if (loadMoreProductsBtn) {
+    loadMoreProductsBtn.onclick = () => {
+      productOffset += productLimit;
+      renderProducts();
+    };
+  }
+
+  if (filterProductsBtn) {
+    filterProductsBtn.onclick = () => {
+      const keyword = document.getElementById("productFilter").value.trim();
+      const filtered = allProducts.filter(p =>
+        p.productName.includes(keyword) || p.janCode.includes(keyword)
+      );
+      renderProducts(filtered);
+    };
+  }
+
+  if (sortProducts) {
+    sortProducts.onchange = () => {
+      const val = sortProducts.value;
+      const sorted = [...allProducts];
+      if (val === "nameAsc") sorted.sort((a, b) => a.productName.localeCompare(b.productName));
+      if (val === "nameDesc") sorted.sort((a, b) => b.productName.localeCompare(a.productName));
+      if (val === "janAsc") sorted.sort((a, b) => a.janCode.localeCompare(b.janCode));
+      renderProducts(sorted.slice(0, productOffset + productLimit));
+    };
+  }
+
+  if (exportProductsBtn) {
+    exportProductsBtn.onclick = () => {
+      const rows = [["商品名", "JANコード", "会社名", "Lot番号", "単位"]];
+      allProducts.forEach(p => {
+        rows.push([p.productName, p.janCode, p.company, p.lotNumber, p.unit]);
+      });
+      const csv = rows.map(r => r.join(",")).join("\n");
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "products.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+  }
+
+  window.updateProduct = async (id) => {
+    const item = document.querySelector(`[data-id="${id}"]`).parentElement;
+    const updated = {
+      productName: item.querySelector(".edit-name").value.trim(),
+      janCode: item.querySelector(".edit-jan").value.trim(),
+      company: item.querySelector(".edit-company").value.trim(),
+      lotNumber: item.querySelector(".edit-lot").value.trim(),
+      unit: item.querySelector(".edit-unit").value.trim(),
+      timestamp: serverTimestamp()
+    };
+    await setDoc(doc(db, "products", id), updated);
+    alert("更新しました");
   };
 
-  Object.entries(sectionButtons).forEach(([btnId, sectionId]) => {
-    const btn = document.getElementById(btnId);
-    if (btn) {
-      btn.addEventListener("click", () => toggleSection(sectionId));
-    }
-  });
+  window.deleteProduct = async (id) => {
+    if (!confirm("本当に削除しますか？")) return;
+    await deleteDoc(doc(db, "products", id));
+    alert("削除しました");
+    allProducts = allProducts.filter(p => p.id !== id);
+    renderProducts();
+  };
 
-  // ✅ 商品検索用カメラ読み取り
-  const scanSearchBtn = document.getElementById("scanSearchBtn");
-  const scannerWrapper = document.getElementById("scannerWrapper");
-  const scanStatus = document.getElementById("scanStatus");
-  const searchInput = document.getElementById("searchInput");
+  function renderProducts(list = allProducts.slice(0, productOffset + productLimit)) {
+    const container = document.getElementById("productList");
+    container.innerHTML = list.map(p => `
+      <div class="product-item">
+        <input value="${p.productName}" data-id="${p.id}" class="edit-name">
+        <input value="${p.janCode}" class="edit-jan">
+        <input value="${p.company}" class="edit-company">
+        <input value="${p.lotNumber}" class="edit-lot">
+        <input value="${p.unit}" class="edit-unit">
+        <button onclick="updateProduct('${p.id}')">更新</button>
+        <button onclick="deleteProduct('${p.id}')">削除</button>
+      </div>
+    `).join("");
 
-  if (scanSearchBtn && scannerWrapper && scanStatus && searchInput) {
-    scanSearchBtn.onclick = () => {
-      toggleSection("searchSection");
-      scannerWrapper.style.display = "block";
-      scanStatus.textContent = "📷 読み取り中...";
-      scanStatus.classList.add("show");
-
-      if (window.Quagga) Quagga.stop();
-      const scanner = document.querySelector("#scanner");
-      if (scanner) scanner.innerHTML = "";
-
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: scanner,
-          constraints: { facingMode: "environment" }
-        },
-        decoder: { readers: ["ean_reader"] }
-      }, err => {
-        if (err) return console.error("カメラ初期化エラー:", err);
-        Quagga.start();
-      });
-
-      Quagga.onDetected(data => {
-        const code = data.codeResult.code;
-        searchInput.value = code;
-
-        scanStatus.textContent = `✅ 読み取り成功: ${code}`;
-        scanStatus.classList.add("show");
-
-        setTimeout(() => {
-          scanStatus.classList.remove("show");
-          scannerWrapper.style.display = "none";
-          Quagga.stop();
-          if (scanner) scanner.innerHTML = "";
-        }, 1500);
-
-        document.getElementById("searchBtn").click();
-      });
-    };
+    loadMoreProductsBtn.style.display =
+      productOffset + productLimit < allProducts.length ? "block" : "none";
   }
-
-  // ✅ 商品登録用カメラ読み取り
-  const scanRegisterBtn = document.getElementById("startScanBtn");
-  const scannerWrapperRegister = document.getElementById("scannerWrapperRegister");
-  const scanStatusRegister = document.getElementById("scanStatusRegister");
-  const janCodeInput = document.getElementById("janCodeInput");
-
-  if (scanRegisterBtn && scannerWrapperRegister && scanStatusRegister && janCodeInput) {
-    scanRegisterBtn.onclick = () => {
-      toggleSection("registerSection");
-      scannerWrapperRegister.style.display = "block";
-      scanStatusRegister.textContent = "📷 読み取り中...";
-      scanStatusRegister.classList.add("show");
-
-      if (window.Quagga) Quagga.stop();
-      const scannerRegister = document.querySelector("#scannerRegister");
-      if (scannerRegister) scannerRegister.innerHTML = "";
-
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: scannerRegister,
-          constraints: { facingMode: "environment" }
-        },
-        decoder: { readers: ["ean_reader"] }
-      }, err => {
-        if (err) return console.error("カメラ初期化エラー:", err);
-        Quagga.start();
-      });
-
-      Quagga.onDetected(data => {
-        const code = data.codeResult.code;
-        janCodeInput.value = code;
-
-        scanStatusRegister.textContent = `✅ 読み取り成功: ${code}`;
-        scanStatusRegister.classList.add("show");
-
-        setTimeout(() => {
-          scanStatusRegister.classList.remove("show");
-          scannerWrapperRegister.style.display = "none";
-          Quagga.stop();
-          if (scannerRegister) scannerRegister.innerHTML = "";
-        }, 1500);
-      });
-    };
-  }
-});
+}
