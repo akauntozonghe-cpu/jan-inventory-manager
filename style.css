@@ -1,148 +1,30 @@
-/* 全体の基本スタイル */
-body {
-  font-family: sans-serif;
-  padding: 1rem;
-}
+function toggleSection(id) {
+  const allSections = document.querySelectorAll(".section");
 
-#systemTitle {
-  background: #f0f0f0;
-  padding: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-}
+  allSections.forEach(section => {
+    if (section.id !== id && section.classList.contains("show")) {
+      section.classList.remove("show");
+      sessionStorage.setItem("section_" + section.id, false);
+    }
+  });
 
-#userHeader {
-  margin-top: 8px;
-  padding: 6px;
-  background: #fafafa;
-  border-bottom: 1px solid #ddd;
-}
+  const el = document.getElementById(id);
+  if (!el) return;
 
-/* ボタン配置グリッド */
-.button-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
+  const isVisible = el.classList.contains("show");
+  el.classList.toggle("show", !isVisible);
+  sessionStorage.setItem("section_" + id, !isVisible);
 
-.button-grid button {
-  padding: 14px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.button-grid button:hover {
-  background-color: #2e59d9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.button-grid button:active {
-  background-color: #1c3fa0;
-  transform: scale(0.98);
-}
-
-.button-grid button.active {
-  background-color: #1cc88a;
-  box-shadow: 0 0 0 3px rgba(28,200,138,0.3);
-}
-
-.button-grid button span.icon {
-  font-size: 1.3rem;
-}
-
-/* ✅ JANコード入力欄の統一スタイル */
-.jan-row {
-  margin-bottom: 12px;
-}
-
-.jan-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.jan-input-wrapper input {
-  flex: 1;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.scan-btn {
-  padding: 8px;
-  font-size: 1.2rem;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scan-btn:hover {
-  background-color: #2e59d9;
-}
-
-/* ✅ カメラ映像を青枠内に収める */
-#scannerWrapper,
-#scannerWrapperRegister {
-  width: 100%;
-  max-width: 320px;
-  height: 240px;
-  border: 2px solid #4e73df;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 12px auto;
-  position: relative;
-  background: #000;
-  display: none;
-}
-
-#scanner,
-#scannerRegister {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ✅ ステータス表示（読み取り中・成功） */
-#scanStatus,
-#scanStatusRegister {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-}
-
-#scanStatus.show,
-#scanStatusRegister.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1.05);
+  document.querySelectorAll(".button-grid button").forEach(btn => btn.classList.remove("active"));
+  if (!isVisible) {
+    const btnMap = {
+      registerSection: "btn-register",
+      searchSection: "btn-search",
+      contactSection: "btn-contact",
+      historySection: "btn-history",
+      listSection: "btn-list"
+    };
+    const activeBtn = document.getElementById(btnMap[id]);
+    if (activeBtn) activeBtn.classList.add("active");
+  }
 }
