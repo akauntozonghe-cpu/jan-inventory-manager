@@ -173,60 +173,39 @@
     <button id="loadMoreProductsBtn" style="display:none;">さらに表示</button>
   </div>
 </div>
-  <script type="module">
-window.addEventListener("DOMContentLoaded", () => {
-  const name = sessionStorage.getItem("responsibilityName") || "未設定";
-  const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
-  const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : "未設定";
+<script type="module">
+  // ✅ モジュールのインポート
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-  const loginUserEl = document.getElementById("loginUser");
-  if (loginUserEl) {
-    loginUserEl.textContent = `ログイン中: ${name}（${roleJP}）`;
-  }
+  // ✅ Firebase 初期化
+  const firebaseConfig = {
+    apiKey: "...",
+    authDomain: "...",
+    projectId: "...",
+    // 他の設定項目
+  };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-  if (roleJP === "管理者") {
-    document.body.classList.add("admin");
-  }
-});
-  // すでにあるログイン情報取得の直後に追加
-  const role = sessionStorage.getItem("responsibilityRole");
-
-  if (role === "管理者") {
-    const adminBtn = document.getElementById("btn-admin");
-    if (adminBtn) {
-      adminBtn.style.display = "inline-block";
-      adminBtn.onclick = () => location.href = "admin.html";
-    }
-  }
-
-  // その後に他のセクション切り替えやイベント登録などが続く
-</script>
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, addDoc, getDocs, query, where,
-      updateDoc, deleteDoc, doc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.firebasestorage.app",
-      messagingSenderId: "245219344089",
-      appId: "1:245219344089:web:e46105927c302e6a5788c8",
-      measurementId: "G-TRH31MJCE3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  // ✅ DOMが読み込まれてから実行する処理
+  window.addEventListener("DOMContentLoaded", () => {
     const name = sessionStorage.getItem("responsibilityName") || "未設定";
-    const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
-    const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : roleRaw;
-    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
-    if (roleJP === "管理者") document.body.classList.add("admin");
+    const role = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
+    const roleJP = role === "admin" ? "管理者" : role === "user" ? "責任者" : "未設定";
 
+    const loginUserEl = document.getElementById("loginUser");
+    if (loginUserEl) {
+      loginUserEl.textContent = `ログイン中: ${name}（${roleJP}）`;
+    }
+
+    if (roleJP === "管理者") {
+      document.body.classList.add("admin");
+    }
+
+    // ✅ ここにイベント登録や画面操作などを続けて書く
+  });
+</script>
     // 商品登録
     registerBtn.onclick = async () => {
       const data = {
@@ -373,6 +352,7 @@ tu
   </script>
 </body>
 </html>
+
 
 
 
