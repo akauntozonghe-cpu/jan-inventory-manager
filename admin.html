@@ -25,17 +25,6 @@
   <div id="userList">読み込み中...</div>
   <button id="expandUsersBtn" style="display:none;">すべて見る</button>
 
-  <h2>📦 商品一覧</h2>
-  <div id="productFilters">
-    <label>商品名: <input type="text" id="filterName"></label>
-    <label>バーコード: <input type="text" id="filterBarcode"></label>
-    <label>在庫 ≥ <input type="number" id="filterStockMin" value="0"></label>
-    <label>在庫 ≤ <input type="number" id="filterStockMax" value="9999"></label>
-    <button id="applyProductFilters">絞り込み</button>
-  </div>
-  <div id="productList">読み込み中...</div>
-  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
-
   <h2>📝 操作履歴</h2>
   <div id="logList">読み込み中...</div>
   <button id="expandLogsBtn" style="display:none;">すべて見る</button>
@@ -45,7 +34,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, getDocs, addDoc, deleteDoc, doc
+      getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -69,22 +58,48 @@
       location.href = "index.html";
     };
 
-    // 責任者一覧
     let allUsers = [];
+
     document.getElementById("addUserBtn").onclick = async () => {
       const newName = document.getElementById("newName").value.trim();
       const newNumber = document.getElementById("newNumber").value.trim();
       const newRole = document.getElementById("newRole").value;
+
       if (!newName || !newNumber) return alert("名前と番号を入力してください");
-      await addDoc(collection(db, "users"), { name: newName, number: newNumber, role: newRole });
-      alert("登録しました");
+
+      await addDoc(collection(db, "users"), {
+        name: newName,
+        number: newNumber,
+        role: newRole
+      });
+
+      alert(`${newRole}『${newName}』を登録しました`);
+
+      await addDoc(collection(db, "logs"), {
+        userName: name,
+        role: role,
+        action: `${newRole}を登録しました`,
+        target: newName,
+        timestamp: serverTimestamp()
+      });
+
       fetchUsers();
     };
 
     async function deleteUser(id) {
-      if (confirm("本当に削除しますか？")) {
+      const user = allUsers.find(u => u.id === id);
+      if (user && confirm(`${user.role}『${user.name}』を削除しますか？`)) {
         await deleteDoc(doc(db, "users", id));
-        alert("削除しました");
+        alert(`${user.role}『${user.name}』を削除しました`);
+
+        await addDoc(collection(db, "logs"), {
+          userName: name,
+          role: role,
+          action: `${user.role}を削除しました`,
+          target: user.name,
+          timestamp: serverTimestamp()
+        });
+
         fetchUsers();
       }
     }
@@ -98,74 +113,48 @@
     function renderUsers(limit) {
       const userListDiv = document.getElementById("userList");
       userListDiv.innerHTML = "";
+
       allUsers.slice(0, limit).forEach(user => {
         const div = document.createElement("div");
-        div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}
+        div.innerHTML = `${user.name}（${user.role}）
           <button onclick="deleteUser('${user.id}')">削除</button>`;
         userListDiv.appendChild(div);
       });
+
       document.getElementById("expandUsersBtn").style.display =
         allUsers.length > limit ? "inline-block" : "none";
+
       document.getElementById("expandUsersBtn").onclick = () => {
         renderUsers(allUsers.length);
         document.getElementById("expandUsersBtn").style.display = "none";
       };
     }
 
-    // 商品一覧
-    let allProducts = [];
-    async function fetchProducts() {
-      const snap = await getDocs(collection(db, "products"));
-      allProducts = snap.docs.map(doc => doc.data());
-      applyProductFilters(10);
-    }
-
-    function applyProductFilters(limit = 10) {
-      const nameFilter = document.getElementById("filterName").value.trim().toLowerCase();
-      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
-      const stockMin = parseInt(document.getElementById("filterStockMin").value);
-      const stockMax = parseInt(document.getElementById("filterStockMax").value);
-      const productListDiv = document.getElementById("productList");
-      productListDiv.innerHTML = "";
-
-      const filtered = allProducts.filter(data => {
-        const nameMatch = nameFilter === "" || data.name?.toLowerCase().includes(nameFilter);
-        const barcodeMatch = barcodeFilter === "" || data.barcode?.includes(barcodeFilter);
-        const stockMatch =
-          (!isNaN(stockMin) ? data.stock >= stockMin : true) &&
-          (!isNaN(stockMax) ? data.stock <= stockMax : true);
-        return nameMatch && barcodeMatch && stockMatch;
-      });
-
-      filtered.slice(0, limit).forEach(data => {
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${data.name}</strong><br>
-          バーコード: ${data.barcode}<br>
-          在庫数: ${data.stock}<br><hr>`;
-        productListDiv.appendChild(div);
-      });
-
-      document.getElementById("expandProductsBtn").style.display =
-        filtered.length > limit ? "inline-block" : "none";
-      document.getElementById("expandProductsBtn").onclick = () => {
-        applyProductFilters(filtered.length);
-        document.getElementById("expandProductsBtn").style.display = "none";
-      };
-
-      if (filtered.length === 0) {
-        productListDiv.textContent = "一致する商品が見つかりません";
-      }
-    }
-
-    document.getElementById("applyProductFilters").onclick = () => applyProductFilters(10);
-
-    // 操作履歴
     async function loadLogs(limit = 10) {
       const logListDiv = document.getElementById("logList");
       logListDiv.innerHTML = "読み込み中...";
+
       const snap = await getDocs(collection(db, "logs"));
       const logs = snap.docs.map(doc => doc.data()).sort((a, b) =>
         b.timestamp?.toDate() - a.timestamp?.toDate()
       );
 
-      logs.slice(0, limit
+      logs.slice(0, limit).forEach(data => {
+        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
+        logListDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が ${data.action}『${data.target}』</div>`;
+      });
+
+      document.getElementById("expandLogsBtn").style.display =
+        logs.length > limit ? "inline-block" : "none";
+
+      document.getElementById("expandLogsBtn").onclick = () => {
+        loadLogs(logs.length);
+        document.getElementById("expandLogsBtn").style.display = "none";
+      };
+    }
+
+    fetchUsers();
+    loadLogs();
+  </script>
+</body>
+</html>
