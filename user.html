@@ -23,18 +23,25 @@
       font-size: 1.6rem;
       margin: 0;
     }
+    .toggle-btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      background: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
     .section {
-      max-width: 500px;
-      margin: 0 auto 24px;
+      display: none;
+      animation: fadeIn 0.4s ease-out;
       background: white;
       padding: 16px;
       border-radius: 12px;
       box-shadow: 0 0 8px rgba(0,0,0,0.05);
-    }
-    .section h2 {
-      font-size: 1.2rem;
-      margin-bottom: 12px;
-      text-align: center;
+      margin-bottom: 20px;
     }
     input, textarea, select, button {
       width: 100%;
@@ -84,6 +91,10 @@
     body.admin .admin-only {
       display: block;
     }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
@@ -92,8 +103,8 @@
   </header>
   <div id="loginUser">読み込み中...</div>
 
-  <div class="section">
-    <h2>📦 商品登録</h2>
+  <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
+  <div class="section" id="registerSection">
     <input type="text" id="productId" placeholder="管理番号">
     <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
     <input type="text" id="location" placeholder="保管場所">
@@ -102,7 +113,7 @@
 
     <div style="display:flex; gap:8px;">
       <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
-      <button id="startScanBtn" style="flex-shrink:0;">📷 読み取り</button>
+      <button id="startScanBtn" style="flex-shrink:0;">📷</button>
     </div>
     <div id="scannerWrapper"><div id="scanner"></div></div>
 
@@ -134,10 +145,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    const role = sessionStorage.getItem("responsibilityRole");
+    const roleRaw = sessionStorage.getItem("responsibilityRole");
     const name = sessionStorage.getItem("responsibilityName");
-    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
-    if (role === "管理者") document.body.classList.add("admin");
+    const roleJP = roleRaw === "admin" ? "管理者" :
+                   roleRaw === "user" ? "責任者" : roleRaw;
+
+    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
+    if (roleJP === "管理者") document.body.classList.add("admin");
+
+    function toggleSection(id) {
+      const el = document.getElementById(id);
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    }
 
     document.getElementById("startScanBtn").onclick = () => {
       const wrapper = document.getElementById("scannerWrapper");
@@ -180,16 +199,3 @@
         categorySmall: document.getElementById("categorySmall").value,
         jan: document.getElementById("janCodeInput").value,
         company: document.getElementById("company").value,
-        name: document.getElementById("productName").value,
-        lot: document.getElementById("lotNumber").value,
-        expiry: document.getElementById("expiry").value,
-        unit: document.getElementById("unit").value,
-        registeredBy: name,
-        timestamp: serverTimestamp()
-      };
-      await addDoc(collection(db, "products"), data);
-      alert("✅ 登録完了");
-    };
-  </script>
-</body>
-</html>
