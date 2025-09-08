@@ -119,21 +119,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scanSearchBtn && scannerWrapper && scanStatus && searchInput) {
     scanSearchBtn.onclick = () => {
-      toggleSection("searchSection"); // ✅ 排他表示を先に実行
+      toggleSection("searchSection");
       scannerWrapper.style.display = "block";
       scanStatus.textContent = "📷 読み取り中...";
       scanStatus.classList.add("show");
 
-      if (window.Quagga) Quagga.stop(); // ✅ 前回セッションを終了
+      if (window.Quagga) Quagga.stop();
+      const scanner = document.querySelector("#scanner");
+      if (scanner) scanner.innerHTML = "";
 
       Quagga.init({
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#scanner"),
-          constraints: {
-            facingMode: "environment"
-          }
+          target: scanner,
+          constraints: { facingMode: "environment" }
         },
         decoder: { readers: ["ean_reader"] }
       }, err => {
@@ -152,6 +152,7 @@ document.addEventListener("DOMContentLoaded", () => {
           scanStatus.classList.remove("show");
           scannerWrapper.style.display = "none";
           Quagga.stop();
+          if (scanner) scanner.innerHTML = "";
         }, 1500);
 
         document.getElementById("searchBtn").click();
@@ -167,21 +168,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scanRegisterBtn && scannerWrapperRegister && scanStatusRegister && janCodeInput) {
     scanRegisterBtn.onclick = () => {
-      toggleSection("registerSection"); // ✅ 排他表示を先に実行
+      toggleSection("registerSection");
       scannerWrapperRegister.style.display = "block";
       scanStatusRegister.textContent = "📷 読み取り中...";
       scanStatusRegister.classList.add("show");
 
-      if (window.Quagga) Quagga.stop(); // ✅ 前回セッションを終了
+      if (window.Quagga) Quagga.stop();
+      const scannerRegister = document.querySelector("#scannerRegister");
+      if (scannerRegister) scannerRegister.innerHTML = "";
 
       Quagga.init({
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#scannerRegister"),
-          constraints: {
-            facingMode: "environment"
-          }
+          target: scannerRegister,
+          constraints: { facingMode: "environment" }
         },
         decoder: { readers: ["ean_reader"] }
       }, err => {
@@ -200,6 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
           scanStatusRegister.classList.remove("show");
           scannerWrapperRegister.style.display = "none";
           Quagga.stop();
+          if (scannerRegister) scannerRegister.innerHTML = "";
         }, 1500);
       });
     };
