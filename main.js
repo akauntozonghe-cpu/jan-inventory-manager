@@ -19,7 +19,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOMが読み込まれてから処理開始
 document.addEventListener("DOMContentLoaded", () => {
   // ✅ ログイン処理
   const loginBtn = document.getElementById("loginBtn");
@@ -66,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ✅ セクション排他表示 toggleSection 関数
+  // ✅ セクション排他表示
   function toggleSection(id) {
     const allSections = document.querySelectorAll(".section");
     allSections.forEach(section => {
@@ -96,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // ✅ ボタンにイベントを設定
+  // ✅ ボタンイベント設定
   const sectionButtons = {
     "btn-register": "registerSection",
     "btn-search": "searchSection",
@@ -112,7 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ✅ QuaggaJS 読み取り処理（商品検索用）
+  // ✅ 商品検索用カメラ読み取り
   const scanSearchBtn = document.getElementById("scanSearchBtn");
   const scannerWrapper = document.getElementById("scannerWrapper");
   const scanStatus = document.getElementById("scanStatus");
@@ -120,19 +119,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scanSearchBtn && scannerWrapper && scanStatus && searchInput) {
     scanSearchBtn.onclick = () => {
+      toggleSection("searchSection"); // ✅ 排他表示を先に実行
       scannerWrapper.style.display = "block";
       scanStatus.textContent = "📷 読み取り中...";
       scanStatus.classList.add("show");
+
+      if (window.Quagga) Quagga.stop(); // ✅ 前回セッションを終了
 
       Quagga.init({
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#scanner")
+          target: document.querySelector("#scanner"),
+          constraints: {
+            facingMode: "environment"
+          }
         },
         decoder: { readers: ["ean_reader"] }
       }, err => {
-        if (err) return console.error(err);
+        if (err) return console.error("カメラ初期化エラー:", err);
         Quagga.start();
       });
 
@@ -154,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // ✅ QuaggaJS 読み取り処理（商品登録用）
+  // ✅ 商品登録用カメラ読み取り
   const scanRegisterBtn = document.getElementById("startScanBtn");
   const scannerWrapperRegister = document.getElementById("scannerWrapperRegister");
   const scanStatusRegister = document.getElementById("scanStatusRegister");
@@ -162,19 +167,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (scanRegisterBtn && scannerWrapperRegister && scanStatusRegister && janCodeInput) {
     scanRegisterBtn.onclick = () => {
+      toggleSection("registerSection"); // ✅ 排他表示を先に実行
       scannerWrapperRegister.style.display = "block";
       scanStatusRegister.textContent = "📷 読み取り中...";
       scanStatusRegister.classList.add("show");
+
+      if (window.Quagga) Quagga.stop(); // ✅ 前回セッションを終了
 
       Quagga.init({
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#scannerRegister")
+          target: document.querySelector("#scannerRegister"),
+          constraints: {
+            facingMode: "environment"
+          }
         },
         decoder: { readers: ["ean_reader"] }
       }, err => {
-        if (err) return console.error(err);
+        if (err) return console.error("カメラ初期化エラー:", err);
         Quagga.start();
       });
 
