@@ -2,187 +2,156 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>在庫管理 - 責任者画面</title>
-  <link rel="stylesheet" href="./style.css">
+  <style>
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background-color: #f8f9fc;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: linear-gradient(to right, #4e73df, #1cc88a);
+      color: white;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin: 0;
+    }
+
+    .section {
+      max-width: 500px;
+      margin: 0 auto 32px;
+      background: white;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      animation: fadeIn 0.6s ease-out;
+    }
+
+    .section h2 {
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    input, button, textarea {
+      display: block;
+      width: 100%;
+      margin: 8px 0;
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #2e59d9;
+    }
+
+    .admin-only {
+      display: none;
+    }
+
+    body.admin .admin-only {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
 </head>
 <body>
-  <header><h1>在庫管理 - 責任者画面</h1></header>
-  <div id="userHeader">
-    <span id="loginUser"></span>
+  <header>
+    <h1>在庫管理 - 責任者画面</h1>
+  </header>
+
+  <div class="section" id="userInfo">
+    <p id="loginUser">ログイン中: 読み込み中...</p>
     <button id="logoutBtn">ログアウト</button>
   </div>
 
-  <div id="adminAccess" style="margin-top: 20px;"></div>
+  <div class="section" id="productRegister">
+    <h2>📦 商品登録</h2>
+    <input type="text" placeholder="管理番号" required>
+    <input type="text" placeholder="管理区別番号" class="admin-only">
+    <input type="text" placeholder="保管場所" required>
+    <input type="text" placeholder="大分類" required>
+    <input type="text" placeholder="小分類" required>
+    <input type="text" id="janCode" placeholder="JANコード">
+    <button id="scanJanBtn">📷 JANコードを読み取る</button>
+    <input type="file" accept="image/*">
+    <input type="text" placeholder="会社名" required>
+    <input type="text" placeholder="品名" required>
+    <input type="text" placeholder="Lot.No・製造番号">
+    <input type="date" placeholder="期限">
+    <input type="text" placeholder="個数単位" required>
+    <button>登録する</button>
+  </div>
 
-  <h2>📦 商品登録</h2>
-  <input type="text" id="newProductName" placeholder="商品名">
-  <input type="text" id="newBarcode" placeholder="バーコード">
-  <input type="number" id="newStock" placeholder="在庫数">
-  <button id="addProductBtn">登録</button>
+  <div class="section" id="productSearch">
+    <h2>🔍 商品検索</h2>
+    <input type="text" placeholder="商品名">
+    <input type="text" placeholder="JANコード">
+    <button>検索する</button>
+  </div>
 
-  <h2>🔍 商品検索</h2>
-  <label>商品名: <input type="text" id="filterProductName"></label>
-  <label>バーコード: <input type="text" id="filterBarcode"></label>
-  <button id="applyProductFilter">絞り込み</button>
-  <div id="productList">読み込み中...</div>
-  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
-
-  <div id="contactSection" style="margin-top: 30px;">
+  <div class="section" id="contactSection">
     <h2>📩 管理者に連絡</h2>
     <button id="contactAdminBtn">管理者に連絡する</button>
-    <div id="contactForm" style="display:none; margin-top:10px;">
-      <textarea id="contactMessage" rows="3" cols="40" placeholder="要件を入力してください"></textarea><br>
-      <button id="sendContactBtn">送信</button>
+    <div id="contactForm" style="display:none;">
+      <textarea rows="3" placeholder="要件を入力してください"></textarea>
+      <button>送信</button>
       <p id="contactStatus"></p>
     </div>
   </div>
 
-  <h2>📝 自分の操作履歴</h2>
-  <div id="selfLogList">読み込み中...</div>
+  <div class="section" id="logSection">
+    <h2>📝 自分の操作履歴</h2>
+    <div id="selfLogList">読み込み中...</div>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      projectId: "inventory-app-312ca"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
+  <script>
     const name = sessionStorage.getItem("responsibilityName");
-    const rawRole = sessionStorage.getItem("responsibilityRole");
-    const roleMap = { "Admin": "管理者", "責任者": "責任者" };
-    const role = roleMap[rawRole] || rawRole;
+    const role = sessionStorage.getItem("responsibilityRole");
+    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
+    if (role === "管理者") {
+      document.body.classList.add("admin");
+    } else {
+      document.getElementById("contactSection").style.display = "block";
+    }
 
-    if (!name || !role) location.href = "index.html";
-
-    document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}）`;
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
-    // 管理者としてログインしている責任者には管理者画面ボタンを表示
-    if (role === "管理者") {
-      const adminDiv = document.getElementById("adminAccess");
-      const btn = document.createElement("button");
-      btn.textContent = "管理者画面へ";
-      btn.onclick = () => location.href = "admin.html";
-      adminDiv.appendChild(btn);
-
-      // 管理者には連絡セクションを非表示
-      document.getElementById("contactSection").style.display = "none";
-    }
-
-    // 商品登録
-    document.getElementById("addProductBtn").onclick = async () => {
-      const nameInput = document.getElementById("newProductName").value.trim();
-      const barcode = document.getElementById("newBarcode").value.trim();
-      const stock = parseInt(document.getElementById("newStock").value);
-
-      if (!nameInput || !barcode || isNaN(stock)) {
-        alert("商品名・バーコード・在庫数をすべて入力してください");
-        return;
-      }
-
-      await addDoc(collection(db, "products"), {
-        name: nameInput,
-        barcode: barcode,
-        stock: stock
-      });
-
-      await addDoc(collection(db, "logs"), {
-        userName: name,
-        role: role,
-        action: "商品を登録しました",
-        target: nameInput,
-        timestamp: serverTimestamp()
-      });
-
-      alert(`商品『${nameInput}』を登録しました`);
-      loadProducts(10);
-    };
-
-    // 商品一覧表示＋フィルター
-    let allProducts = [];
-
-    async function loadProducts(limit = 10) {
-      const snap = await getDocs(collection(db, "products"));
-      allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      renderProducts(limit);
-    }
-
-    function renderProducts(limit) {
-      const productListDiv = document.getElementById("productList");
-      productListDiv.innerHTML = "";
-
-      const nameFilter = document.getElementById("filterProductName").value.trim().toLowerCase();
-      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
-
-      const filtered = allProducts.filter(p => {
-        const nameMatch = nameFilter === "" || p.name?.toLowerCase().includes(nameFilter);
-        const barcodeMatch = barcodeFilter === "" || p.barcode?.includes(barcodeFilter);
-        return nameMatch && barcodeMatch;
-      });
-
-      filtered.slice(0, limit).forEach(data => {
-        const div = document.createElement("div");
-        div.innerHTML = `<strong>${data.name}</strong> / バーコード: ${data.barcode} / 在庫: ${data.stock}<hr>`;
-        productListDiv.appendChild(div);
-      });
-
-      document.getElementById("expandProductsBtn").style.display =
-        filtered.length > limit ? "inline-block" : "none";
-
-      document.getElementById("expandProductsBtn").onclick = () => {
-        renderProducts(filtered.length);
-        document.getElementById("expandProductsBtn").style.display = "none";
-      };
-    }
-
-    document.getElementById("applyProductFilter").onclick = () => {
-      renderProducts(10);
-    };
-
-    loadProducts();
-
-    // 管理者に連絡ボタン → 入力欄表示
     document.getElementById("contactAdminBtn").onclick = () => {
       document.getElementById("contactForm").style.display = "block";
       document.getElementById("contactStatus").textContent = "";
     };
 
-    // 送信ボタン → Firestoreに記録
-    document.getElementById("sendContactBtn").onclick = async () => {
-      const message = document.getElementById("contactMessage").value.trim();
-      if (!message) {
-        document.getElementById("contactStatus").textContent = "要件を入力してください";
-        return;
-      }
-
-      await addDoc(collection(db, "logs"), {
-        userName: name,
-        role: role,
-        action: "管理者に連絡しました",
-        target: message,
-        timestamp: serverTimestamp()
-      });
-
-      document.getElementById("contactStatus").textContent = "連絡しました。対応をお待ちください。";
-      document.getElementById("contactMessage").value = "";
+    document.getElementById("scanJanBtn").onclick = () => {
+      alert("JANコード読み取り機能は後ほど実装されます");
     };
-
-    // 自分の操作履歴表示
-    async function loadSelfLogs() {
-      const snap = await getDocs(collection(db, "logs"));
-      const logs = snap.docs.map(doc => doc.data())
-        .filter(log => log.userName === name)
-        .sort((a, b) => {
-          const timeA = a.timestamp?.toDate?.()
+  </script>
+</body>
+</html>
