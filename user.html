@@ -3,144 +3,176 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>在庫管理 - 商品登録</title>
+  <title>在庫管理 - 責任者画面</title>
   <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      margin: 0;
-      padding: 20px;
-      background-color: #f8f9fc;
-    }
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, where, updateDoc, deleteDoc, doc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-    h1 {
-      text-align: center;
-      font-size: 1.6rem;
-      margin-bottom: 16px;
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
 
-    .section {
-      max-width: 500px;
-      margin: 0 auto 24px;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-    input, button {
-      display: block;
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
+    const role = sessionStorage.getItem("responsibilityRole");
+    const name = sessionStorage.getItem("responsibilityName");
 
-    button {
-      background-color: #4e73df;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
+      if (role === "管理者") {
+        document.getElementById("csvSection").style.display = "block";
+      }
 
-    button:hover {
-      background-color: #2e59d9;
-    }
-
-    #scanner {
-      width: 100%;
-      max-width: 400px;
-      height: 240px;
-      margin: 12px auto;
-      border: 2px solid #4e73df;
-      border-radius: 8px;
-    }
-
-    #successMsg {
-      margin-top: 12px;
-      color: green;
-      font-weight: bold;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <h1>📷 JANコード読み取り</h1>
-
-  <div class="section">
-    <button id="startScanBtn">読み取り開始</button>
-    <div id="scanner"></div>
-    <input type="text" id="janCodeInput" placeholder="JANコードがここに表示されます">
-    <div id="successMsg"></div>
-  </div>
-
-  <div class="section">
-    <h2>📦 商品情報</h2>
-    <input type="text" id="productName" placeholder="品名">
-    <input type="text" id="company" placeholder="会社名">
-    <input type="text" id="price" placeholder="価格">
-    <input type="text" id="unit" placeholder="個数単位">
-    <button id="registerBtn">登録する</button>
-  </div>
-
-  <script>
-    const janInput = document.getElementById("janCodeInput");
-    const successMsg = document.getElementById("successMsg");
+      loadHistory();
+    });
 
     document.getElementById("startScanBtn").onclick = () => {
-      successMsg.textContent = "";
       Quagga.init({
         inputStream: {
           type: "LiveStream",
           target: document.querySelector("#scanner"),
-          constraints: {
-            facingMode: "environment"
-          }
+          constraints: { facingMode: "environment" }
         },
-        decoder: {
-          readers: ["ean_reader"]
-        },
+        decoder: { readers: ["ean_reader"] },
         locate: true
       }, err => {
-        if (err) {
-          console.error("Quagga初期化エラー:", err);
-          return;
-        }
+        if (err) return console.error(err);
         Quagga.start();
       });
 
       Quagga.onDetected(result => {
         const code = result.codeResult.code;
-        janInput.value = code;
-        successMsg.textContent = `✅ 読み取り成功: ${code}`;
+        document.getElementById("janCode").value = code;
         Quagga.stop();
-        fetchProductInfo(code);
+        document.getElementById("scanStatus").textContent = `✅ 読み取り成功: ${code}`;
       });
     };
 
-    function fetchProductInfo(janCode) {
-      // 楽天APIなどと連携する場合はここでAPI呼び出し
-      // 以下は仮の自動取得処理（実際はAPI連携）
-      document.getElementById("productName").value = "仮の商品名";
-      document.getElementById("company").value = "仮の会社名";
-      document.getElementById("price").value = "1234";
-      document.getElementById("unit").value = "個";
-    }
-
-    document.getElementById("registerBtn").onclick = () => {
+    document.getElementById("registerBtn").onclick = async () => {
       const data = {
-        jan: janInput.value,
+        jan: document.getElementById("janCode").value,
         name: document.getElementById("productName").value,
         company: document.getElementById("company").value,
-        price: document.getElementById("price").value,
-        unit: document.getElementById("unit").value
+        unit: document.getElementById("unit").value,
+        registeredBy: name,
+        timestamp: serverTimestamp()
       };
-      console.log("登録された商品:", data);
-      alert("✅ 商品を登録しました（仮処理）");
+      await addDoc(collection(db, "products"), data);
+      alert("✅ 登録完了");
+      loadHistory();
     };
+
+    document.getElementById("searchBtn").onclick = async () => {
+      const keyword = document.getElementById("searchInput").value.trim();
+      const q = query(collection(db, "products"), where("name", ">=", keyword));
+      const snap = await getDocs(q);
+      const area = document.getElementById("searchResults");
+      area.innerHTML = "";
+
+      snap.forEach(docSnap => {
+        const data = docSnap.data();
+        const div = document.createElement("div");
+        div.innerHTML = `
+          <p>📦 ${data.name}（${data.jan}）</p>
+          ${role === "管理者" ? `
+            <button onclick="editProduct('${docSnap.id}')">✏️ 編集</button>
+            <button onclick="deleteProduct('${docSnap.id}')">🗑️ 削除</button>
+          ` : ""}
+        `;
+        area.appendChild(div);
+      });
+    };
+
+    window.editProduct = async (id) => {
+      const newName = prompt("新しい品名を入力");
+      if (newName) {
+        await updateDoc(doc(db, "products", id), { name: newName });
+        alert("✅ 編集完了");
+        loadHistory();
+      }
+    };
+
+    window.deleteProduct = async (id) => {
+      if (confirm("削除しますか？")) {
+        await deleteDoc(doc(db, "products", id));
+        alert("✅ 削除完了");
+        loadHistory();
+      }
+    };
+
+    document.getElementById("contactSendBtn").onclick = async () => {
+      const msg = document.getElementById("contactMsg").value;
+      if (msg.trim()) {
+        await addDoc(collection(db, "contacts"), {
+          from: name,
+          message: msg,
+          timestamp: serverTimestamp()
+        });
+        document.getElementById("contactStatus").textContent = "✅ 送信しました";
+      }
+    };
+
+    async function loadHistory() {
+      const q = query(collection(db, "products"), where("registeredBy", "==", name));
+      const snap = await getDocs(q);
+      const area = document.getElementById("historyList");
+      area.innerHTML = "";
+      snap.forEach(doc => {
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.textContent = `📦 ${d.name}（${d.jan}） - ${d.timestamp?.toDate().toLocaleString()}`;
+        area.appendChild(div);
+      });
+    }
+
+    document.getElementById("csvUpload").addEventListener("change", async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const text = await file.text();
+      const rows = text.trim().split("\n").map(r => r.split(","));
+      let count = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const [jan, name, company, unit] = rows[i];
+        await addDoc(collection(db, "products"), {
+          jan, name, company, unit,
+          registeredBy: name,
+          timestamp: serverTimestamp()
+        });
+        count++;
+      }
+      document.getElementById("csvStatus").textContent = `✅ ${count} 件登録しました`;
+      loadHistory();
+    });
   </script>
-</body>
-</html>
+  <style>
+    body { font-family: "Segoe UI", sans-serif; padding: 20px; background: #f8f9fc; }
+    .section { max-width: 500px; margin: 0 auto 24px; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.05); }
+    h2 { font-size: 1.2rem; margin-bottom: 12px; text-align: center; }
+    input, textarea, button { width: 100%; margin: 8px 0; padding: 10px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background: #4e73df; color: white; border: none; cursor: pointer; }
+    button:hover { background: #2e59d9; }
+    #scanner { width: 100%; height: 240px; border: 2px solid #4e73df; border-radius: 8px; margin-bottom: 12px; }
+    #loginUser { text-align: center; font-weight: bold; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div id="loginUser">読み込み中...</div>
+
+  <div class="section">
+    <h2>📷 JANコード読み取り</h2>
+    <button id="startScanBtn">読み取り開始</button>
+    <div id="scanner"></div>
+    <input type="text" id="janCode" placeholder="JANコード">
+    <div id="scanStatus"></div>
+  </div>
+
+  <div class="section">
+    <h2>📦 商品登録</h2>
+    <input type="text" id="productName" placeholder="品名">
+    <input type="text" id="company"
