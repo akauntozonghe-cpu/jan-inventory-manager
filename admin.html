@@ -26,6 +26,11 @@
   <button id="expandUsersBtn" style="display:none;">すべて見る</button>
 
   <h2>📦 商品一覧</h2>
+  <div style="margin-bottom: 10px;">
+    <label>商品名: <input type="text" id="filterProductName" placeholder="例: りんご"></label>
+    <label>バーコード: <input type="text" id="filterBarcode" placeholder="例: 4901234567890"></label>
+    <button id="applyProductFilter">絞り込み</button>
+  </div>
   <div id="productList">読み込み中...</div>
   <button id="expandProductsBtn" style="display:none;">すべて見る</button>
 
@@ -75,6 +80,8 @@
     });
 
     let allUsers = [];
+    let allProducts = [];
+    let allLogs = [];
 
     document.getElementById("addUserBtn").onclick = async () => {
       const newName = document.getElementById("newName").value.trim();
@@ -129,33 +136,24 @@
     }
 
     async function loadProducts(limit = 10) {
-      const productListDiv = document.getElementById("productList");
-      productListDiv.innerHTML = "読み込み中...";
       const snap = await getDocs(collection(db, "products"));
-      const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderProducts(limit);
+    }
+
+    function renderProducts(limit) {
+      const productListDiv = document.getElementById("productList");
       productListDiv.innerHTML = "";
-      products.slice(0, limit).forEach(data => {
+
+      const nameFilter = document.getElementById("filterProductName").value.trim().toLowerCase();
+      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
+
+      const filtered = allProducts.filter(p => {
+        const nameMatch = nameFilter === "" || p.name?.toLowerCase().includes(nameFilter);
+        const barcodeMatch = barcodeFilter === "" || p.barcode?.includes(barcodeFilter);
+        return nameMatch && barcodeMatch;
+      });
+
+      filtered.slice(0, limit).forEach(data => {
         const div = document.createElement("div");
-        const nameInput = document.createElement("input");
-        nameInput.value = data.name;
-        nameInput.style.marginRight = "8px";
-        const stockInput = document.createElement("input");
-        stockInput.type = "number";
-        stockInput.value = data.stock;
-        stockInput.style.width = "60px";
-        stockInput.style.marginRight = "8px";
-        const editBtn = document.createElement("button");
-        editBtn.textContent = "更新";
-        editBtn.onclick = async () => {
-          await updateDoc(doc(db, "products", data.id), {
-            name: nameInput.value.trim(),
-            stock: parseInt(stockInput.value)
-          });
-          alert(`商品『${nameInput.value}』を更新しました`);
-          await addDoc(collection(db, "logs"), {
-            userName: name, role, action: "商品を更新しました", target: nameInput.value, timestamp: serverTimestamp()
-          });
-          loadProducts(limit);
-        };
-        const deleteBtn = document.createElement("button");
-        deleteBtn.textContent
+        const nameInput = document.createElement("
