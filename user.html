@@ -55,16 +55,17 @@
     <input type="text" id="categoryLarge" placeholder="大分類">
     <input type="text" id="categorySmall" placeholder="小分類">
 <div class="jan-row">
-  <label for="janCodeInput">JANコード</label>
   <div class="jan-input-wrapper">
     <input type="text" id="janCodeInput" placeholder="JANコード">
     <button id="startScanBtn" class="scan-btn" title="カメラで読み取る">📷</button>
   </div>
 </div>
-    <div style="display:flex; gap:8px;">
-      <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
-      <button id="startScanBtn" style="flex-shrink:0;">📷</button>
-    </div>
+    <div class="jan-row">
+  <div class="jan-input-wrapper">
+    <input type="text" id="searchJanInput" placeholder="JANコード">
+    <button id="scanSearchBtn" class="scan-btn" title="カメラで読み取る">📷</button>
+  </div>
+</div>
     <div id="scannerWrapper"><div id="scanner"></div></div>
     <input type="file" id="photo" accept="image/*">
     <img id="preview" src="" alt="プレビュー画像">
@@ -297,6 +298,7 @@
   </script>
 </body>
 </html>
+
 
 
 
