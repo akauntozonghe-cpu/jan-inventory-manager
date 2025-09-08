@@ -30,6 +30,11 @@
   <button id="expandProductsBtn" style="display:none;">すべて見る</button>
 
   <h2>📝 操作履歴</h2>
+  <div>
+    <label>ユーザー名: <input type="text" id="filterUser"></label>
+    <label>操作種別: <input type="text" id="filterAction"></label>
+    <button id="applyLogFilter">絞り込み</button>
+  </div>
   <div id="logList">読み込み中...</div>
   <button id="expandLogsBtn" style="display:none;">すべて見る</button>
 
@@ -162,32 +167,29 @@
     }
 
     // 操作履歴
+    let allLogs = [];
+
     async function loadLogs(limit = 10) {
-      const logListDiv = document.getElementById("logList");
-      logListDiv.innerHTML = "読み込み中...";
-
       const snap = await getDocs(collection(db, "logs"));
-      const logs = snap.docs.map(doc => doc.data()).sort((a, b) =>
-        b.timestamp?.toDate() - a.timestamp?.toDate()
-      );
-
-      logs.slice(0, limit).forEach(data => {
-        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
-        logListDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が ${data.action}『${data.target}』</div>`;
+      allLogs = snap.docs.map(doc => doc.data()).sort((a, b) => {
+        const timeA = a.timestamp?.toDate?.() ?? new Date(0);
+        const timeB = b.timestamp?.toDate?.() ?? new Date(0);
+        return timeB - timeA;
       });
-
-      document.getElementById("expandLogsBtn").style.display =
-        logs.length > limit ? "inline-block" : "none";
-
-      document.getElementById("expandLogsBtn").onclick = () => {
-        loadLogs(logs.length);
-        document.getElementById("expandLogsBtn").style.display = "none";
-      };
+      renderLogs(limit);
     }
 
-    fetchUsers();
-    loadProducts();
-    loadLogs();
-  </script>
-</body>
-</html>
+    function renderLogs(limit) {
+      const logListDiv = document.getElementById("logList");
+      logListDiv.innerHTML = "";
+
+      const userFilter = document.getElementById("filterUser").value.trim().toLowerCase();
+      const actionFilter = document.getElementById("filterAction").value.trim().toLowerCase();
+
+      const filtered = allLogs.filter(log => {
+        const userMatch = userFilter === "" || log.userName?.toLowerCase().includes(userFilter);
+        const actionMatch = actionFilter === "" || log.action?.toLowerCase().includes(actionFilter);
+        return userMatch && actionMatch;
+      });
+
+      filtered.slice(0, limit).for
