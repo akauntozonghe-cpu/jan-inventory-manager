@@ -59,13 +59,6 @@
     <input type="text" id="janCodeInput" placeholder="JANコード">
     <button id="startScanBtn" class="scan-btn" title="カメラで読み取る">📷</button>
   </div>
-</div>
-    <div class="jan-row">
-  <div class="jan-input-wrapper">
-    <input type="text" id="searchJanInput" placeholder="JANコード">
-    <button id="scanSearchBtn" class="scan-btn" title="カメラで読み取る">📷</button>
-  </div>
-</div>
     <div id="scannerWrapper"><div id="scanner"></div></div>
     <input type="file" id="photo" accept="image/*">
     <img id="preview" src="" alt="プレビュー画像">
@@ -81,11 +74,12 @@
     <button id="registerBtn">登録する</button>
   </div>
 
-  <div class="section" id="searchSection">
-    <div style="display:flex; gap:8px;">
-      <input type="text" id="searchInput" placeholder="商品名またはJANコード" style="flex:1;">
-      <button id="scanSearchBtn" style="flex-shrink:0;">📷</button>
-    </div>
+  <div class="jan-row">
+  <div class="jan-input-wrapper">
+    <input type="text" id="searchInput" placeholder="商品名またはJANコード">
+    <button id="scanSearchBtn" class="scan-btn" title="カメラで読み取る">📷</button>
+  </div>
+</div>
     <div id="searchScannerWrapper"><div id="searchScanner"></div></div>
     <button id="searchBtn">検索する</button>
     <div id="searchResults"></div>
@@ -298,6 +292,7 @@
   </script>
 </body>
 </html>
+
 
 
 
