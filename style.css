@@ -1,3 +1,4 @@
+/* 全体の基本スタイル */
 body {
   font-family: sans-serif;
   padding: 1rem;
@@ -18,6 +19,7 @@ body {
   border-bottom: 1px solid #ddd;
 }
 
+/* ボタン配置グリッド */
 .button-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -99,29 +101,32 @@ body {
 .scan-btn:hover {
   background-color: #2e59d9;
 }
+
 /* ✅ カメラ映像を青枠内に収める */
-#scannerWrapper {
+#scannerWrapper,
+#scannerWrapperRegister {
   width: 100%;
   max-width: 320px;
   height: 240px;
-  border: 2px solid #4e73df; /* 青枠 */
+  border: 2px solid #4e73df;
   border-radius: 8px;
-  overflow: hidden;          /* はみ出し防止 */
+  overflow: hidden;
   margin: 12px auto;
   position: relative;
   background: #000;
-  display: none;             /* 初期は非表示、JSで表示制御 */
+  display: none;
 }
 
-/* ✅ カメラ映像の表示領域 */
-#scanner {
+#scanner,
+#scannerRegister {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
 /* ✅ ステータス表示（読み取り中・成功） */
-#scanStatus {
+#scanStatus,
+#scanStatusRegister {
   position: absolute;
   bottom: 8px;
   left: 50%;
@@ -136,8 +141,8 @@ body {
   pointer-events: none;
 }
 
-/* ✅ 表示時のアニメーション */
-#scanStatus.show {
+#scanStatus.show,
+#scanStatusRegister.show {
   opacity: 1;
   transform: translateX(-50%) scale(1.05);
 }
