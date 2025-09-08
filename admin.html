@@ -25,6 +25,10 @@
   <div id="userList">読み込み中...</div>
   <button id="expandUsersBtn" style="display:none;">すべて見る</button>
 
+  <h2>📦 商品一覧</h2>
+  <div id="productList">読み込み中...</div>
+  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
+
   <h2>📝 操作履歴</h2>
   <div id="logList">読み込み中...</div>
   <button id="expandLogsBtn" style="display:none;">すべて見る</button>
@@ -58,6 +62,7 @@
       location.href = "index.html";
     };
 
+    // 責任者一覧
     let allUsers = [];
 
     document.getElementById("addUserBtn").onclick = async () => {
@@ -116,7 +121,7 @@
 
       allUsers.slice(0, limit).forEach(user => {
         const div = document.createElement("div");
-        div.innerHTML = `${user.name}（${user.role}）
+        div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}
           <button onclick="deleteUser('${user.id}')">削除</button>`;
         userListDiv.appendChild(div);
       });
@@ -130,6 +135,33 @@
       };
     }
 
+    // 商品一覧
+    async function loadProducts(limit = 10) {
+      const productListDiv = document.getElementById("productList");
+      productListDiv.innerHTML = "読み込み中...";
+
+      const snap = await getDocs(collection(db, "products"));
+      const products = snap.docs.map(doc => doc.data());
+
+      productListDiv.innerHTML = "";
+      products.slice(0, limit).forEach(data => {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.name}</strong><br>
+          バーコード: ${data.barcode}<br>
+          在庫数: ${data.stock}<br><hr>`;
+        productListDiv.appendChild(div);
+      });
+
+      document.getElementById("expandProductsBtn").style.display =
+        products.length > limit ? "inline-block" : "none";
+
+      document.getElementById("expandProductsBtn").onclick = () => {
+        loadProducts(products.length);
+        document.getElementById("expandProductsBtn").style.display = "none";
+      };
+    }
+
+    // 操作履歴
     async function loadLogs(limit = 10) {
       const logListDiv = document.getElementById("logList");
       logListDiv.innerHTML = "読み込み中...";
@@ -154,6 +186,7 @@
     }
 
     fetchUsers();
+    loadProducts();
     loadLogs();
   </script>
 </body>
