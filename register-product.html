@@ -113,7 +113,6 @@
         resultFunction: function(result) {
           const code = result.code;
           document.getElementById("barcodeInput").value = code;
-          // 自動遷移：商品検索画面へ
           location.href = `search-product.html?barcode=${encodeURIComponent(code)}`;
         }
       };
