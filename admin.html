@@ -67,6 +67,14 @@
       location.href = "index.html";
     };
 
+    // Enterキー対応
+    document.getElementById("newName").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("addUserBtn").click();
+    });
+    document.getElementById("newNumber").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("addUserBtn").click();
+    });
+
     // 責任者一覧
     let allUsers = [];
 
@@ -126,8 +134,11 @@
 
       allUsers.slice(0, limit).forEach(user => {
         const div = document.createElement("div");
-        div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}
-          <button onclick="deleteUser('${user.id}')">削除</button>`;
+        div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}`;
+        const btn = document.createElement("button");
+        btn.textContent = "削除";
+        btn.onclick = () => deleteUser(user.id);
+        div.appendChild(btn);
         userListDiv.appendChild(div);
       });
 
@@ -187,9 +198,4 @@
       const actionFilter = document.getElementById("filterAction").value.trim().toLowerCase();
 
       const filtered = allLogs.filter(log => {
-        const userMatch = userFilter === "" || log.userName?.toLowerCase().includes(userFilter);
-        const actionMatch = actionFilter === "" || log.action?.toLowerCase().includes(actionFilter);
-        return userMatch && actionMatch;
-      });
-
-      filtered.slice(0, limit).for
+        const userMatch = userFilter === "" || log.userName?.toLowerCase().includes(user
