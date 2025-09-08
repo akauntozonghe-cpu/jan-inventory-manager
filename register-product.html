@@ -9,7 +9,7 @@
   <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/webcodecamjs.js"></script>
 </head>
 <body>
-  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <header><h1>在庫管理</h1></header>
   <div id="userHeader">
     <span id="loginUser"></span>
     <button id="logoutBtn">ログアウト</button>
@@ -24,7 +24,7 @@
   <label>在庫数: <input type="number" id="stockInput" value="0"></label><br>
   <button id="submitBtn">登録</button>
   <p id="resultMsg"></p>
-  <button onclick="location.href='admin.html'">← 管理者画面に戻る</button>
+  <button onclick="location.href='user.html'">← 責任者画面に戻る</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
@@ -44,12 +44,11 @@
 
     const name = sessionStorage.getItem("responsibilityName");
     const role = sessionStorage.getItem("responsibilityRole");
-    const number = sessionStorage.getItem("responsibilityNumber");
 
     if (!name || role !== "管理者") location.href = "user.html";
 
     document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+      `ログイン中: ${name}（${role}）`;
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
@@ -108,11 +107,14 @@
       }
     });
 
-    // スキャン機能
+    // スキャン機能＋自動連携
     document.getElementById("scanBtn").onclick = () => {
       const args = {
         resultFunction: function(result) {
-          document.getElementById("barcodeInput").value = result.code;
+          const code = result.code;
+          document.getElementById("barcodeInput").value = code;
+          // 自動遷移：商品検索画面へ
+          location.href = `search-product.html?barcode=${encodeURIComponent(code)}`;
         }
       };
       new WebCodeCamJS("#barcode-canvas").init(args).play();
