@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>在庫入出庫</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <div id="userHeader">
+    <span id="loginUser"></span>
+    <button id="logoutBtn">ログアウト</button>
+  </div>
+
+  <h2>📦 在庫入出庫</h2>
+  <input type="text" id="barcodeInput" placeholder="バーコードを入力">
+  <button id="searchBtn">検索</button>
+  <div id="productArea"></div>
+  <button onclick="location.href='user.html'">← 責任者画面に戻る</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, query, where, getDocs,
+      updateDoc, doc, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+    const number = sessionStorage.getItem("responsibilityNumber");
+
+    if (!name || !role || !number) location.href = "index.html";
+
+    document.getElementById("loginUser").textContent =
+      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      sessionStorage.clear();
+      location.href = "index.html";
+    };
+
+    const urlParams = new URLSearchParams(location.search);
+    const barcodeFromURL = urlParams.get("barcode");
+    if (barcodeFromURL) {
+      document.getElementById("barcodeInput").value = barcodeFromURL;
+      document.getElementById("searchBtn").click();
+    }
+
+    document.getElementById("searchBtn").onclick = async () => {
+      const barcode = document.getElementById("barcodeInput").value.trim();
+      const resultDiv = document.getElementById("productArea");
+      resultDiv.innerHTML = "";
+
+      const q = query(collection(db, "products"), where("barcode", "==", barcode));
+      const snap = await getDocs(q);
+      if (snap.empty) {
+        resultDiv.innerHTML = "<p>商品が見つかりません</p>";
+        return;
+      }
+
+      const docSnap = snap.docs[0];
+      const data = docSnap.data();
+      const id = docSnap.id;
+
+      resultDiv.innerHTML = `
+        <p><strong>${data.name}</strong><br>現在の在庫: ${data.stock}</p>
+        <label>入庫数: <input type="number" id="inQty" value="0"></label>
+        <label>出庫数: <input type="number" id="outQty" value="0"></label>
+        <button id="updateStockBtn">在庫を更新</button>
+      `;
+
+      document.getElementById("updateStockBtn").onclick = async () => {
+        const inQty = parseInt(document.getElementById("inQty").value);
+        const outQty = parseInt(document.getElementById("outQty").value);
+        const newStock = data.stock + inQty - outQty;
+        if (newStock < 0) {
+          alert("在庫がマイナスになります");
+          return;
+        }
+
+        await updateDoc(doc(db, "products", id), { stock: newStock });
+        await addDoc(collection(db, "logs"), {
+          userId: number,
+          userName: name,
+          role: role,
+          action: `在庫を更新しました（+${inQty}, -${outQty})`,
+          target: `${data.name}（バーコード: ${barcode}）`,
+          timestamp: serverTimestamp()
+        });
+
+        alert("在庫を更新しました");
+        resultDiv.innerHTML = "";
+        document.getElementById("barcodeInput").value = "";
+      };
+    };
+  </script>
+</body>
+</html>

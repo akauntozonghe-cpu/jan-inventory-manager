@@ -2,11 +2,48 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>ユーザー画面</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>在庫管理 - 責任者画面</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <h2>一般ユーザー画面</h2>
-  <p>ようこそ！</p>
+  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <div id="userHeader">
+    <span id="loginUser"></span>
+    <button id="logoutBtn">ログアウト</button>
+  </div>
+
+  <h2>📦 メニュー</h2>
+  <button onclick="location.href='search-product.html'">🔍 商品検索</button>
+  <button onclick="location.href='stock-inout.html'">📦 在庫入出庫</button>
+  <button id="addProductBtn">➕ 商品追加</button>
+  <button id="adminBtn">🛠 管理者画面へ</button>
+
+  <script type="module">
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+    const number = sessionStorage.getItem("responsibilityNumber");
+
+    if (!name || !role || !number) location.href = "index.html";
+
+    document.getElementById("loginUser").textContent =
+      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      sessionStorage.clear();
+      location.href = "index.html";
+    };
+
+    document.getElementById("addProductBtn").onclick = () => {
+      role === "管理者"
+        ? location.href = "register-product.html"
+        : alert("商品追加は管理者のみ可能です");
+    };
+
+    document.getElementById("adminBtn").onclick = () => {
+      role === "管理者"
+        ? location.href = "admin.html"
+        : alert("管理者画面は管理者のみアクセス可能です");
+    };
+  </script>
 </body>
 </html>

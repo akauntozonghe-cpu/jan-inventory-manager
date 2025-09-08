@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>責任者追加</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <div id="userHeader">
+    <span id="loginUser"></span>
+    <button id="logoutBtn">ログアウト</button>
+  </div>
+
+  <h2>➕ 責任者の新規登録</h2>
+  <label>氏名: <input type="text" id="nameInput"></label><br>
+  <label>番号: <input type="text" id="numberInput"></label><br>
+  <label>権限:
+    <select id="roleSelect">
+      <option value="user">責任者</option>
+      <option value="admin">管理者</option>
+    </select>
+  </label><br>
+  <button id="registerBtn">登録</button>
+  <p id="resultMsg"></p>
+  <button onclick="location.href='admin.html'">← 管理者画面に戻る</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+    const number = sessionStorage.getItem("responsibilityNumber");
+
+    if (!name || role !== "管理者") location.href = "user.html";
+
+    document.getElementById("loginUser").textContent =
+      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      sessionStorage.clear();
+      location.href = "index.html";
+    };
+
+    document.getElementById("registerBtn").onclick = async () => {
+      const newName = document.getElementById("nameInput").value.trim();
+      const newNumber = document.getElementById("numberInput").value.trim();
+      const newRole = document.getElementById("roleSelect").value;
+      const msg = document.getElementById("resultMsg");
+
+      if (!newName || !newNumber) {
+        msg.textContent = "氏名と番号を入力してください";
+        return;
+      }
+
+      await addDoc(collection(db, "users"), {
+        name: newName,
+        number: newNumber,
+        role: newRole,
+        createdAt: new Date()
+      });
+
+      msg.textContent = "登録が完了しました";
+      document.getElementById("nameInput").value = "";
+      document.getElementById("numberInput").value = "";
+    };
+  </script>
+</body>
+</html>

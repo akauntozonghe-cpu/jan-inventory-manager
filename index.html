@@ -2,14 +2,14 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>サインイン</title>
-  <link rel="stylesheet" href="style.css">
+  <title>在庫管理 - ログイン</title>
 </head>
 <body>
-  <h2>責任者番号でログイン</h2>
-  <input type="text" id="numberInput" placeholder="責任者番号を入力">
-  <button id="loginBtn" type="button">サインイン</button>
-
-  <script type="module" src="main.js"></script>
+  <h1>在庫管理</h1>
+  <label>責任者番号: <input type="text" id="numberInput"></label>
+  <button id="loginBtn">ログイン</button>
+  <p id="errorMsg" style="color:red;"></p>
+  <p id="loadingMsg"></p>
+  <script type="module" src="./main.js"></script>
 </body>
 </html>

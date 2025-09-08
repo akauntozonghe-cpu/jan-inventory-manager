@@ -12,45 +12,31 @@ import {
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.appspot.com",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
+  projectId: "inventory-app-312ca"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-function translateRole(role) {
-  switch (role) {
-    case "admin": return "管理者";
-    case "user": return "責任者";
-    default: return role;
-  }
-}
-
 document.getElementById("loginBtn").addEventListener("click", async () => {
-  let number = document.getElementById("numberInput").value
-    .replace(/\s/g, "")
-    .replace(/[０-９]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-
-  if (!number) return;
+  const number = document.getElementById("numberInput").value.trim();
+  const errorMsg = document.getElementById("errorMsg");
+  const loadingMsg = document.getElementById("loadingMsg");
+  errorMsg.textContent = "";
+  loadingMsg.textContent = "ログイン中...";
 
   try {
     const q = query(collection(db, "users"), where("number", "==", number));
-    const querySnapshot = await getDocs(q);
+    const snap = await getDocs(q);
 
-    if (!querySnapshot.empty) {
-      const docSnap = querySnapshot.docs[0];
-      const data = docSnap.data();
-      const role = translateRole(data.role);
+    if (!snap.empty) {
+      const data = snap.docs[0].data();
       const name = data.name;
+      const role = data.role === "admin" ? "管理者" : "責任者";
 
       sessionStorage.setItem("responsibilityNumber", number);
-      sessionStorage.setItem("responsibilityRole", role);
       sessionStorage.setItem("responsibilityName", name);
+      sessionStorage.setItem("responsibilityRole", role);
 
       await addDoc(collection(db, "logs"), {
         userId: number,
@@ -61,16 +47,14 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         timestamp: serverTimestamp()
       });
 
-      if (role === "管理者") {
-        window.location.href = "admin.html";
-      } else {
-        window.location.href = "system.html";
-      }
+      window.location.href = "user.html";
     } else {
-      alert("該当する責任者が見つかりません");
+      errorMsg.textContent = "番号が見つかりません";
     }
   } catch (err) {
+    errorMsg.textContent = "エラーが発生しました";
     console.error(err);
-    alert("エラーが発生しました");
+  } finally {
+    loadingMsg.textContent = "";
   }
 });

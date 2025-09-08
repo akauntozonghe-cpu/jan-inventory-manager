@@ -1,32 +1,25 @@
-#header {
-  position: fixed;
-  top: 0;
-  right: 0;
-  background-color: #f0f0f0;
-  padding: 8px 16px;
-  font-size: 14px;
-  border-bottom-left-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  z-index: 1000;
+body {
+  font-family: sans-serif;
+  padding: 1rem;
 }
 
-#header span {
-  margin-right: 12px;
+#systemTitle {
+  background: #f0f0f0;
+  padding: 8px;
+  font-size: 20px;
+  font-weight: bold;
+  border-bottom: 1px solid #ccc;
 }
 
-#logoutBtn {
-  padding: 4px 8px;
-  font-size: 12px;
-  cursor: pointer;
+#userHeader {
+  margin-top: 8px;
+  padding: 6px;
+  background: #fafafa;
+  border-bottom: 1px solid #ddd;
 }
 
-#filters {
-  margin-top: 60px;
-  padding: 12px;
-  background-color: #fafafa;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+button {
+  margin: 8px 0;
+  padding: 10px 16px;
+  font-size: 16px;
 }
-
-#filters label {
-  display:
