@@ -14,8 +14,28 @@
 
   <div id="adminAccess" style="margin-top: 20px;"></div>
 
-  <h2>📩 管理者に連絡</h2>
-  <button id="contactAdminBtn">管理者に連絡する</button>
+  <h2>📦 商品登録</h2>
+  <input type="text" id="newProductName" placeholder="商品名">
+  <input type="text" id="newBarcode" placeholder="バーコード">
+  <input type="number" id="newStock" placeholder="在庫数">
+  <button id="addProductBtn">登録</button>
+
+  <h2>🔍 商品検索</h2>
+  <label>商品名: <input type="text" id="filterProductName"></label>
+  <label>バーコード: <input type="text" id="filterBarcode"></label>
+  <button id="applyProductFilter">絞り込み</button>
+  <div id="productList">読み込み中...</div>
+  <button id="expandProductsBtn" style="display:none;">すべて見る</button>
+
+  <div id="contactSection" style="margin-top: 30px;">
+    <h2>📩 管理者に連絡</h2>
+    <button id="contactAdminBtn">管理者に連絡する</button>
+    <div id="contactForm" style="display:none; margin-top:10px;">
+      <textarea id="contactMessage" rows="3" cols="40" placeholder="要件を入力してください"></textarea><br>
+      <button id="sendContactBtn">送信</button>
+      <p id="contactStatus"></p>
+    </div>
+  </div>
 
   <h2>📝 自分の操作履歴</h2>
   <div id="selfLogList">読み込み中...</div>
@@ -49,25 +69,114 @@
       location.href = "index.html";
     };
 
-    // 管理者のみ「管理者画面へ」ボタンを表示
+    // 管理者としてログインしている責任者には管理者画面ボタンを表示
     if (role === "管理者") {
       const adminDiv = document.getElementById("adminAccess");
       const btn = document.createElement("button");
       btn.textContent = "管理者画面へ";
       btn.onclick = () => location.href = "admin.html";
       adminDiv.appendChild(btn);
+
+      // 管理者には連絡セクションを非表示
+      document.getElementById("contactSection").style.display = "none";
     }
 
-    // 管理者に連絡ボタン
-    document.getElementById("contactAdminBtn").onclick = async () => {
+    // 商品登録
+    document.getElementById("addProductBtn").onclick = async () => {
+      const nameInput = document.getElementById("newProductName").value.trim();
+      const barcode = document.getElementById("newBarcode").value.trim();
+      const stock = parseInt(document.getElementById("newStock").value);
+
+      if (!nameInput || !barcode || isNaN(stock)) {
+        alert("商品名・バーコード・在庫数をすべて入力してください");
+        return;
+      }
+
+      await addDoc(collection(db, "products"), {
+        name: nameInput,
+        barcode: barcode,
+        stock: stock
+      });
+
+      await addDoc(collection(db, "logs"), {
+        userName: name,
+        role: role,
+        action: "商品を登録しました",
+        target: nameInput,
+        timestamp: serverTimestamp()
+      });
+
+      alert(`商品『${nameInput}』を登録しました`);
+      loadProducts(10);
+    };
+
+    // 商品一覧表示＋フィルター
+    let allProducts = [];
+
+    async function loadProducts(limit = 10) {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      renderProducts(limit);
+    }
+
+    function renderProducts(limit) {
+      const productListDiv = document.getElementById("productList");
+      productListDiv.innerHTML = "";
+
+      const nameFilter = document.getElementById("filterProductName").value.trim().toLowerCase();
+      const barcodeFilter = document.getElementById("filterBarcode").value.trim();
+
+      const filtered = allProducts.filter(p => {
+        const nameMatch = nameFilter === "" || p.name?.toLowerCase().includes(nameFilter);
+        const barcodeMatch = barcodeFilter === "" || p.barcode?.includes(barcodeFilter);
+        return nameMatch && barcodeMatch;
+      });
+
+      filtered.slice(0, limit).forEach(data => {
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${data.name}</strong> / バーコード: ${data.barcode} / 在庫: ${data.stock}<hr>`;
+        productListDiv.appendChild(div);
+      });
+
+      document.getElementById("expandProductsBtn").style.display =
+        filtered.length > limit ? "inline-block" : "none";
+
+      document.getElementById("expandProductsBtn").onclick = () => {
+        renderProducts(filtered.length);
+        document.getElementById("expandProductsBtn").style.display = "none";
+      };
+    }
+
+    document.getElementById("applyProductFilter").onclick = () => {
+      renderProducts(10);
+    };
+
+    loadProducts();
+
+    // 管理者に連絡ボタン → 入力欄表示
+    document.getElementById("contactAdminBtn").onclick = () => {
+      document.getElementById("contactForm").style.display = "block";
+      document.getElementById("contactStatus").textContent = "";
+    };
+
+    // 送信ボタン → Firestoreに記録
+    document.getElementById("sendContactBtn").onclick = async () => {
+      const message = document.getElementById("contactMessage").value.trim();
+      if (!message) {
+        document.getElementById("contactStatus").textContent = "要件を入力してください";
+        return;
+      }
+
       await addDoc(collection(db, "logs"), {
         userName: name,
         role: role,
         action: "管理者に連絡しました",
-        target: "管理者",
+        target: message,
         timestamp: serverTimestamp()
       });
-      alert("管理者に連絡しました。対応をお待ちください。");
+
+      document.getElementById("contactStatus").textContent = "連絡しました。対応をお待ちください。";
+      document.getElementById("contactMessage").value = "";
     };
 
     // 自分の操作履歴表示
@@ -76,25 +185,4 @@
       const logs = snap.docs.map(doc => doc.data())
         .filter(log => log.userName === name)
         .sort((a, b) => {
-          const timeA = a.timestamp?.toDate?.() ?? new Date(0);
-          const timeB = b.timestamp?.toDate?.() ?? new Date(0);
-          return timeB - timeA;
-        });
-
-      const logListDiv = document.getElementById("selfLogList");
-      logListDiv.innerHTML = "";
-
-      logs.slice(0, 10).forEach(data => {
-        const time = data.timestamp?.toDate?.()?.toLocaleString("ja-JP") || "日時不明";
-        logListDiv.innerHTML += `<div>${time} - ${data.action}『${data.target}』</div>`;
-      });
-
-      if (logs.length === 0) {
-        logListDiv.textContent = "履歴が見つかりません";
-      }
-    }
-
-    loadSelfLogs();
-  </script>
-</body>
-</html>
+          const timeA = a.timestamp?.toDate?.()
