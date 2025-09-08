@@ -39,12 +39,14 @@
 <body>
   <header><h1>在庫管理 - 責任者画面</h1></header>
   <div id="loginUser">読み込み中...</div>
-    <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
-  <button class="toggle-btn" onclick="toggleSection('searchSection')">🔍 商品検索</button>
-  <button class="toggle-btn" onclick="toggleSection('contactSection')">📩 管理者に連絡</button>
-  <button class="toggle-btn" onclick="toggleSection('historySection')">📝 自分の履歴</button>
-  <button class="toggle-btn" onclick="toggleSection('listSection')">📋 登録済み一覧</button>
-
+    <div class="button-grid">
+  <button onclick="toggleSection('registerSection')">📦 商品登録</button>
+  <button onclick="toggleSection('searchSection')">🔍 商品検索</button>
+  <button onclick="toggleSection('contactSection')">📩 管理者に連絡</button>
+  <button onclick="toggleSection('historySection')">📝 自分の履歴</button>
+  <button onclick="toggleSection('listSection')">📋 登録済み一覧</button>
+</div>
+  
   <div class="section" id="registerSection">
     <input type="text" id="productId" placeholder="管理番号">
     <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
@@ -287,3 +289,4 @@
   </script>
 </body>
 </html>
+
