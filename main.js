@@ -153,4 +153,44 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     };
   }
+
+  // ✅ QuaggaJS 読み取り処理（商品登録用）
+  const scanRegisterBtn = document.getElementById("startScanBtn");
+  const scannerWrapperRegister = document.getElementById("scannerWrapperRegister");
+  const scanStatusRegister = document.getElementById("scanStatusRegister");
+  const janCodeInput = document.getElementById("janCodeInput");
+
+  if (scanRegisterBtn && scannerWrapperRegister && scanStatusRegister && janCodeInput) {
+    scanRegisterBtn.onclick = () => {
+      scannerWrapperRegister.style.display = "block";
+      scanStatusRegister.textContent = "📷 読み取り中...";
+      scanStatusRegister.classList.add("show");
+
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#scannerRegister")
+        },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+
+      Quagga.onDetected(data => {
+        const code = data.codeResult.code;
+        janCodeInput.value = code;
+
+        scanStatusRegister.textContent = `✅ 読み取り成功: ${code}`;
+        scanStatusRegister.classList.add("show");
+
+        setTimeout(() => {
+          scanStatusRegister.classList.remove("show");
+          scannerWrapperRegister.style.display = "none";
+          Quagga.stop();
+        }, 1500);
+      });
+    };
+  }
 });
