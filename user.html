@@ -6,91 +6,28 @@
   <title>在庫管理 - 責任者画面</title>
   <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f8f9fc;
-      padding: 16px;
-    }
-    header {
-      text-align: center;
-      padding: 16px;
-      background: linear-gradient(to right, #4e73df, #1cc88a);
-      color: white;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 1.6rem;
-      margin: 0;
-    }
-    .toggle-btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      background: #4e73df;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-    .section {
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-      display: none;
-      transition: max-height 0.4s ease, opacity 0.4s ease;
-      overflow: hidden;
-    }
-    .section.show {
-      display: block;
-      animation: fadeIn 0.4s ease-out;
-    }
-    input, textarea, select, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #4e73df;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #2e59d9;
-    }
-    #loginUser {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-    .admin-only {
-      display: none;
-    }
-    body.admin .admin-only {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* 📱 スマホ最適化 */
+    body { font-family: "Segoe UI", sans-serif; background: #f8f9fc; padding: 16px; }
+    header { text-align: center; padding: 16px; background: linear-gradient(to right, #4e73df, #1cc88a); color: white; border-radius: 12px; margin-bottom: 20px; }
+    h1 { font-size: 1.6rem; margin: 0; }
+    .toggle-btn { width: 100%; padding: 12px; font-size: 1rem; background: #4e73df; color: white; border: none; border-radius: 8px; margin-bottom: 12px; cursor: pointer; }
+    .section { max-width: 500px; margin: 0 auto; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.05); display: none; transition: max-height 0.4s ease, opacity 0.4s ease; overflow: hidden; }
+    .section.show { display: block; animation: fadeIn 0.4s ease-out; }
+    input, textarea, select, button { width: 100%; margin: 8px 0; padding: 10px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background-color: #4e73df; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #2e59d9; }
+    #scannerWrapper, #searchScannerWrapper { display: none; width: 100%; max-width: 400px; height: 240px; margin: 12px auto; border: 2px solid #4e73df; border-radius: 8px; position: relative; }
+    #scanner, #searchScanner { width: 100%; height: 100%; }
+    canvas.drawingBuffer { position: absolute; top: 0; left: 0; }
+    #loginUser { text-align: center; font-weight: bold; margin-bottom: 16px; }
+    .admin-only { display: none; }
+    body.admin .admin-only { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    #preview { max-width: 100%; margin-top: 8px; border-radius: 8px; }
     @media (max-width: 768px) {
       body { padding: 12px; font-size: 16px; }
       .toggle-btn { font-size: 1.1rem; padding: 14px; }
       input, textarea, select, button { font-size: 1rem; }
     }
-
-    /* 💻 PC最適化 */
     @media (min-width: 769px) {
       body { padding: 32px; font-size: 14px; }
       .section { max-width: 700px; }
@@ -100,5 +37,248 @@
   </style>
 </head>
 <body>
+  <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
+  <button class="toggle-btn" onclick="toggleSection('searchSection')">🔍 商品検索</button>
+  <button class="toggle-btn" onclick="toggleSection('contactSection')">📩 管理者に連絡</button>
+  <button class="toggle-btn" onclick="toggleSection('historySection')">📝 自分の履歴</button>
+  <button class="toggle-btn" onclick="toggleSection('listSection')">📋 登録済み一覧</button>
+
+  <div class="section" id="registerSection">
+    <input type="text" id="productId" placeholder="管理番号">
+    <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
+    <input type="text" id="location" placeholder="保管場所">
+    <input type="text" id="categoryLarge" placeholder="大分類">
+    <input type="text" id="categorySmall" placeholder="小分類">
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
+      <button id="startScanBtn" style="flex-shrink:0;">📷</button>
+    </div>
+    <div id="scannerWrapper"><div id="scanner"></div></div>
+    <input type="file" id="photo" accept="image/*">
+    <img id="preview" src="" alt="プレビュー画像">
+    <input type="text" id="company" placeholder="会社名">
+    <input type="text" id="productName" placeholder="品名">
+    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号">
+    <input type="date" id="expiry" placeholder="期">
+    <input list="unitOptions" id="unit" placeholder="個数単位">
+    <datalist id="unitOptions">
+      <option value="個"><option value="枚"><option value="パック"><option value="袋">
+      <option value="セット"><option value="箱"><option value="包"><option value="本"><option value="枚入り">
+    </datalist>
+    <button id="registerBtn">登録する</button>
+  </div>
+
+  <div class="section" id="searchSection">
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="searchInput" placeholder="商品名またはJANコード" style="flex:1;">
+      <button id="scanSearchBtn" style="flex-shrink:0;">📷</button>
+    </div>
+    <div id="searchScannerWrapper"><div id="searchScanner"></div></div>
+    <button id="searchBtn">検索する</button>
+    <div id="searchResults"></div>
+  </div>
+
+  <div class="section" id="contactSection">
+    <textarea id="contactMsg" rows="3" placeholder="要件を入力してください"></textarea>
+    <button id="contactSendBtn">送信</button>
+    <div id="contactStatus"></div>
+  </div>
+
+  <div class="section" id="historySection">
+    <button id="exportCsvBtn">📤 CSV出力</button>
+    <div id="historyList">読み込み中...</div>
+  </div>
+
+  <div class="section" id="listSection">
+    <button id="loadAllBtn">📋 一覧を表示</button>
+    <div id="allProducts"></div>
+  </div>
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, query, where,
+      updateDoc, deleteDoc, doc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.firebasestorage.app",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8",
+      measurementId: "G-TRH31MJCE3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
+    const name = sessionStorage.getItem("responsibilityName") || "未設定";
+    const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : roleRaw;
+    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
+    if (roleJP === "管理者") document.body.classList.add("admin");
+
+    function toggleSection(id) {
+      const el = document.getElementById(id);
+      const isVisible = el.classList.contains("show");
+      el.classList.toggle("show", !isVisible);
+      sessionStorage.setItem("section_" + id, !isVisible);
+    }
+
+    ["registerSection", "searchSection", "contactSection", "historySection", "listSection"].forEach(id => {
+      if (sessionStorage.getItem("section_" + id) === "true") {
+        document.getElementById(id).classList.add("show");
+      }
+    });
+
+    // 商品登録処理
+    document.getElementById("registerBtn").onclick = async () => {
+      const data = {
+        productId: productId.value,
+        productGroupId: productGroupId.value,
+        location: location.value,
+        categoryLarge: categoryLarge.value,
+        categorySmall: categorySmall.value,
+        janCode: janCodeInput.value,
+        company: company.value,
+        productName: productName.value,
+        lotNumber: lotNumber.value,
+        expiry: expiry.value,
+        unit: unit.value,
+        user: name,
+        role: roleJP,
+        timestamp: serverTimestamp()
+      };
+      try {
+        await addDoc(collection(db, "products"), data);
+        alert("登録しました");
+      } catch (e) {
+        alert("登録に失敗しました: " + e.message);
+      }
+    };
+
+    // QuaggaJS 初期化（登録）
+    document.getElementById("startScanBtn").onclick = () => {
+      scannerWrapper.style.display = "block";
+      Quagga.init({
+        inputStream: { name: "Live", type: "LiveStream", target: scanner },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+      Quagga.onDetected(data => {
+        janCodeInput.value = data.codeResult.code;
+        Quagga.stop();
+        scannerWrapper.style.display = "none";
+      });
+    };
+
+    // QuaggaJS 初期化（検索）
+    document.getElementById("scanSearchBtn").onclick = () => {
+      searchScannerWrapper.style.display = "block";
+      Quagga.init({
+        inputStream: { name: "Live", type: "LiveStream", target: searchScanner },
+        decoder: { readers: ["ean_reader"] }
+      }, err => {
+        if (err) return console.error(err);
+        Quagga.start();
+      });
+      Quagga.onDetected(data => {
+        searchInput.value = data.codeResult.code;
+        Quagga.stop();
+        searchScannerWrapper.style.display = "none";
+      });
+    };
+
+    // 商品検索処理
+    document.getElementById("searchBtn").onclick = async () => {
+      const keyword = searchInput.value.trim();
+      const q = query(collection(db, "products"), where("janCode", "==", keyword));
+      const snapshot = await getDocs(q);
+      searchResults.innerHTML = "";
+      snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${d.productName}</strong> (${d.company})<br>JAN: ${d.janCode}`;
+        if (roleJP === "管理者") {
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "削除";
+          delBtn.onclick = async () => {
+            await deleteDoc(doc(db, "products", docSnap.id));
+            alert("削除しました");
+            div.remove();
+          };
+          div.appendChild(delBtn);
+        }
+        searchResults.appendChild(div);
+      });
+    };
+
+    // 管理者連絡処理
+    document.getElementById("contactSendBtn").onclick = async () => {
+      const msg = contactMsg.value.trim();
+      if (!msg) return alert("メッセージを入力してください");
+      try {
+        await addDoc(collection(db, "messages"), {
+          message: msg,
+          user: name,
+          role: roleJP,
+          timestamp: serverTimestamp()
+        });
+        contactStatus.textContent = "送信しました";
+        contactMsg.value = "";
+      } catch (e) {
+        contactStatus.textContent = "送信失敗: " + e.message;
+      }
+    };
+
+    // 履歴表示＋CSV出力
+    document.getElementById("exportCsvBtn").onclick = async () => {
+      const q = query(collection(db, "products"), where("user", "==", name));
+      const snapshot = await getDocs(q);
+      let csv = "品名,会社名,JANコード,登録日時\n";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        csv += `${d.productName},${d.company},${d.janCode},${d.timestamp?.toDate?.().toLocaleString()}\n`;
+      });
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "history.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // 登録済み一覧表示
+    document.getElementById("loadAllBtn").onclick = async () => {
+      const snapshot = await getDocs(collection(db, "products"));
+      allProducts.innerHTML = "";
+      snapshot.forEach(doc => {
+        const d = doc.data();
+        const div = document.createElement("div");
+        div.innerHTML = `<strong>${d.productName}</strong> (${d.company})<br>JAN: ${d.janCode}`;
+        allProducts.appendChild(div);
+      });
+    };
+
+    // 画像プレビュー
+    document.getElementById("photo").onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          preview.src = reader.result;
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+  </script>
+</body>
+</html>
+
   <header><h1>在庫管理 - 責任者画面</h1></header>
   <div id="loginUser">読み込み中...</div>
