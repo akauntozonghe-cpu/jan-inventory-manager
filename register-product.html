@@ -86,7 +86,15 @@
         if (!snap.empty) {
           const docRef = doc(db, "products", snap.docs[0].id);
           await updateDoc(docRef, { name: productName, barcode, stock });
-          msg.textContent = "商品を更新しました";
+          msg.textContent = `商品『${productName}』を更新しました`;
+
+          await addDoc(collection(db, "logs"), {
+            userName: name,
+            role: role,
+            action: "商品を更新しました",
+            target: productName,
+            timestamp: serverTimestamp()
+          });
         }
       } else {
         await addDoc(collection(db, "products"), {
@@ -95,7 +103,15 @@
           stock,
           createdAt: serverTimestamp()
         });
-        msg.textContent = "商品を登録しました";
+        msg.textContent = `商品『${productName}』を登録しました`;
+
+        await addDoc(collection(db, "logs"), {
+          userName: name,
+          role: role,
+          action: "商品を登録しました",
+          target: productName,
+          timestamp: serverTimestamp()
+        });
       }
     };
 
