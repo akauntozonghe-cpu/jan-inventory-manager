@@ -2,8 +2,11 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>商品追加・編集</title>
+  <title>商品登録・編集</title>
   <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/qrcodelib.js"></script>
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/webcodecamjs.js"></script>
 </head>
 <body>
   <header id="systemTitle"><h1>在庫管理</h1></header>
@@ -12,9 +15,12 @@
     <button id="logoutBtn">ログアウト</button>
   </div>
 
-  <h2>➕ 商品の登録・編集</h2>
-  <label>商品名: <input type="text" id="nameInput"></label><br>
-  <label>バーコード: <input type="text" id="barcodeInput"></label><br>
+  <h2>📝 商品の登録・編集</h2>
+
+  <label>商品名: <input type="text" id="nameInput" placeholder="商品名を入力"></label><br>
+  <label>バーコード: <input type="text" id="barcodeInput" placeholder="バーコードを入力"></label>
+  <button id="scanBtn">📷 スキャン</button><br>
+  <canvas id="barcode-canvas" style="width:100%;max-width:400px;"></canvas><br>
   <label>在庫数: <input type="number" id="stockInput" value="0"></label><br>
   <button id="submitBtn">登録</button>
   <p id="resultMsg"></p>
@@ -23,8 +29,8 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, addDoc, serverTimestamp,
-      query, where, getDocs, updateDoc, doc
+      getFirestore, collection, addDoc, query, where,
+      getDocs, updateDoc, doc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -44,7 +50,6 @@
 
     document.getElementById("loginUser").textContent =
       `ログイン中: ${name}（${role}） / 番号: ${number}`;
-
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
@@ -94,6 +99,23 @@
         });
         msg.textContent = "商品を登録しました";
       }
+    };
+
+    // Enterキー対応
+    document.getElementById("barcodeInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        document.getElementById("submitBtn").click();
+      }
+    });
+
+    // スキャン機能
+    document.getElementById("scanBtn").onclick = () => {
+      const args = {
+        resultFunction: function(result) {
+          document.getElementById("barcodeInput").value = result.code;
+        }
+      };
+      new WebCodeCamJS("#barcode-canvas").init(args).play();
     };
   </script>
 </body>
