@@ -1,75 +1,39 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>商品検索</title>
-  <link rel="stylesheet" href="./style.css">
-</head>
-<body>
-  <header id="systemTitle"><h1>在庫管理</h1></header>
-  <div id="userHeader">
-    <span id="loginUser"></span>
-    <button id="logoutBtn">ログアウト</button>
-  </div>
+<input type="text" id="barcodeInput" placeholder="商品名またはバーコード">
+<button id="scanBtn">📷 スキャン</button>
+<canvas id="barcode-canvas" style="width:100%;max-width:400px;"></canvas>
+<div id="searchResults"></div>
 
-  <h2>🔍 商品検索</h2>
-  <input type="text" id="searchInput" placeholder="商品名またはバーコード">
-  <button id="searchBtn">検索</button>
-  <div id="searchResults" style="margin-top: 1rem;"></div>
-  <button onclick="location.href='user.html'">← 責任者画面に戻る</button>
+<script type="module">
+  import { setupBarcodeInput } from "./barcode-handler.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+  import { getFirestore, collection, getDocs, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  const firebaseConfig = { /* Firebase設定 */ };
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      projectId: "inventory-app-312ca"
-    };
+  const name = sessionStorage.getItem("responsibilityName");
+  const role = sessionStorage.getItem("responsibilityRole");
+  const number = sessionStorage.getItem("responsibilityNumber");
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+  function searchProducts(keyword) {
+    const resultsDiv = document.getElementById("searchResults");
+    resultsDiv.innerHTML = "検索中...";
 
-    const name = sessionStorage.getItem("responsibilityName");
-    const role = sessionStorage.getItem("responsibilityRole");
-    const number = sessionStorage.getItem("responsibilityNumber");
+    addDoc(collection(db, "searchLogs"), {
+      userId: number,
+      userName: name,
+      role: role,
+      keyword: keyword,
+      timestamp: serverTimestamp()
+    });
 
-    if (!name || !role || !number) location.href = "index.html";
-
-    document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}） / 番号: ${number}`;
-
-    document.getElementById("logoutBtn").onclick = () => {
-      sessionStorage.clear();
-      location.href = "index.html";
-    };
-
-    document.getElementById("searchBtn").onclick = async () => {
-      const keyword = document.getElementById("searchInput").value.trim().toLowerCase();
-      const resultsDiv = document.getElementById("searchResults");
-      resultsDiv.innerHTML = "検索中...";
-
-      await addDoc(collection(db, "searchLogs"), {
-        userId: number,
-        userName: name,
-        role: role,
-        keyword: keyword,
-        timestamp: serverTimestamp()
-      });
-
-      const snap = await getDocs(collection(db, "products"));
-      let found = false;
+    getDocs(collection(db, "products")).then(snap => {
       resultsDiv.innerHTML = "";
-
+      let found = false;
       snap.forEach(doc => {
         const data = doc.data();
-        const nameMatch = data.name?.toLowerCase().includes(keyword);
-        const barcodeMatch = data.barcode?.includes(keyword);
-
-        if (nameMatch || barcodeMatch) {
+        if (data.name?.toLowerCase().includes(keyword) || data.barcode?.includes(keyword)) {
           found = true;
           const div = document.createElement("div");
           div.innerHTML = `
@@ -78,15 +42,14 @@
             在庫数: ${data.stock}<br>
             <a href="stock-inout.html?barcode=${data.barcode}">📦 在庫操作</a>
             ${role === "管理者" ? ` | <a href="register-product.html?edit=${data.barcode}">✏️ 編集</a>` : ""}
+            | <a href="product-history.html?barcode=${data.barcode}">📜 履歴を見る</a>
           `;
           resultsDiv.appendChild(div);
         }
       });
+      if (!found) resultsDiv.innerHTML = "<p>一致する商品が見つかりません</p>";
+    });
+  }
 
-      if (!found) {
-        resultsDiv.innerHTML = "<p>一致する商品が見つかりません</p>";
-      }
-    };
-  </script>
-</body>
-</html>
+  setupBarcodeInput(searchProducts);
+</script>

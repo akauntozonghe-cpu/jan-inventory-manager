@@ -18,7 +18,7 @@
   <h2>📜 商品の操作履歴</h2>
 
   <div id="historyFilters">
-    <label>バーコード: <input type="text" id="barcodeInput"></label>
+    <label>バーコード: <input type="text" id="barcodeInput" placeholder="バーコードを入力"></label>
     <button id="scanBtn">📷 スキャン</button><br>
     <label>操作種別: <input type="text" id="filterAction" placeholder="例: 更新"></label>
     <label>責任者名: <input type="text" id="filterUser" placeholder="例: 山田太郎"></label>
@@ -32,10 +32,9 @@
   <button onclick="location.href='search-product.html'">← 商品検索に戻る</button>
 
   <script type="module">
+    import { setupBarcodeInput } from "./barcode-handler.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, getDocs
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
@@ -51,49 +50,47 @@
     const number = sessionStorage.getItem("responsibilityNumber");
 
     if (!name || !role || !number) location.href = "index.html";
-
     document.getElementById("loginUser").textContent =
       `ログイン中: ${name}（${role}） / 番号: ${number}`;
-
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
-    const barcodeParam = new URLSearchParams(location.search).get("barcode");
-    if (barcodeParam) document.getElementById("barcodeInput").value = barcodeParam;
-
-    async function loadFilteredLogs() {
-      const barcode = document.getElementById("barcodeInput").value.trim();
+    function loadFilteredLogs(barcode) {
       const actionFilter = document.getElementById("filterAction").value.trim();
       const userFilter = document.getElementById("filterUser").value.trim();
       const dateFilter = document.getElementById("filterDate").value;
-      const snap = await getDocs(collection(db, "logs"));
       const div = document.getElementById("historyList");
-      div.innerHTML = "";
+      div.innerHTML = "読み込み中...";
 
-      snap.forEach(doc => {
-        const data = doc.data();
-        const time = data.timestamp?.toDate();
-        const timeStr = time?.toLocaleString("ja-JP") || "日時不明";
+      getDocs(collection(db, "logs")).then(snap => {
+        div.innerHTML = "";
+        snap.forEach(doc => {
+          const data = doc.data();
+          const time = data.timestamp?.toDate();
+          const timeStr = time?.toLocaleString("ja-JP") || "日時不明";
 
-        const matchBarcode = barcode === "" || data.target?.includes(barcode);
-        const matchAction = actionFilter === "" || data.action?.includes(actionFilter);
-        const matchUser = userFilter === "" || data.userName?.includes(userFilter);
-        const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
+          const matchBarcode = barcode === "" || data.target?.includes(barcode);
+          const matchAction = actionFilter === "" || data.action?.includes(actionFilter);
+          const matchUser = userFilter === "" || data.userName?.includes(userFilter);
+          const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
 
-        if (matchBarcode && matchAction && matchUser && matchDate) {
-          div.innerHTML += `<div>${timeStr} - ${data.userName}（${data.role}）が ${data.action}</div>`;
+          if (matchBarcode && matchAction && matchUser && matchDate) {
+            div.innerHTML += `<div>${timeStr} - ${data.userName}（${data.role}）が ${data.action}</div>`;
+          }
+        });
+
+        if (div.innerHTML === "") {
+          div.textContent = "一致する履歴が見つかりません";
         }
       });
-
-      if (div.innerHTML === "") {
-        div.textContent = "一致する履歴が見つかりません";
-      }
     }
 
-    document.getElementById("applyFilters").onclick = loadFilteredLogs;
-    loadFilteredLogs();
+    document.getElementById("applyFilters").onclick = () => {
+      const barcode = document.getElementById("barcodeInput").value.trim();
+      loadFilteredLogs(barcode);
+    };
 
     document.getElementById("downloadCSV").onclick = async () => {
       const barcode = document.getElementById("barcodeInput").value.trim();
@@ -133,15 +130,7 @@
       document.body.removeChild(link);
     };
 
-    document.getElementById("scanBtn").onclick = () => {
-      const args = {
-        resultFunction: function(result) {
-          document.getElementById("barcodeInput").value = result.code;
-          loadFilteredLogs();
-        }
-      };
-      new WebCodeCamJS("#barcode-canvas").init(args).play();
-    };
+    setupBarcodeInput(loadFilteredLogs);
   </script>
 </body>
 </html>
