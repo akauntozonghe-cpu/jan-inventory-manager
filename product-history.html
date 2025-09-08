@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>商品履歴</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/qrcodelib.js"></script>
+  <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/webcodecamjs.js"></script>
+</head>
+<body>
+  <header id="systemTitle"><h1>在庫管理</h1></header>
+  <div id="userHeader">
+    <span id="loginUser"></span>
+    <button id="logoutBtn">ログアウト</button>
+  </div>
+
+  <h2>📜 商品の操作履歴</h2>
+
+  <div id="historyFilters">
+    <label>バーコード: <input type="text" id="barcodeInput"></label>
+    <button id="scanBtn">📷 スキャン</button><br>
+    <label>操作種別: <input type="text" id="filterAction" placeholder="例: 更新"></label>
+    <label>責任者名: <input type="text" id="filterUser" placeholder="例: 山田太郎"></label>
+    <label>日付: <input type="date" id="filterDate"></label>
+    <button id="applyFilters">絞り込み</button>
+    <button id="downloadCSV">📥 CSV出力</button>
+  </div>
+
+  <canvas id="barcode-canvas" style="width:100%;max-width:400px;"></canvas>
+  <div id="historyList">読み込み中...</div>
+  <button onclick="location.href='search-product.html'">← 商品検索に戻る</button>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+    const number = sessionStorage.getItem("responsibilityNumber");
+
+    if (!name || !role || !number) location.href = "index.html";
+
+    document.getElementById("loginUser").textContent =
+      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      sessionStorage.clear();
+      location.href = "index.html";
+    };
+
+    const barcodeParam = new URLSearchParams(location.search).get("barcode");
+    if (barcodeParam) document.getElementById("barcodeInput").value = barcodeParam;
+
+    async function loadFilteredLogs() {
+      const barcode = document.getElementById("barcodeInput").value.trim();
+      const actionFilter = document.getElementById("filterAction").value.trim();
+      const userFilter = document.getElementById("filterUser").value.trim();
+      const dateFilter = document.getElementById("filterDate").value;
+      const snap = await getDocs(collection(db, "logs"));
+      const div = document.getElementById("historyList");
+      div.innerHTML = "";
+
+      snap.forEach(doc => {
+        const data = doc.data();
+        const time = data.timestamp?.toDate();
+        const timeStr = time?.toLocaleString("ja-JP") || "日時不明";
+
+        const matchBarcode = barcode === "" || data.target?.includes(barcode);
+        const matchAction = actionFilter === "" || data.action?.includes(actionFilter);
+        const matchUser = userFilter === "" || data.userName?.includes(userFilter);
+        const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
+
+        if (matchBarcode && matchAction && matchUser && matchDate) {
+          div.innerHTML += `<div>${timeStr} - ${data.userName}（${data.role}）が ${data.action}</div>`;
+        }
+      });
+
+      if (div.innerHTML === "") {
+        div.textContent = "一致する履歴が見つかりません";
+      }
+    }
+
+    document.getElementById("applyFilters").onclick = loadFilteredLogs;
+    loadFilteredLogs();
+
+    document.getElementById("downloadCSV").onclick = async () => {
+      const barcode = document.getElementById("barcodeInput").value.trim();
+      const actionFilter = document.getElementById("filterAction").value.trim();
+      const userFilter = document.getElementById("filterUser").value.trim();
+      const dateFilter = document.getElementById("filterDate").value;
+      const snap = await getDocs(collection(db, "logs"));
+
+      const rows = [["日時", "責任者名", "権限", "操作内容", "対象"]];
+      snap.forEach(doc => {
+        const data = doc.data();
+        const time = data.timestamp?.toDate();
+        const matchBarcode = barcode === "" || data.target?.includes(barcode);
+        const matchAction = actionFilter === "" || data.action?.includes(actionFilter);
+        const matchUser = userFilter === "" || data.userName?.includes(userFilter);
+        const matchDate = dateFilter === "" || time?.toISOString().startsWith(dateFilter);
+
+        if (matchBarcode && matchAction && matchUser && matchDate) {
+          rows.push([
+            time?.toLocaleString("ja-JP") || "",
+            data.userName || "",
+            data.role || "",
+            data.action || "",
+            data.target || ""
+          ]);
+        }
+      });
+
+      const csvContent = rows.map(r => r.map(v => `"${v}"`).join(",")).join("\n");
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `履歴_${barcode || "全件"}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    };
+
+    document.getElementById("scanBtn").onclick = () => {
+      const args = {
+        resultFunction: function(result) {
+          document.getElementById("barcodeInput").value = result.code;
+          loadFilteredLogs();
+        }
+      };
+      new WebCodeCamJS("#barcode-canvas").init(args).play();
+    };
+  </script>
+</body>
+</html>
