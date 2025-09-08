@@ -99,3 +99,45 @@ body {
 .scan-btn:hover {
   background-color: #2e59d9;
 }
+/* ✅ カメラ映像を青枠内に収める */
+#scannerWrapper {
+  width: 100%;
+  max-width: 320px;
+  height: 240px;
+  border: 2px solid #4e73df; /* 青枠 */
+  border-radius: 8px;
+  overflow: hidden;          /* はみ出し防止 */
+  margin: 12px auto;
+  position: relative;
+  background: #000;
+  display: none;             /* 初期は非表示、JSで表示制御 */
+}
+
+/* ✅ カメラ映像の表示領域 */
+#scanner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ✅ ステータス表示（読み取り中・成功） */
+#scanStatus {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+
+/* ✅ 表示時のアニメーション */
+#scanStatus.show {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.05);
+}
