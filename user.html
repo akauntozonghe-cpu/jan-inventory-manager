@@ -55,8 +55,11 @@
     <input type="text" id="categoryLarge" placeholder="大分類">
     <input type="text" id="categorySmall" placeholder="小分類">
 <div class="jan-row">
-  <input type="text" id="janCodeInput" placeholder="JANコード">
-  <button id="startScanBtn">📷</button>
+  <label for="janCodeInput">JANコード</label>
+  <div class="jan-input-wrapper">
+    <input type="text" id="janCodeInput" placeholder="JANコード">
+    <button id="startScanBtn" class="scan-btn" title="カメラで読み取る">📷</button>
+  </div>
 </div>
     <div style="display:flex; gap:8px;">
       <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
@@ -294,6 +297,7 @@
   </script>
 </body>
 </html>
+
 
 
 
