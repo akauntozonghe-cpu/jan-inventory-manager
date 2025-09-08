@@ -6,19 +6,35 @@
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header><h1>在庫管理</h1></header>
+  <header><h1>在庫管理 - 責任者画面</h1></header>
   <div id="userHeader">
     <span id="loginUser"></span>
     <button id="logoutBtn">ログアウト</button>
   </div>
 
-  <h2>📦 メニュー</h2>
-  <button onclick="location.href='search-product.html'">🔍 商品検索</button>
-  <button onclick="location.href='stock-inout.html'">📥 在庫入出庫</button>
-  <button onclick="location.href='register-product.html'">📝 商品登録</button>
-  <div id="adminBtnArea"></div>
+  <div id="adminAccess" style="margin-top: 20px;"></div>
 
-  <script>
+  <h2>📩 管理者に連絡</h2>
+  <button id="contactAdminBtn">管理者に連絡する</button>
+
+  <h2>📝 自分の操作履歴</h2>
+  <div id="selfLogList">読み込み中...</div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
     const name = sessionStorage.getItem("responsibilityName");
     const role = sessionStorage.getItem("responsibilityRole");
 
@@ -26,18 +42,57 @@
 
     document.getElementById("loginUser").textContent =
       `ログイン中: ${name}（${role}）`;
-
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
+    // 管理者画面へボタン（管理者のみ表示）
     if (role === "管理者") {
+      const adminDiv = document.getElementById("adminAccess");
       const btn = document.createElement("button");
-      btn.textContent = "🛠 管理者画面へ";
+      btn.textContent = "管理者画面へ";
       btn.onclick = () => location.href = "admin.html";
-      document.getElementById("adminBtnArea").appendChild(btn);
+      adminDiv.appendChild(btn);
     }
+
+    // 管理者に連絡ボタン
+    document.getElementById("contactAdminBtn").onclick = async () => {
+      await addDoc(collection(db, "logs"), {
+        userName: name,
+        role: role,
+        action: "管理者に連絡しました",
+        target: "管理者",
+        timestamp: serverTimestamp()
+      });
+      alert("管理者に連絡しました。対応をお待ちください。");
+    };
+
+    // 自分の操作履歴表示
+    async function loadSelfLogs() {
+      const snap = await getDocs(collection(db, "logs"));
+      const logs = snap.docs.map(doc => doc.data())
+        .filter(log => log.userName === name)
+        .sort((a, b) => {
+          const timeA = a.timestamp?.toDate?.() ?? new Date(0);
+          const timeB = b.timestamp?.toDate?.() ?? new Date(0);
+          return timeB - timeA;
+        });
+
+      const logListDiv = document.getElementById("selfLogList");
+      logListDiv.innerHTML = "";
+
+      logs.slice(0, 10).forEach(data => {
+        const time = data.timestamp?.toDate?.()?.toLocaleString("ja-JP") || "日時不明";
+        logListDiv.innerHTML += `<div>${time} - ${data.action}『${data.target}』</div>`;
+      });
+
+      if (logs.length === 0) {
+        logListDiv.textContent = "履歴が見つかりません";
+      }
+    }
+
+    loadSelfLogs();
   </script>
 </body>
 </html>
