@@ -155,5 +155,75 @@
       });
 
       filtered.slice(0, limit).forEach(data => {
-        const div = document.createElement("div");
-        const nameInput = document.createElement("
+  const div = document.createElement("div");
+
+  // ✅ ここから編集・削除UIを追加
+  const nameInput = document.createElement("input");
+  nameInput.value = data.name || "";
+  nameInput.placeholder = "商品名";
+
+  const barcodeInput = document.createElement("input");
+  barcodeInput.value = data.barcode || "";
+  barcodeInput.placeholder = "バーコード";
+
+  const companyInput = document.createElement("input");
+  companyInput.value = data.company || "";
+  companyInput.placeholder = "会社名";
+
+  const lotInput = document.createElement("input");
+  lotInput.value = data.lotNumber || "";
+  lotInput.placeholder = "Lot番号";
+
+  const unitInput = document.createElement("input");
+  unitInput.value = data.unit || "";
+  unitInput.placeholder = "単位";
+
+  const updateBtn = document.createElement("button");
+  updateBtn.textContent = "更新";
+  updateBtn.onclick = async () => {
+    await updateDoc(doc(db, "products", data.id), {
+      name: nameInput.value.trim(),
+      barcode: barcodeInput.value.trim(),
+      company: companyInput.value.trim(),
+      lotNumber: lotInput.value.trim(),
+      unit: unitInput.value.trim(),
+      timestamp: serverTimestamp()
+    });
+    await addDoc(collection(db, "logs"), {
+      userName: name,
+      role,
+      action: "商品を更新しました",
+      target: nameInput.value.trim(),
+      timestamp: serverTimestamp()
+    });
+    alert("更新しました");
+  };
+
+  const deleteBtn = document.createElement("button");
+  deleteBtn.textContent = "削除";
+  deleteBtn.onclick = async () => {
+    if (!confirm("本当に削除しますか？")) return;
+    await deleteDoc(doc(db, "products", data.id));
+    await addDoc(collection(db, "logs"), {
+      userName: name,
+      role,
+      action: "商品を削除しました",
+      target: data.name || "不明",
+      timestamp: serverTimestamp()
+    });
+    alert("削除しました");
+    loadProducts(limit);
+  };
+
+  // ✅ ここまでを表示ブロックに追加
+  div.appendChild(nameInput);
+  div.appendChild(barcodeInput);
+  div.appendChild(companyInput);
+  div.appendChild(lotInput);
+  div.appendChild(unitInput);
+  div.appendChild(updateBtn);
+  div.appendChild(deleteBtn);
+
+  productListDiv.appendChild(div);
+});
+
