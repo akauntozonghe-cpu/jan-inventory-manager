@@ -13,21 +13,22 @@
   </div>
 
   <h2>👥 責任者一覧</h2>
+  <div>
+    <input type="text" id="newName" placeholder="名前">
+    <input type="text" id="newNumber" placeholder="番号">
+    <select id="newRole">
+      <option value="責任者">責任者</option>
+      <option value="管理者">管理者</option>
+    </select>
+    <button id="addUserBtn">登録</button>
+  </div>
   <div id="userList">読み込み中...</div>
-
-  <h2>📦 商品一覧</h2>
-  <div id="productList">読み込み中...</div>
-
-  <h2>📝 操作履歴</h2>
-  <div id="logList">読み込み中...</div>
-
-  <h2>🔍 検索履歴</h2>
-  <div id="searchLogList">読み込み中...</div>
+  <button id="expandUsersBtn" style="display:none;">すべて見る</button>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, getDocs
+      getFirestore, collection, getDocs, addDoc, deleteDoc, doc
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -41,58 +42,79 @@
 
     const name = sessionStorage.getItem("responsibilityName");
     const role = sessionStorage.getItem("responsibilityRole");
-    const number = sessionStorage.getItem("responsibilityNumber");
 
     if (!name || role !== "管理者") location.href = "user.html";
 
     document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}） / 番号: ${number}`;
+      `ログイン中: ${name}（${role}）`;
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
-    // 責任者一覧
-    const userListDiv = document.getElementById("userList");
-    getDocs(collection(db, "users")).then(snap => {
+    let allUsers = [];
+
+    // 登録処理
+    document.getElementById("addUserBtn").onclick = async () => {
+      const newName = document.getElementById("newName").value.trim();
+      const newNumber = document.getElementById("newNumber").value.trim();
+      const newRole = document.getElementById("newRole").value;
+
+      if (!newName || !newNumber) return alert("名前と番号を入力してください");
+
+      await addDoc(collection(db, "users"), {
+        name: newName,
+        number: newNumber,
+        role: newRole
+      });
+
+      alert("登録しました");
+      fetchUsers(); // 再読み込み
+    };
+
+    // 削除処理
+    async function deleteUser(id) {
+      if (confirm("本当に削除しますか？")) {
+        await deleteDoc(doc(db, "users", id));
+        alert("削除しました");
+        fetchUsers();
+      }
+    }
+
+    // 一覧取得
+    async function fetchUsers() {
+      const snap = await getDocs(collection(db, "users"));
+      allUsers = snap.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      renderUsers(10); // 初期表示は10件
+    }
+
+    // 表示制限付き描画
+    function renderUsers(limit) {
+      const userListDiv = document.getElementById("userList");
       userListDiv.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        userListDiv.innerHTML += `<div>${data.name}（${data.role}） / 番号: ${data.number}</div>`;
-      });
-    });
 
-    // 商品一覧
-    const productListDiv = document.getElementById("productList");
-    getDocs(collection(db, "products")).then(snap => {
-      productListDiv.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        productListDiv.innerHTML += `<div>${data.name} / バーコード: ${data.barcode} / 在庫: ${data.stock}</div>`;
+      allUsers.slice(0, limit).forEach(user => {
+        const div = document.createElement("div");
+        div.innerHTML = `
+          ${user.name}（${user.role}） / 番号: ${user.number}
+          <button onclick="deleteUser('${user.id}')">削除</button>
+        `;
+        userListDiv.appendChild(div);
       });
-    });
 
-    // 操作履歴
-    const logListDiv = document.getElementById("logList");
-    getDocs(collection(db, "logs")).then(snap => {
-      logListDiv.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
-        logListDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が ${data.action}</div>`;
-      });
-    });
+      document.getElementById("expandUsersBtn").style.display =
+        allUsers.length > limit ? "inline-block" : "none";
 
-    // 検索履歴
-    const searchLogDiv = document.getElementById("searchLogList");
-    getDocs(collection(db, "searchLogs")).then(snap => {
-      searchLogDiv.innerHTML = "";
-      snap.forEach(doc => {
-        const data = doc.data();
-        const time = data.timestamp?.toDate()?.toLocaleString("ja-JP") || "日時不明";
-        searchLogDiv.innerHTML += `<div>${time} - ${data.userName}（${data.role}）が「${data.keyword}」を検索</div>`;
-      });
-    });
+      document.getElementById("expandUsersBtn").onclick = () => {
+        renderUsers(allUsers.length); // 全件表示
+        document.getElementById("expandUsersBtn").style.display = "none";
+      };
+    }
+
+    fetchUsers(); // 初期読み込み
   </script>
 </body>
 </html>
