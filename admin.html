@@ -43,7 +43,7 @@
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
-      getFirestore, collection, getDocs, addDoc, deleteDoc, doc, serverTimestamp
+      getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc, serverTimestamp
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -61,46 +61,32 @@
     if (!name || role !== "管理者") location.href = "user.html";
 
     document.getElementById("loginUser").textContent =
-      `ログイン中: ${name}（${role}）`;
+      `登録中の責任者: ${name}（${role}）`;
     document.getElementById("logoutBtn").onclick = () => {
       sessionStorage.clear();
       location.href = "index.html";
     };
 
-    // Enterキー対応
-    document.getElementById("newName").addEventListener("keydown", (e) => {
+    document.getElementById("newName").addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("addUserBtn").click();
     });
-    document.getElementById("newNumber").addEventListener("keydown", (e) => {
+    document.getElementById("newNumber").addEventListener("keydown", e => {
       if (e.key === "Enter") document.getElementById("addUserBtn").click();
     });
 
-    // 責任者一覧
     let allUsers = [];
 
     document.getElementById("addUserBtn").onclick = async () => {
       const newName = document.getElementById("newName").value.trim();
       const newNumber = document.getElementById("newNumber").value.trim();
       const newRole = document.getElementById("newRole").value;
-
       if (!newName || !newNumber) return alert("名前と番号を入力してください");
 
-      await addDoc(collection(db, "users"), {
-        name: newName,
-        number: newNumber,
-        role: newRole
-      });
-
+      await addDoc(collection(db, "users"), { name: newName, number: newNumber, role: newRole });
       alert(`${newRole}『${newName}』を登録しました`);
-
       await addDoc(collection(db, "logs"), {
-        userName: name,
-        role: role,
-        action: `${newRole}を登録しました`,
-        target: newName,
-        timestamp: serverTimestamp()
+        userName: name, role, action: `${newRole}を登録しました`, target: newName, timestamp: serverTimestamp()
       });
-
       fetchUsers();
     };
 
@@ -109,15 +95,9 @@
       if (user && confirm(`${user.role}『${user.name}』を削除しますか？`)) {
         await deleteDoc(doc(db, "users", id));
         alert(`${user.role}『${user.name}』を削除しました`);
-
         await addDoc(collection(db, "logs"), {
-          userName: name,
-          role: role,
-          action: `${user.role}を削除しました`,
-          target: user.name,
-          timestamp: serverTimestamp()
+          userName: name, role, action: `${user.role}を削除しました`, target: user.name, timestamp: serverTimestamp()
         });
-
         fetchUsers();
       }
     }
@@ -131,7 +111,6 @@
     function renderUsers(limit) {
       const userListDiv = document.getElementById("userList");
       userListDiv.innerHTML = "";
-
       allUsers.slice(0, limit).forEach(user => {
         const div = document.createElement("div");
         div.innerHTML = `${user.name}（${user.role}） / 番号: ${user.number}`;
@@ -141,61 +120,46 @@
         div.appendChild(btn);
         userListDiv.appendChild(div);
       });
-
       document.getElementById("expandUsersBtn").style.display =
         allUsers.length > limit ? "inline-block" : "none";
-
       document.getElementById("expandUsersBtn").onclick = () => {
         renderUsers(allUsers.length);
         document.getElementById("expandUsersBtn").style.display = "none";
       };
     }
 
-    // 商品一覧
     async function loadProducts(limit = 10) {
       const productListDiv = document.getElementById("productList");
       productListDiv.innerHTML = "読み込み中...";
-
       const snap = await getDocs(collection(db, "products"));
-      const products = snap.docs.map(doc => doc.data());
-
+      const products = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       productListDiv.innerHTML = "";
       products.slice(0, limit).forEach(data => {
         const div = document.createElement("div");
-        div.innerHTML = `<strong>${data.name}</strong><br>
-          バーコード: ${data.barcode}<br>
-          在庫数: ${data.stock}<br><hr>`;
-        productListDiv.appendChild(div);
-      });
-
-      document.getElementById("expandProductsBtn").style.display =
-        products.length > limit ? "inline-block" : "none";
-
-      document.getElementById("expandProductsBtn").onclick = () => {
-        loadProducts(products.length);
-        document.getElementById("expandProductsBtn").style.display = "none";
-      };
-    }
-
-    // 操作履歴
-    let allLogs = [];
-
-    async function loadLogs(limit = 10) {
-      const snap = await getDocs(collection(db, "logs"));
-      allLogs = snap.docs.map(doc => doc.data()).sort((a, b) => {
-        const timeA = a.timestamp?.toDate?.() ?? new Date(0);
-        const timeB = b.timestamp?.toDate?.() ?? new Date(0);
-        return timeB - timeA;
-      });
-      renderLogs(limit);
-    }
-
-    function renderLogs(limit) {
-      const logListDiv = document.getElementById("logList");
-      logListDiv.innerHTML = "";
-
-      const userFilter = document.getElementById("filterUser").value.trim().toLowerCase();
-      const actionFilter = document.getElementById("filterAction").value.trim().toLowerCase();
-
-      const filtered = allLogs.filter(log => {
-        const userMatch = userFilter === "" || log.userName?.toLowerCase().includes(user
+        const nameInput = document.createElement("input");
+        nameInput.value = data.name;
+        nameInput.style.marginRight = "8px";
+        const stockInput = document.createElement("input");
+        stockInput.type = "number";
+        stockInput.value = data.stock;
+        stockInput.style.width = "60px";
+        stockInput.style.marginRight = "8px";
+        const editBtn = document.createElement("button");
+        editBtn.textContent = "更新";
+        editBtn.onclick = async () => {
+          await updateDoc(doc(db, "products", data.id), {
+            name: nameInput.value.trim(),
+            stock: parseInt(stockInput.value)
+          });
+          alert(`商品『${nameInput.value}』を更新しました`);
+          await addDoc(collection(db, "logs"), {
+            userName: name, role, action: "商品を更新しました", target: nameInput.value, timestamp: serverTimestamp()
+          });
+          loadProducts(limit);
+        };
+        const deleteBtn = document.createElement("button");
+        deleteBtn.textContent = "削除";
+        deleteBtn.onclick = async () => {
+          if (confirm(`商品『${data.name}』を削除しますか？`)) {
+            await deleteDoc(doc(db, "products", data.id));
+            alert(`商品『${data
