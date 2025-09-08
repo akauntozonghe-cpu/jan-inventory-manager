@@ -61,70 +61,8 @@ body {
 .button-grid button span.icon {
   font-size: 1.3rem;
 }
-.jan-row {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  margin-bottom: 12px;
-}
 
-.jan-row input {
-  flex: 1;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.jan-row button {
-  padding: 10px 14px;
-  font-size: 1.1rem;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.jan-row button:hover {
-  background-color: #2e59d9;
-}
-.jan-row {
-  margin-bottom: 12px;
-}
-
-.jan-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.jan-input-wrapper input {
-  flex: 1;
-  padding: 10px;
-  font-size: 1rem;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.scan-btn {
-  padding: 8px;
-  font-size: 1.2rem;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scan-btn:hover {
-  background-color: #2e59d9;
-}
+/* ✅ JANコード入力欄の統一スタイル */
 .jan-row {
   margin-bottom: 12px;
 }
