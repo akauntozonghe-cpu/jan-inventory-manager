@@ -96,6 +96,11 @@
     const loginBtn = document.getElementById("loginBtn");
     const loginMsg = document.getElementById("loginMsg");
 
+    // 自動フォーカス
+    window.onload = () => {
+      loginInput.focus();
+    };
+
     loginInput.addEventListener("keydown", (e) => {
       if (e.key === "Enter") loginBtn.click();
     });
