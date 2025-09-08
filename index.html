@@ -5,31 +5,72 @@
   <title>在庫管理</title>
   <link rel="stylesheet" href="./style.css">
   <style>
+    body {
+      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f8f9fc;
+    }
+
     .app-header {
       text-align: center;
       padding: 24px 12px;
       background: linear-gradient(to right, #4e73df, #1cc88a);
       color: white;
-      border-radius: 8px;
-      margin-bottom: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      animation: fadeIn 1s ease-out;
     }
+
     .app-title {
-      font-size: 2rem;
+      font-size: 2.2rem;
       margin: 0;
       font-weight: bold;
       letter-spacing: 1px;
     }
-    .app-subtitle {
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    label, input, button {
+      display: block;
+      margin: 12px auto;
       font-size: 1rem;
-      margin-top: 8px;
-      opacity: 0.9;
+      max-width: 300px;
+      width: 100%;
+    }
+
+    input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    button {
+      padding: 10px;
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #2e59d9;
+    }
+
+    #loginMsg {
+      text-align: center;
+      color: red;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <header class="app-header">
     <h1 class="app-title">在庫管理</h1>
-    <p class="app-subtitle">JANコード対応・スマホ最適化</p>
   </header>
 
   <label>責任者番号: <input type="text" id="loginNumber" placeholder="番号を入力"></label>
