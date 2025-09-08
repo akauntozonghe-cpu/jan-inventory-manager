@@ -174,6 +174,19 @@
   </div>
 </div>
   <script type="module">
+  // すでにあるログイン情報取得の直後に追加
+  const role = sessionStorage.getItem("responsibilityRole");
+
+  if (role === "管理者") {
+    const adminBtn = document.getElementById("btn-admin");
+    if (adminBtn) {
+      adminBtn.style.display = "inline-block";
+      adminBtn.onclick = () => location.href = "admin.html";
+    }
+  }
+
+  // その後に他のセクション切り替えやイベント登録などが続く
+</script>
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
     import {
       getFirestore, collection, addDoc, getDocs, query, where,
@@ -346,6 +359,7 @@ tu
   </script>
 </body>
 </html>
+
 
 
 
