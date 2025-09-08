@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <title>商品登録・編集</title>
   <link rel="stylesheet" href="./style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
   <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/qrcodelib.js"></script>
   <script src="https://rawgit.com/andrastoth/webcodecamjs/master/js/webcodecamjs.js"></script>
 </head>
@@ -100,20 +99,16 @@
       }
     };
 
-    // Enterキー対応
     document.getElementById("barcodeInput").addEventListener("keydown", (e) => {
       if (e.key === "Enter") {
         document.getElementById("submitBtn").click();
       }
     });
 
-    // スキャン機能＋自動連携
     document.getElementById("scanBtn").onclick = () => {
       const args = {
         resultFunction: function(result) {
-          const code = result.code;
-          document.getElementById("barcodeInput").value = code;
-          location.href = `search-product.html?barcode=${encodeURIComponent(code)}`;
+          document.getElementById("barcodeInput").value = result.code;
         }
       };
       new WebCodeCamJS("#barcode-canvas").init(args).play();
