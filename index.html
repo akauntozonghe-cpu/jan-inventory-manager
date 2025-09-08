@@ -52,6 +52,12 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 6px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus {
+      border-color: #4e73df;
+      outline: none;
     }
 
     button {
@@ -61,10 +67,12 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.3s, transform 0.2s;
     }
 
     button:hover {
       background-color: #2e59d9;
+      transform: scale(1.02);
     }
 
     #loginMsg {
