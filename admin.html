@@ -162,4 +162,5 @@
         deleteBtn.onclick = async () => {
           if (confirm(`商品『${data.name}』を削除しますか？`)) {
             await deleteDoc(doc(db, "products", data.id));
-            alert(`商品『${data
+            alert(`商品『${data.name}』を削除しました`);
+            await
