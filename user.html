@@ -3,88 +3,60 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>在庫管理 - 責任者画面</title>
+  <title>JANコード読み取り</title>
+  <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
   <style>
     body {
-      font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+      font-family: "Segoe UI", sans-serif;
       margin: 0;
-      padding: 16px;
-      background-color: #f8f9fc;
-    }
-
-    header {
-      text-align: center;
       padding: 20px;
-      background: linear-gradient(to right, #4e73df, #1cc88a);
-      color: white;
-      border-radius: 12px;
-      margin-bottom: 20px;
+      background-color: #f8f9fc;
+      text-align: center;
     }
 
     h1 {
-      font-size: 1.8rem;
-      margin: 0;
+      font-size: 1.6rem;
+      margin-bottom: 20px;
     }
 
-    .section {
-      max-width: 500px;
-      margin: 0 auto 32px;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-      animation: fadeIn 0.6s ease-out;
-    }
-
-    .section h2 {
-      font-size: 1.2rem;
-      margin-bottom: 12px;
-      text-align: center;
-    }
-
-    input, button, textarea {
-      display: block;
+    #scanner {
       width: 100%;
-      margin: 8px 0;
+      max-width: 400px;
+      height: 240px;
+      margin: 0 auto 16px;
+      border: 2px solid #4e73df;
+      border-radius: 8px;
+    }
+
+    input {
+      width: 90%;
+      max-width: 300px;
       padding: 10px;
       font-size: 1rem;
-      border-radius: 6px;
+      margin-bottom: 12px;
       border: 1px solid #ccc;
-      box-sizing: border-box;
+      border-radius: 6px;
     }
 
     button {
+      padding: 10px 20px;
+      font-size: 1rem;
       background-color: #4e73df;
       color: white;
       border: none;
+      border-radius: 6px;
       cursor: pointer;
-      transition: background-color 0.3s;
     }
 
     button:hover {
       background-color: #2e59d9;
     }
 
-    .admin-only {
-      display: none;
-    }
-
-    body.admin .admin-only {
-      display: block;
-    }
-
-    #registerSuccess {
-      display: none;
-      text-align: center;
+    #successMsg {
+      margin-top: 12px;
       color: green;
       font-weight: bold;
-      margin-top: 10px;
       animation: fadeUp 0.6s ease-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
     }
 
     @keyframes fadeUp {
@@ -94,60 +66,47 @@
   </style>
 </head>
 <body>
-  <header>
-    <h1>在庫管理 - 責任者画面</h1>
-  </header>
+  <h1>📷 JANコード読み取り</h1>
 
-  <div class="section" id="userInfo">
-    <p id="loginUser">ログイン中: 読み込み中...</p>
-    <button id="logoutBtn">ログアウト</button>
-  </div>
+  <div id="scanner"></div>
+  <button id="startScanBtn">読み取り開始</button>
 
-  <div class="section" id="productRegister">
-    <h2>📦 商品登録</h2>
-    <input type="text" id="productId" placeholder="管理番号" required>
-    <input type="text" id="productGroupId" placeholder="管理区別番号" class="admin-only">
-    <input type="text" id="location" placeholder="保管場所" required>
-    <input type="text" id="categoryLarge" placeholder="大分類" required>
-    <input type="text" id="categorySmall" placeholder="小分類" required>
-    <input type="text" id="janCode" placeholder="JANコード">
-    <button id="scanJanBtn">📷 JANコードを読み取る</button>
-    <input type="file" id="photo" accept="image/*">
-    <input type="text" id="company" placeholder="会社名" required>
-    <input type="text" id="productName" placeholder="品名" required>
-    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号">
-    <input type="date" id="expiry" placeholder="期限">
-    <input type="text" id="unit" placeholder="個数単位" required>
-    <button id="registerBtn">登録する</button>
-    <div id="registerSuccess">✅ 登録が完了しました！</div>
-  </div>
+  <input type="text" id="janCodeInput" placeholder="JANコードがここに表示されます">
+  <div id="successMsg"></div>
 
   <script>
-    const name = sessionStorage.getItem("responsibilityName");
-    const role = sessionStorage.getItem("responsibilityRole");
-    document.getElementById("loginUser").textContent = `ログイン中: ${name}（${role}）`;
-    if (role === "管理者") {
-      document.body.classList.add("admin");
-    }
+    const startBtn = document.getElementById("startScanBtn");
+    const janInput = document.getElementById("janCodeInput");
+    const successMsg = document.getElementById("successMsg");
 
-    document.getElementById("logoutBtn").onclick = () => {
-      sessionStorage.clear();
-      location.href = "index.html";
-    };
+    startBtn.onclick = () => {
+      successMsg.textContent = "";
+      Quagga.init({
+        inputStream: {
+          type: "LiveStream",
+          target: document.querySelector("#scanner"),
+          constraints: {
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          readers: ["ean_reader"]
+        },
+        locate: true
+      }, err => {
+        if (err) {
+          console.error("Quagga初期化エラー:", err);
+          return;
+        }
+        Quagga.start();
+      });
 
-    document.getElementById("scanJanBtn").onclick = () => {
-      // 仮の読み取り処理（実装はQuaggaJSやZXingと連携）
-      const dummyCode = "4901234567894";
-      document.getElementById("janCode").value = dummyCode;
-      alert("JANコードを読み取りました: " + dummyCode);
-    };
-
-    document.getElementById("registerBtn").onclick = () => {
-      // 仮の登録処理（実際はFirestoreなどに保存）
-      document.getElementById("registerSuccess").style.display = "block";
-      setTimeout(() => {
-        document.getElementById("registerSuccess").style.display = "none";
-      }, 3000);
+      Quagga.onDetected(result => {
+        const code = result.codeResult.code;
+        janInput.value = code;
+        successMsg.textContent = `✅ 読み取り成功: ${code}`;
+        Quagga.stop();
+      });
     };
   </script>
 </body>
