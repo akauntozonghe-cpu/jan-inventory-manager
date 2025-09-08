@@ -3,13 +3,66 @@
 <head>
   <meta charset="UTF-8">
   <title>在庫管理 - ログイン</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <h1>在庫管理</h1>
-  <label>責任者番号: <input type="text" id="numberInput"></label>
+  <header><h1>在庫管理 - ログイン</h1></header>
+
+  <label>責任者番号: <input type="text" id="loginNumber" placeholder="番号を入力"></label>
   <button id="loginBtn">ログイン</button>
-  <p id="errorMsg" style="color:red;"></p>
-  <p id="loadingMsg"></p>
-  <script type="module" src="./main.js"></script>
+  <p id="loginMsg"></p>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, getDocs
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const loginInput = document.getElementById("loginNumber");
+    const loginBtn = document.getElementById("loginBtn");
+    const loginMsg = document.getElementById("loginMsg");
+
+    // Enterキー対応
+    loginInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") loginBtn.click();
+    });
+
+    // ログイン処理
+    loginBtn.onclick = async () => {
+      const inputNumber = loginInput.value.trim();
+      loginMsg.textContent = "";
+
+      if (!inputNumber) {
+        loginMsg.textContent = "番号を入力してください";
+        return;
+      }
+
+      try {
+        const snap = await getDocs(collection(db, "users"));
+        const match = snap.docs.find(doc => doc.data().number === inputNumber);
+
+        if (match) {
+          const user = match.data();
+          sessionStorage.setItem("responsibilityName", user.name);
+          sessionStorage.setItem("responsibilityRole", user.role);
+          location.href = user.role === "管理者" ? "admin.html" : "user.html";
+        } else {
+          loginMsg.textContent = "番号が一致しません";
+        }
+      } catch (e) {
+        console.error("ログインエラー:", e);
+        loginMsg.textContent = "ログイン処理中にエラーが発生しました";
+      }
+    };
+  </script>
 </body>
 </html>
