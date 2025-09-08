@@ -6,114 +6,28 @@
   <title>在庫管理 - 責任者画面</title>
   <script src="https://unpkg.com/quagga@0.12.1/dist/quagga.min.js"></script>
   <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background: #f8f9fc;
-      padding: 16px;
-    }
-    header {
-      text-align: center;
-      padding: 16px;
-      background: linear-gradient(to right, #4e73df, #1cc88a);
-      color: white;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    h1 {
-      font-size: 1.6rem;
-      margin: 0;
-    }
-    .toggle-btn {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      background: #4e73df;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-    .section {
-      max-width: 500px;
-      margin: 0 auto;
-      background: white;
-      padding: 16px;
-      border-radius: 12px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
-      display: none;
-      transition: max-height 0.4s ease, opacity 0.4s ease;
-      overflow: hidden;
-    }
-    .section.show {
-      display: block;
-      animation: fadeIn 0.4s ease-out;
-    }
-    input, textarea, select, button {
-      width: 100%;
-      margin: 8px 0;
-      padding: 10px;
-      font-size: 1rem;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      box-sizing: border-box;
-    }
-    button {
-      background-color: #4e73df;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #2e59d9;
-    }
-    #scannerWrapper, #searchScannerWrapper {
-      display: none;
-      width: 100%;
-      max-width: 400px;
-      height: 240px;
-      margin: 12px auto;
-      border: 2px solid #4e73df;
-      border-radius: 8px;
-      position: relative;
-    }
-    #scanner, #searchScanner {
-      width: 100%;
-      height: 100%;
-    }
-    canvas.drawingBuffer {
-      position: absolute;
-      top: 0;
-      left: 0;
-    }
-    #loginUser {
-      text-align: center;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-    .admin-only {
-      display: none;
-    }
-    body.admin .admin-only {
-      display: block;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    #preview {
-      max-width: 100%;
-      margin-top: 8px;
-      border-radius: 8px;
-    }
+    body { font-family: "Segoe UI", sans-serif; background: #f8f9fc; padding: 16px; }
+    header { text-align: center; padding: 16px; background: linear-gradient(to right, #4e73df, #1cc88a); color: white; border-radius: 12px; margin-bottom: 20px; }
+    h1 { font-size: 1.6rem; margin: 0; }
+    .toggle-btn { width: 100%; padding: 12px; font-size: 1rem; background: #4e73df; color: white; border: none; border-radius: 8px; margin-bottom: 12px; cursor: pointer; }
+    .section { max-width: 500px; margin: 0 auto; background: white; padding: 16px; border-radius: 12px; box-shadow: 0 0 8px rgba(0,0,0,0.05); display: none; transition: max-height 0.4s ease, opacity 0.4s ease; overflow: hidden; }
+    .section.show { display: block; animation: fadeIn 0.4s ease-out; }
+    input, textarea, select, button { width: 100%; margin: 8px 0; padding: 10px; font-size: 1rem; border-radius: 6px; border: 1px solid #ccc; box-sizing: border-box; }
+    button { background-color: #4e73df; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #2e59d9; }
+    #scannerWrapper, #searchScannerWrapper { display: none; width: 100%; max-width: 400px; height: 240px; margin: 12px auto; border: 2px solid #4e73df; border-radius: 8px; position: relative; }
+    #scanner, #searchScanner { width: 100%; height: 100%; }
+    canvas.drawingBuffer { position: absolute; top: 0; left: 0; }
+    #loginUser { text-align: center; font-weight: bold; margin-bottom: 16px; }
+    .admin-only { display: none; }
+    body.admin .admin-only { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    #preview { max-width: 100%; margin-top: 8px; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <header>
-    <h1>在庫管理 - 責任者画面</h1>
-  </header>
+  <header><h1>在庫管理 - 責任者画面</h1></header>
   <div id="loginUser">読み込み中...</div>
-
   <button class="toggle-btn" onclick="toggleSection('registerSection')">📦 商品登録</button>
   <button class="toggle-btn" onclick="toggleSection('searchSection')">🔍 商品検索</button>
   <button class="toggle-btn" onclick="toggleSection('contactSection')">📩 管理者に連絡</button>
@@ -126,13 +40,11 @@
     <input type="text" id="location" placeholder="保管場所">
     <input type="text" id="categoryLarge" placeholder="大分類">
     <input type="text" id="categorySmall" placeholder="小分類">
-
     <div style="display:flex; gap:8px;">
       <input type="text" id="janCodeInput" placeholder="JANコード" style="flex:1;">
       <button id="startScanBtn" style="flex-shrink:0;">📷</button>
     </div>
     <div id="scannerWrapper"><div id="scanner"></div></div>
-
     <input type="file" id="photo" accept="image/*">
     <img id="preview" src="" alt="プレビュー画像">
     <input type="text" id="company" placeholder="会社名">
@@ -181,9 +93,9 @@
     } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      projectId: "inventory-app-312ca"
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID"
     };
 
     const app = initializeApp(firebaseConfig);
@@ -191,9 +103,7 @@
 
     const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
     const name = sessionStorage.getItem("responsibilityName") || "未設定";
-    const roleJP = roleRaw === "admin" ? "管理者" :
-                   roleRaw === "user" ? "責任者" : roleRaw;
-
+    const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : roleRaw;
     document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
     if (roleJP === "管理者") document.body.classList.add("admin");
 
@@ -204,4 +114,16 @@
       sessionStorage.setItem("section_" + id, !isVisible);
     }
 
-    ["register
+    ["registerSection", "searchSection", "contactSection", "historySection", "listSection"].forEach(id => {
+      if (sessionStorage.getItem("section_" + id) === "true") {
+        document.getElementById(id).classList.add("show");
+      }
+    });
+
+    document.getElementById("photo").onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          document.getElementById("preview").src = reader.result;
+        };
