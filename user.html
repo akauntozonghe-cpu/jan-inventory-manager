@@ -7,6 +7,31 @@
 </head>
 <body>
   <header><h1>在庫管理 - 責任者画面</h1></header>
+<!-- タイトルとログイン表示 -->
+<h1 id="systemTitle">在庫管理</h1>
+<div id="loginInfo">
+  ログイン中: <span id="responsibilityName">未設定</span>（<span id="responsibilityRole">未設定</span>）
+</div>
+<!-- ハンバーガーメニュー -->
+<div id="hamburgerMenu">☰</div>
+<nav id="sideMenu" style="display:none;">
+  <button id="toggleThemeBtn">🌓 テーマ切替</button>
+  <button id="toggleNotifyBtn">🔔 通知設定</button>
+  <button id="openSettingsBtn">⚙️ 設定</button>
+</nav>
+
+<!-- 設定パネル -->
+<section id="settingsPanel" style="display:none; margin-top: 10px;">
+  <h2>設定</h2>
+  <label for="settingName">名前：</label>
+  <input id="settingName" placeholder="名前を入力" />
+  <label for="settingRole">ロール：</label>
+  <select id="settingRole">
+    <option value="admin">管理者</option>
+    <option value="user">一般</option>
+  </select>
+  <button id="saveSettingsBtn">保存</button>
+</section>  
 <body>
   <!-- ログイン情報表示 -->
   <div id="loginUser">ログイン情報を取得中...</div>
@@ -103,6 +128,7 @@
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
 
 
 
