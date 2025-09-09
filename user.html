@@ -7,7 +7,11 @@
 </head>
 <body>
   <header><h1>在庫管理 - 責任者画面</h1></header>
-
+<body>
+  <!-- ✅ ログインユーザー表示と管理者メニューボタン -->
+  <div id="loginUser">読み込み中...</div>
+  <button id="btn-admin" style="display:none;">管理者メニュー</button>
+  
   <!-- ログイン情報表示 -->
   <div id="loginUser">読み込み中...</div>
   <button id="btn-admin" style="display:none;">🔧 管理者メニュー</button>
@@ -57,14 +61,13 @@
     <button id="loadAllBtn">一覧表示</button>
     <div id="allProducts"></div>
   </section>
-
-  <!-- 管理者専用セクション -->
+  
+  <!-- ✅ 管理者専用セクション：ここに追加 -->
   <section id="adminSection" style="display:none;">
     <h2>🛠 管理者メニュー</h2>
 
-    <!-- ユーザー管理 -->
-    <div>
-      <h3>👥 ユーザー管理</h3>
+    <div class="admin-block">
+      <h3>ユーザー管理</h3>
       <input id="newUserName" placeholder="名前">
       <input id="newUserNumber" placeholder="番号">
       <select id="newUserRole">
@@ -74,9 +77,21 @@
       <button id="addUserBtn">追加</button>
       <input id="deleteUserNumber" placeholder="削除する番号">
       <button id="deleteUserBtn">削除</button>
-      <div id="userList">読み込み中...</div>
     </div>
 
+    <div class="admin-block">
+      <h3>操作履歴</h3>
+      <input id="logUserFilter" placeholder="ユーザー名">
+      <input id="logDateFilter" type="date">
+      <button id="loadLogsBtn">絞り込み</button>
+      <button id="exportLogsBtn">CSV出力</button>
+      <div id="logList">読み込み中...</div>
+    </div>
+  </section>
+
+  <!-- スクリプト読み込み -->
+  <script type="module" src="main.js"></script>
+</body>
     <!-- 操作履歴 -->
     <div>
       <h3>📝 操作履歴</h3>
@@ -92,3 +107,4 @@
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
