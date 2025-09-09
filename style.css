@@ -64,7 +64,7 @@ body {
   font-size: 1.3rem;
 }
 
-/* ✅ JANコード入力欄の統一スタイル */
+/* JANコード入力欄の統一スタイル */
 .jan-row {
   margin-bottom: 12px;
 }
@@ -102,7 +102,7 @@ body {
   background-color: #2e59d9;
 }
 
-/* ✅ カメラ映像を青枠内に収める */
+/* カメラ映像を青枠内に収める */
 #scannerWrapper,
 #scannerWrapperRegister {
   width: 100%;
@@ -124,7 +124,7 @@ body {
   object-fit: cover;
 }
 
-/* ✅ ステータス表示（読み取り中・成功） */
+/* ステータス表示（読み取り中・成功） */
 #scanStatus,
 #scanStatusRegister {
   position: absolute;
@@ -147,7 +147,7 @@ body {
   transform: translateX(-50%) scale(1.05);
 }
 
-/* ✅ セクション切り替えアニメーション */
+/* セクション切り替えアニメーション */
 .section {
   visibility: hidden;
   opacity: 0;
@@ -159,6 +159,8 @@ body {
   opacity: 1;
   transition: opacity 0.4s ease;
 }
+
+/* 管理者セクション */
 .admin-block {
   margin-bottom: 24px;
   padding: 12px;
@@ -195,6 +197,7 @@ body {
   background-color: #2e59d9;
 }
 
+/* 商品編集グリッド */
 .product-item {
   display: grid;
   grid-template-columns: repeat(6, 1fr) auto auto;
@@ -212,6 +215,17 @@ body {
   font-size: 0.9rem;
   cursor: pointer;
 }
+
+/* ログ一覧グリッド表示 */
+.log-grid {
+  display: grid;
+  grid-template-columns: 160px 1fr 1fr;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid #eee;
+}
+
+/* ロールバッジ */
 .badge {
   display: inline-block;
   padding: 2px 6px;
