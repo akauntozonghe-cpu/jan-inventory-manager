@@ -2,21 +2,133 @@
 body {
   font-family: sans-serif;
   padding: 1rem;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* タイトル */
 #systemTitle {
   background: #f0f0f0;
   padding: 8px;
   font-size: 20px;
   font-weight: bold;
   border-bottom: 1px solid #ccc;
+  cursor: pointer;
 }
 
+/* ユーザー情報ヘッダー */
 #userHeader {
   margin-top: 8px;
   padding: 6px;
   background: #fafafa;
   border-bottom: 1px solid #ddd;
+}
+
+/* ハンバーガーメニュー */
+#hamburgerMenu {
+  font-size: 28px;
+  cursor: pointer;
+  padding: 8px;
+  background-color: #eee;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* サイドメニュー（スライド式） */
+#sideMenu {
+  position: fixed;
+  top: 60px;
+  left: -220px;
+  width: 200px;
+  background-color: #f9f9f9;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+
+#sideMenu.open {
+  left: 0;
+}
+
+#sideMenu button {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 設定パネル */
+#settingsPanel {
+  background-color: #fefefe;
+  border: 1px solid #ddd;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+}
+
+#settingsPanel input,
+#settingsPanel select {
+  display: block;
+  margin: 6px 0 12px;
+  padding: 6px;
+  width: 100%;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+#saveSettingsBtn {
+  padding: 8px 12px;
+  font-size: 14px;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* ダークテーマ */
+.dark-theme {
+  background-color: #1e1e1e;
+  color: #eee;
+}
+
+.dark-theme #systemTitle {
+  background-color: #2a2a2a;
+  border-color: #555;
+}
+
+.dark-theme #sideMenu {
+  background-color: #333;
+  border-color: #555;
+}
+
+.dark-theme #sideMenu button {
+  background-color: #444;
+  color: #fff;
+  border-color: #666;
+}
+
+.dark-theme #settingsPanel {
+  background-color: #2a2a2a;
+  border-color: #555;
+}
+
+.dark-theme input,
+.dark-theme select {
+  background-color: #444;
+  color: #fff;
+  border-color: #666;
+}
+
+.dark-theme #saveSettingsBtn {
+  background-color: #0a84ff;
 }
 
 /* ボタン配置グリッド */
@@ -220,20 +332,4 @@ body {
 .log-grid {
   display: grid;
   grid-template-columns: 160px 1fr 1fr;
-  gap: 8px;
-  padding: 6px 0;
-  border-bottom: 1px solid #eee;
-}
-
-/* ロールバッジ */
-.badge {
-  display: inline-block;
-  padding: 2px 6px;
-  font-size: 0.8rem;
-  font-weight: bold;
-  border-radius: 6px;
-  margin-left: 6px;
-  color: white;
-}
-.badge-admin { background-color: #1cc88a; }
-.badge-user  { background-color: #4e73df; }
+  gap: 8
