@@ -13,25 +13,33 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-window.addEventListener("DOMContentLoaded", () => {
-  const name = sessionStorage.getItem("responsibilityName") || "未設定";
-  const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
-  const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : "未設定";
-  const isAdmin = roleJP === "管理者";
+loadLogsBtn.onclick = async () => {
+  const date = logDateFilter.value;
+  const user = logUserFilter.value.trim();
+  const snap = await getDocs(collection(db, "logs"));
+  const filtered = snap.docs.filter(doc => {
+    const d = doc.data();
+    const matchDate = date ? d.timestamp?.toDate().toISOString().startsWith(date) : true;
+    const matchUser = user ? d.userName.includes(user) : true;
+    return matchDate && matchUser;
+  });
 
-  document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
-
-  if (isAdmin) {
-    document.body.classList.add("admin");
-    const adminBtn = document.getElementById("btn-admin");
-    if (adminBtn) {
-      adminBtn.style.display = "inline-block";
-      adminBtn.onclick = () => {
-        document.getElementById("adminSection").style.display = "block";
-        adminBtn.style.display = "none";
-      };
-    }
-  }
+  logList.innerHTML = filtered.length
+    ? filtered.map(doc => {
+        const d = doc.data();
+        const time = d.timestamp?.toDate().toLocaleString() || "不明";
+        const roleClass = d.role === "admin" ? "badge-admin" : "badge-user";
+        const badge = `<span class="badge ${roleClass}">${d.role === "admin" ? "管理者" : "責任者"}</span>`;
+        return `
+          <div class="log-grid">
+            <div>${time}</div>
+            <div>${d.userName} ${badge}</div>
+            <div>${d.action}</div>
+          </div>
+        `;
+      }).join("")
+    : "<div>該当する履歴はありません。</div>";
+};
 
   // 商品登録
   registerBtn.onclick = async () => {
@@ -229,3 +237,4 @@ window.addEventListener("DOMContentLoaded", () => {
       a.download = "logs.csv";
       a.click();
       URL.revokeObjectURL(url);
+
