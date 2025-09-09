@@ -221,5 +221,6 @@ if (saveSettingsBtn) {
     };
 
     exportLogsBtn.onclick = async () => {
-      const snap = await getDocs(collection(db, "
+     const snap = await getDocs(collection(db, "products"));
+
 
