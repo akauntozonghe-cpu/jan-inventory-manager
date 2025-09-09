@@ -13,33 +13,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-loadLogsBtn.onclick = async () => {
-  const date = logDateFilter.value;
-  const user = logUserFilter.value.trim();
-  const snap = await getDocs(collection(db, "logs"));
-  const filtered = snap.docs.filter(doc => {
-    const d = doc.data();
-    const matchDate = date ? d.timestamp?.toDate().toISOString().startsWith(date) : true;
-    const matchUser = user ? d.userName.includes(user) : true;
-    return matchDate && matchUser;
-  });
+window.addEventListener("DOMContentLoaded", () => {
+  const name = sessionStorage.getItem("responsibilityName") || "未設定";
+  const roleRaw = sessionStorage.getItem("responsibilityRole")?.toLowerCase();
+  const roleJP = roleRaw === "admin" ? "管理者" : roleRaw === "user" ? "責任者" : "未設定";
+  const isAdmin = roleJP === "管理者";
 
-  logList.innerHTML = filtered.length
-    ? filtered.map(doc => {
-        const d = doc.data();
-        const time = d.timestamp?.toDate().toLocaleString() || "不明";
-        const roleClass = d.role === "admin" ? "badge-admin" : "badge-user";
-        const badge = `<span class="badge ${roleClass}">${d.role === "admin" ? "管理者" : "責任者"}</span>`;
-        return `
-          <div class="log-grid">
-            <div>${time}</div>
-            <div>${d.userName} ${badge}</div>
-            <div>${d.action}</div>
-          </div>
-        `;
-      }).join("")
-    : "<div>該当する履歴はありません。</div>";
-};
+  document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
 
   // 商品登録
   registerBtn.onclick = async () => {
@@ -103,7 +83,7 @@ loadLogsBtn.onclick = async () => {
     }
   };
 
-  // CSV出力
+  // CSV出力（責任者）
   exportCsvBtn.onclick = async () => {
     const q = query(collection(db, "products"), where("user", "==", name));
     const snapshot = await getDocs(q);
@@ -181,7 +161,6 @@ loadLogsBtn.onclick = async () => {
 
   // 管理者専用機能
   if (isAdmin) {
-    // ユーザー管理
     addUserBtn.onclick = async () => {
       const name = newUserName.value.trim();
       const number = newUserNumber.value.trim();
@@ -200,7 +179,7 @@ loadLogsBtn.onclick = async () => {
       alert("削除しました");
     };
 
-    // ログ閲覧・CSV出力
+    // ログ表示（グリッド形式）
     loadLogsBtn.onclick = async () => {
       const date = logDateFilter.value;
       const user = logUserFilter.value.trim();
@@ -211,32 +190,23 @@ loadLogsBtn.onclick = async () => {
         const matchUser = user ? d.userName.includes(user) : true;
         return matchDate && matchUser;
       });
-      logList.innerHTML = filtered.map(doc => {
-        const d = doc.data();
-        return `<div>${d.timestamp?.toDate().toLocaleString()} - ${d.userName} (${d.role}) - ${d.action}</div>`;
-      }).join("");
+
+      logList.innerHTML = filtered.length
+        ? filtered.map(doc => {
+            const d = doc.data();
+            const time = d.timestamp?.toDate().toLocaleString() || "不明";
+            const roleClass = d.role === "admin" ? "badge-admin" : "badge-user";
+            const badge = `<span class="badge ${roleClass}">${d.role === "admin" ? "管理者" : "責任者"}</span>`;
+            return `
+              <div class="log-grid">
+                <div>${time}</div>
+                <div>${d.userName} ${badge}</div>
+                <div>${d.action}</div>
+              </div>
+            `;
+          }).join("")
+        : "<div>該当する履歴はありません。</div>";
     };
 
     exportLogsBtn.onclick = async () => {
-  const snap = await getDocs(collection(db, "logs"));
-  const rows = [["日時", "ユーザー", "ロール", "操作"]];
-  snap.forEach(doc => {
-    const d = doc.data();
-    rows.push([
-      d.timestamp.toDate().toLocaleString(),
-      d.name,
-      d.role,
-      d.action
-    ]);
-  });
-  const csv = rows.map(r => r.join(",")).join("\n");
-  const blob = new Blob([csv], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "logs.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}; // ✅ ← この閉じ括弧が必要
-
-
+      const snap = await getDocs(collection(db, "
