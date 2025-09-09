@@ -218,23 +218,25 @@ loadLogsBtn.onclick = async () => {
     };
 
     exportLogsBtn.onclick = async () => {
-      const snap = await getDocs(collection(db, "logs"));
-      const rows = [["日時", "ユーザー", "ロール", "操作"]];
-      snap.forEach(doc => {
-        const d = doc.data();
-        rows.push([
-          d.timestamp?.toDate().toLocaleString(),
-          d.userName,
-          d.role,
-          d.action
-        ]);
-      });
-      const csv = rows.map(r => r.join(",")).join("\n");
-      const blob = new Blob([csv], { type: "text/csv" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "logs.csv";
-      a.click();
-      URL.revokeObjectURL(url);
+  const snap = await getDocs(collection(db, "logs"));
+  const rows = [["日時", "ユーザー", "ロール", "操作"]];
+  snap.forEach(doc => {
+    const d = doc.data();
+    rows.push([
+      d.timestamp.toDate().toLocaleString(),
+      d.name,
+      d.role,
+      d.action
+    ]);
+  });
+  const csv = rows.map(r => r.join(",")).join("\n");
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "logs.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}; // ✅ ← この閉じ括弧が必要
+
 
