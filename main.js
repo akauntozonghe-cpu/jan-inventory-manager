@@ -20,7 +20,19 @@ window.addEventListener("DOMContentLoaded", () => {
   const isAdmin = roleJP === "管理者";
 
   document.getElementById("loginUser").textContent = `ログイン中: ${name}（${roleJP}）`;
-
+  
+const saveSettingsBtn = document.getElementById("saveSettingsBtn");
+if (saveSettingsBtn) {
+  saveSettingsBtn.onclick = () => {
+    const settingName = document.getElementById("settingName")?.value.trim();
+    const settingRole = document.getElementById("settingRole")?.value;
+    if (!settingName) return alert("名前を入力してください");
+    sessionStorage.setItem("responsibilityName", settingName);
+    sessionStorage.setItem("responsibilityRole", settingRole);
+    alert("設定を保存しました。ページを再読み込みしてください");
+  };
+}
+  
   // 商品登録
   registerBtn.onclick = async () => {
     const data = {
@@ -210,3 +222,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
     exportLogsBtn.onclick = async () => {
       const snap = await getDocs(collection(db, "
+
