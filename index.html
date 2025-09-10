@@ -2,179 +2,147 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>在庫管理システム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在庫管理システム</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <!-- ログイン画面 -->
-  <section id="loginView" class="login-container">
-    <h1>在庫管理ログイン</h1>
-    <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" autocomplete="off" />
-    <button id="loginBtn" type="button">ログイン</button>
+  <section id="loginSection">
+    <h1>ログイン</h1>
+    <input type="text" id="loginId" placeholder="責任者ID" />
+    <button id="loginBtn">ログイン</button>
+    <p id="loginError" class="error"></p>
   </section>
 
-  <!-- 責任者画面 -->
-  <div id="appView" class="app hidden">
-    <header id="systemHeader">
-      <div id="systemTitle">在庫管理</div>
-      <div id="userHeader">
-        <span id="responsibilityName" class="user-name">氏名</span>
-        <span id="responsibilityRole" class="badge">ロール</span>
-        <button id="hamburgerMenu" aria-label="メニュー">☰</button>
-      </div>
+  <!-- メイン画面（ログイン後） -->
+  <section id="mainSection" class="hidden">
+    <header>
+      <h2>在庫管理</h2>
+      <span id="userBadge"></span>
+      <button id="menuToggle">≡</button>
     </header>
 
-    <nav id="sideMenu" aria-label="サイドメニュー">
-      <button class="nav-item" data-target="homeSection">ホーム</button>
-      <button class="nav-item" data-target="productSection">商品登録</button>
-      <button class="nav-item" data-target="listSection">商品一覧</button>
-      <button class="nav-item admin-only" data-target="adminSection">管理者</button>
-      <button class="nav-item" data-target="settingsSection">設定</button>
-      <button class="nav-item" data-target="fleaSection">フリマ（仮）</button>
-      <hr />
-      <button id="logoutBtn" class="nav-item danger">ログアウト</button>
+    <!-- サイドメニュー -->
+    <nav id="sideMenu" class="hidden">
+      <ul>
+        <li data-route="homeSection">🏠 ホーム</li>
+        <li data-route="registerSection">📦 商品登録</li>
+        <li data-route="searchSection">🔍 商品検索</li>
+        <li data-route="historySection">📜 操作履歴</li>
+        <li data-route="marketSection">🛍️ フリマ</li>
+        <li data-route="settingsSection">⚙️ 設定</li>
+        <li data-route="alertSection">🚨 問題報告</li>
+        <li id="logoutBtn">🔓 ログアウト</li>
+      </ul>
     </nav>
 
-    <div class="main-content">
-      <!-- ホーム画面 -->
-<section id="homeSection" class="panel hidden">
-  <h2>ホーム</h2>
-  <div id="summaryStats" class="home-block">
-    <h3>在庫サマリー</h3>
-    <p>登録済み商品数や期限切れ商品数などを表示予定</p>
-  </div>
-  <div id="expiringSoon" class="home-block">
-    <h3>期限が近い商品</h3>
-    <ul id="expiringList"></ul>
-  </div>
-  <div id="trendingItems" class="home-block">
-    <h3>よく登録される商品</h3>
-    <ul id="trendingList"></ul>
-  </div>
-  <div id="fleaTips" class="home-block">
-    <h3>フリマ出品候補</h3>
-    <p>在庫過多や期限近い商品を出品候補として表示予定</p>
-  </div>
-</section>
+    <!-- ホーム画面 -->
+    <section id="homeSection" class="content">
+      <h3>在庫サマリー</h3>
+      <div id="summaryStats"></div>
+      <div id="expiringSoon"></div>
+      <div id="topProducts"></div>
+    </section>
 
-      <!-- 商品登録 -->
-<section id="productListSection" class="panel hidden">
-  <h2>商品登録</h2>
-  <form id="productForm">
-    <!-- 管理番号 -->
-    <input type="text" id="productId" placeholder="管理番号" required />
+    <!-- 商品登録画面 -->
+    <section id="registerSection" class="content hidden">
+      <h3>商品登録</h3>
+      <form id="productForm">
+        <input type="text" id="productName" placeholder="商品名" required />
+        <input type="text" id="janCode" placeholder="JANコード" />
+        <input type="text" id="adminCode" placeholder="管理番号" />
+        <input type="text" id="adminCategoryCode" placeholder="管理区別番号" class="admin-only" />
+        <input type="text" id="company" placeholder="会社名" />
+        <input type="text" id="location" placeholder="保管場所" />
+        <input type="text" id="unit" placeholder="単位" />
+        <input type="number" id="quantity" placeholder="数量" />
+        <input type="date" id="expire" />
+        <input type="text" id="lotNumber" placeholder="ロット番号" />
+        <select id="majorCategory">
+          <option value="">大分類</option>
+          <option value="食品">食品</option>
+          <option value="日用品">日用品</option>
+          <option value="医薬品">医薬品</option>
+        </select>
+        <input type="text" id="minorCategory" placeholder="小分類" />
+        <button type="submit">登録</button>
+      </form>
+    </section>
 
-    <!-- 管理区別番号（管理者のみ） -->
-    <input type="text" id="adminCode" placeholder="管理区別番号" class="admin-only" />
+    <!-- 商品検索画面 -->
+    <section id="searchSection" class="content hidden">
+      <h3>商品検索</h3>
+      <input type="text" id="searchKeyword" placeholder="商品名またはJANコード" />
+      <select id="searchStatus">
+        <option value="">ステータス</option>
+        <option value="pending">未承認</option>
+        <option value="approved">承認済</option>
+      </select>
+      <select id="searchMajor">
+        <option value="">大分類</option>
+        <option value="食品">食品</option>
+        <option value="日用品">日用品</option>
+        <option value="医薬品">医薬品</option>
+      </select>
+      <input type="text" id="searchMinor" placeholder="小分類" />
+      <button id="searchBtn">検索</button>
+      <button id="scanBarcodeBtn">バーコード読み取り</button>
+      <ul id="searchResultList"></ul>
+    </section>
 
-    <!-- 保管場所：選択＋手入力 -->
-    <label>保管場所</label>
-    <select id="locationPreset">
-      <option value="">選択してください</option>
-      <option value="キッチン">キッチン</option>
-      <option value="三段引き出し">三段引き出し</option>
-      <option value="倉庫">倉庫</option>
-      <option value="フリマ">フリマ</option>
-      <option value="洗面所">洗面所</option>
-    </select>
-    <input type="text" id="locationCustom" placeholder="その他の保管場所を入力" />
+    <!-- 操作履歴画面 -->
+    <section id="historySection" class="content hidden">
+      <h3>操作履歴</h3>
+      <ul id="logList"></ul>
+    </section>
 
-    <!-- 大分類・小分類 -->
-    <label>大分類</label>
-    <select id="majorCategory">
-      <option value="">選択してください</option>
-      <option value="医療">医療</option>
-      <option value="薬">薬</option>
-      <option value="小林">小林</option>
-      <option value="シャンプーセット">シャンプーセット</option>
-      <option value="洗剤">洗剤</option>
-      <option value="洗面台下">洗面台下</option>
-      <option value="台所下">台所下</option>
-      <option value="フリマ">フリマ</option>
-    </select>
+    <!-- フリマ画面 -->
+    <section id="marketSection" class="content hidden">
+      <h3>フリマ出品</h3>
+      <form id="marketForm">
+        <input type="text" id="marketProductName" placeholder="商品名" required />
+        <input type="number" id="marketPrice" placeholder="価格" required />
+        <select id="marketCondition">
+          <option value="新品">新品</option>
+          <option value="未開封">未開封</option>
+          <option value="使用済">使用済</option>
+        </select>
+        <button type="submit">出品</button>
+      </form>
+      <ul id="marketList"></ul>
+    </section>
 
-    <label>小分類</label>
-    <input type="text" id="minorCategory" placeholder="小分類を入力（選択式も可）" />
+    <!-- 設定画面 -->
+    <section id="settingsSection" class="content hidden">
+      <h3>設定</h3>
+      <label><input type="checkbox" id="darkModeToggle" /> ダークモード</label>
+      <label><input type="checkbox" id="toastToggle" checked /> 通知を表示</label>
+      <div class="admin-only">
+        <h4>管理者設定</h4>
+        <input type="text" id="adminPresetCategory" placeholder="管理区別プリセット" />
+        <button id="saveAdminSettings">保存</button>
+      </div>
+    </section>
 
-    <!-- JANコード -->
-    <input type="text" id="janCode" placeholder="JANコード" />
+    <!-- 問題報告画面 -->
+    <section id="alertSection" class="content hidden">
+      <h3>問題報告</h3>
+      <form id="alertForm">
+        <input type="text" id="alertScreen" placeholder="画面名" required />
+        <textarea id="alertMessage" placeholder="問題内容" required></textarea>
+        <button type="submit">報告</button>
+      </form>
+      <ul id="alertList" class="admin-only"></ul>
+    </section>
+  </section>
 
-    <!-- 写真 -->
-    <input type="file" id="productPhoto" accept="image/*" />
+  <!-- 通知領域 -->
+  <div id="toast" class="hidden"></div>
 
-    <!-- 会社名・品名 -->
-    <input type="text" id="company" placeholder="会社名" />
-    <input type="text" id="productName" placeholder="品名" />
-
-    <!-- Lot番号・期限 -->
-    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号" />
-    <input type="date" id="expireDate" />
-
-    <!-- 個数単位：選択＋手入力 -->
-    <label>単位</label>
-    <select id="unitPreset">
-      <option value="">選択してください</option>
-      <option value="個">個</option>
-      <option value="枚">枚</option>
-      <option value="パック">パック</option>
-      <option value="袋">袋</option>
-      <option value="セット">セット</option>
-      <option value="箱">箱</option>
-      <option value="包">包</option>
-      <option value="本">本</option>
-      <option value="枚入り">枚入り</option>
-    </select>
-    <input type="text" id="unitCustom" placeholder="その他の単位を入力" />
-
-    <!-- 数量 -->
-    <input type="number" id="quantity" placeholder="数量" min="1" />
-
-    <!-- ボタン -->
-    <button type="submit">登録</button>
-    <button type="button" id="backToListBtn">一覧に戻る</button>
-  </form>
-</section>
-
-      <!-- 商品一覧 -->
-      <section id="listSection" class="panel hidden">
-        <h2>商品一覧</h2>
-        <div class="filter-bar">
-          <input id="searchInput" type="text" placeholder="商品名またはJANコードで検索" />
-          <button id="filterMine">自分の商品だけ</button>
-        </div>
-        <div id="productList" class="list-container"></div>
-      </section>
-
-      <!-- 管理者 -->
-      <section id="adminSection" class="panel hidden">
-        <h2>管理者</h2>
-        <p>管理者専用機能をここに追加予定です。</p>
-      </section>
-
-      <!-- 設定 -->
-      <section id="settingsSection" class="panel hidden">
-        <h2>設定</h2>
-        <p>表示言語やテーマ切替などをここに追加予定です。</p>
-      </section>
-
-      <!-- フリマ -->
-      <section id="fleaSection" class="panel hidden">
-        <h2>フリマ（仮）</h2>
-        <p>期限が近い商品や在庫過多の商品を出品候補として表示予定です。</p>
-      </section>
-    </div>
-  </div>
-
-  <!-- トースト通知 -->
-  <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- JavaScript -->
-  <script type="module" src="main.js"></script>
+  <!-- スクリプト -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
-
-
-
-
-
