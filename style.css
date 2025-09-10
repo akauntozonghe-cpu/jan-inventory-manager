@@ -1,335 +1,68 @@
-/* 全体の基本スタイル */
-body {
-  font-family: sans-serif;
-  padding: 1rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
+.login-container {
+  max-width: 400px;
+  margin: auto;
+  padding: 2rem;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  text-align: center;
 }
 
-/* タイトル */
-#systemTitle {
-  background: #f0f0f0;
-  padding: 8px;
-  font-size: 20px;
-  font-weight: bold;
-  border-bottom: 1px solid #ccc;
-  cursor: pointer;
-}
-
-/* ユーザー情報ヘッダー */
-#userHeader {
-  margin-top: 8px;
-  padding: 6px;
-  background: #fafafa;
-  border-bottom: 1px solid #ddd;
-}
-
-/* ハンバーガーメニュー */
-#hamburgerMenu {
-  font-size: 28px;
-  cursor: pointer;
-  padding: 8px;
-  background-color: #eee;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  display: inline-block;
-}
-
-/* サイドメニュー（スライド式） */
-#sideMenu {
-  position: fixed;
-  top: 60px;
-  left: -220px;
-  width: 200px;
-  background-color: #f9f9f9;
-  border-right: 1px solid #ccc;
-  padding: 10px;
-  transition: left 0.3s ease;
-  z-index: 1000;
-}
-
-#sideMenu.open {
-  left: 0;
-}
-
-#sideMenu button {
-  display: block;
+.login-container input {
   width: 100%;
-  margin: 6px 0;
-  padding: 8px;
-  font-size: 14px;
-  background-color: #fff;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* 設定パネル */
-#settingsPanel {
-  background-color: #fefefe;
-  border: 1px solid #ddd;
   padding: 12px;
-  margin-top: 10px;
-  border-radius: 6px;
-}
-
-#settingsPanel input,
-#settingsPanel select {
-  display: block;
-  margin: 6px 0 12px;
-  padding: 6px;
-  width: 100%;
-  font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-#saveSettingsBtn {
-  padding: 8px 12px;
-  font-size: 14px;
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-/* ダークテーマ */
-.dark-theme {
-  background-color: #1e1e1e;
-  color: #eee;
-}
-
-.dark-theme #systemTitle {
-  background-color: #2a2a2a;
-  border-color: #555;
-}
-
-.dark-theme #sideMenu {
-  background-color: #333;
-  border-color: #555;
-}
-
-.dark-theme #sideMenu button {
-  background-color: #444;
-  color: #fff;
-  border-color: #666;
-}
-
-.dark-theme #settingsPanel {
-  background-color: #2a2a2a;
-  border-color: #555;
-}
-
-.dark-theme input,
-.dark-theme select {
-  background-color: #444;
-  color: #fff;
-  border-color: #666;
-}
-
-.dark-theme #saveSettingsBtn {
-  background-color: #0a84ff;
-}
-
-/* ボタン配置グリッド */
-.button-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.button-grid button {
-  padding: 14px;
-  font-size: 1.05rem;
-  font-weight: 600;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.button-grid button:hover {
-  background-color: #2e59d9;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.button-grid button:active {
-  background-color: #1c3fa0;
-  transform: scale(0.98);
-}
-
-.button-grid button.active {
-  background-color: #1cc88a;
-  box-shadow: 0 0 0 3px rgba(28,200,138,0.3);
-}
-
-.button-grid button span.icon {
-  font-size: 1.3rem;
-}
-
-/* JANコード入力欄の統一スタイル */
-.jan-row {
-  margin-bottom: 12px;
-}
-
-.jan-input-wrapper {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.jan-input-wrapper input {
-  flex: 1;
-  padding: 10px;
   font-size: 1rem;
+  margin-top: 8px;
   border: 1px solid #ccc;
   border-radius: 6px;
 }
 
-.scan-btn {
-  padding: 8px;
-  font-size: 1.2rem;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.scan-btn:hover {
-  background-color: #2e59d9;
-}
-
-/* カメラ映像を青枠内に収める */
-#scannerWrapper,
-#scannerWrapperRegister {
-  width: 100%;
-  max-width: 320px;
-  height: 240px;
-  border: 2px solid #4e73df;
-  border-radius: 8px;
-  overflow: hidden;
-  margin: 12px auto;
-  position: relative;
-  background: #000;
-}
-
-#scanner,
-#scannerRegister {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  object-fit: cover;
-}
-
-/* ステータス表示（読み取り中・成功） */
-#scanStatus,
-#scanStatusRegister {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-size: 0.9rem;
-  opacity: 0;
-  transition: opacity 0.3s ease, transform 0.3s ease;
-  pointer-events: none;
-}
-
-#scanStatus.show,
-#scanStatusRegister.show {
-  opacity: 1;
-  transform: translateX(-50%) scale(1.05);
-}
-
-/* セクション切り替えアニメーション */
-.section {
-  visibility: hidden;
-  opacity: 0;
-  transition: opacity 0.4s ease, visibility 0s linear 0.4s;
-}
-
-.section.show {
-  visibility: visible;
-  opacity: 1;
-  transition: opacity 0.4s ease;
-}
-
-/* 管理者セクション */
-.admin-block {
-  margin-bottom: 24px;
+.login-container button {
+  margin-top: 16px;
   padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: #f9f9f9;
-}
-
-.admin-block h3 {
-  margin-bottom: 8px;
-  font-size: 1.1rem;
-  color: #333;
-}
-
-.admin-block input,
-.admin-block select {
-  margin: 4px 4px 8px 0;
-  padding: 6px;
-  font-size: 0.95rem;
-}
-
-.admin-block button {
-  margin: 4px 4px 8px 0;
-  padding: 6px 12px;
-  font-size: 0.95rem;
+  font-size: 1rem;
   background-color: #4e73df;
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
 }
 
-.admin-block button:hover {
+.login-container button:hover {
   background-color: #2e59d9;
 }
 
-/* 商品編集グリッド */
-.product-item {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr) auto auto;
-  gap: 6px;
-  margin-bottom: 8px;
+.input-help {
+  font-size: 0.85rem;
+  color: #e74c3c;
+  margin-top: 4px;
+  opacity: 0;
+  height: 0;
+  transition: opacity 0.3s ease, height 0.3s ease;
 }
 
-.product-item input {
-  padding: 6px;
-  font-size: 0.9rem;
+.input-help.show {
+  opacity: 1;
+  height: auto;
 }
 
-.product-item button {
-  padding: 6px 10px;
-  font-size: 0.9rem;
-  cursor: pointer;
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(10px);
+  background: #333;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  opacity: 0;
+  transition: all .25s ease;
+  z-index: 2000;
 }
-
-/* ログ一覧グリッド表示 */
-.log-grid {
-  display: grid;
-  grid-template-columns: 160px 1fr 1fr;
-  gap: 8
+.toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.toast.error { background:#c0392b; }
+.toast.success { background:#1cc88a; }
