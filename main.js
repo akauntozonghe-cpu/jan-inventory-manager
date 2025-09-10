@@ -106,34 +106,42 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initMenu() {
-    $("#hamburgerMenu")?.addEventListener("click", () => {
-      $("#sideMenu")?.classList.toggle("open");
-    });
+  $("#hamburgerMenu")?.addEventListener("click", () => {
+    $("#sideMenu")?.classList.toggle("open");
+  });
 
-    $("#systemTitle")?.addEventListener("click", () => {
-      routeTo("homeSection");
+  $("#systemTitle")?.addEventListener("click", () => {
+    routeTo("homeSection");
+    $("#sideMenu")?.classList.remove("open");
+  });
+
+  $$(".nav-item[data-target]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      routeTo(btn.dataset.target);
       $("#sideMenu")?.classList.remove("open");
     });
+  });
 
-    $$(".nav-item[data-target]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        routeTo(btn.dataset.target);
-        $("#sideMenu")?.classList.remove("open");
-      });
-    });
+  $("#logoutBtn")?.addEventListener("click", () => {
+    const name = sessionStorage.getItem("responsibilityName");
+    sessionStorage.clear();
+    toast(`${name || "ユーザー"} をログアウトしました`, "success");
+    setTimeout(() => {
+      location.reload();
+    }, 600);
+  });
 
-    document.addEventListener("click", (e) => {
-      const menu = $("#sideMenu");
-      const hamburger = $("#hamburgerMenu");
-      if (!menu?.classList.contains("open")) return;
-      const clickedInsideMenu = menu.contains(e.target);
-      const clickedHamburger = hamburger?.contains(e.target);
-      if (!clickedInsideMenu && !clickedHamburger) {
-        menu.classList.remove("open");
-      }
-    });
-  }
-
+  document.addEventListener("click", (e) => {
+    const menu = $("#sideMenu");
+    const hamburger = $("#hamburgerMenu");
+    if (!menu?.classList.contains("open")) return;
+    const clickedInsideMenu = menu.contains(e.target);
+    const clickedHamburger = hamburger?.contains(e.target);
+    if (!clickedInsideMenu && !clickedHamburger) {
+      menu.classList.remove("open");
+    }
+  });
+}
   function routeTo(panelId) {
     $$(".panel").forEach((p) => p.classList.add("hidden"));
     const el = $(`#${panelId}`);
@@ -194,4 +202,5 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
