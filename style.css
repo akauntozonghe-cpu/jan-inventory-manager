@@ -121,3 +121,55 @@ body.dark nav#sideMenu {
   background: #333;
   color: #eee;
 }
+/* ログインセクションのレイアウト */
+#loginSection {
+  max-width: 400px;
+  margin: 5vh auto;
+  padding: 2em;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* タイトル */
+#loginSection h1 {
+  font-size: 1.5em;
+  margin-bottom: 1em;
+  text-align: center;
+}
+
+/* 補足説明 */
+.note {
+  font-size: 0.9em;
+  color: #666;
+  margin-top: 0.3em;
+  display: block;
+}
+
+/* ログインエラー表示（アニメーション付き） */
+#loginError {
+  background: #d40000;
+  color: white;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  margin-top: 0.8em;
+  font-weight: bold;
+  display: none;
+}
+#loginError.show {
+  display: block;
+  animation: fadeIn 0.3s ease, shake 0.4s ease;
+}
+
+/* アニメーション定義 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
