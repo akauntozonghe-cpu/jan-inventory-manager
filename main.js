@@ -59,7 +59,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const appView = $("#appView");
   const loginInput = $("#responsibilityId");
   const loginBtn = $("#loginBtn");
-
+  loginInput?.addEventListener("keydown", (e) => {
+   if (e.key === "Enter") {
+    loginBtn?.click(); // ログインボタンをクリックしたのと同じ動作
+  }
+});
   loginBtn?.addEventListener("click", async () => {
     const id = loginInput.value.trim();
     if (!id) {
@@ -280,3 +284,4 @@ document.addEventListener("DOMContentLoaded", () => {
     initHome();
   });
 });
+
