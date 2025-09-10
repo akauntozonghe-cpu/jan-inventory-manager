@@ -21,6 +21,13 @@ const userBadge = document.getElementById("userBadge");
 // ログイン処理
 loginBtn.addEventListener("click", async () => {
   const id = loginId.value.trim();
+  // Enterキーでログイン送信対応
+loginId.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault(); // フォーム送信を防ぐ
+    loginBtn.click();   // ログインボタンをクリック
+  }
+});
   if (!id) return (loginError.textContent = "IDを入力してください");
 
   const snapshot = await db.collection("users").where("id", "==", id).get();
@@ -374,4 +381,5 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
 
