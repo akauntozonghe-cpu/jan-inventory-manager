@@ -1,7 +1,36 @@
 :root {
   --bg: #f4f6f9;
   --card: #ffffff;
-  --text: #222;
+  --text: #222;.home-block {
+  margin-bottom: 1.5em;
+  padding: 0.75em;
+  background: #f9f9f9;
+  border-radius: 6px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.05);
+}
+.home-block h3 {
+  margin-top: 0;
+  font-size: 1.1em;
+  color: #333;
+}
+.toast {
+  position: fixed;
+  bottom: 1em;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 0.5em 1em;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 9999;
+}
+.toast.show {
+  opacity: 1;
+}
+.toast.success { background: #4caf50; }
+.toast.error { background: #f44336; }
   --muted: #667085;
   --primary: #4e73df;
   --primary-2: #2e59d9;
@@ -130,3 +159,4 @@ body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 
 /* 権限制御の見た目 */
 .admin-only.hidden { display: none !important; }
+
