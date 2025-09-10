@@ -10,6 +10,7 @@
   --border: #e5e7eb;
 }
 
+
 .login-container {
   max-width: 420px;
   margin: 64px auto;
@@ -147,7 +148,35 @@
 
 #systemTitle {
   cursor: pointer;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
+
+#systemTitle:hover {
+  color: var(--primary);
+  transform: scale(1.05);
+}
+
+/* HOMEセクションの表示アニメーション */
+#homeSection {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 再表示用のクラス（JSで付け外し可能） */
+.fade {
+  animation: fadeIn 0.4s ease;
+}
+
 
 
 
