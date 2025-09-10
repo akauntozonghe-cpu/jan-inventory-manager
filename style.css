@@ -160,3 +160,7 @@ body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 /* 権限制御の見た目 */
 .admin-only.hidden { display: none !important; }
 
+#systemTitle {
+  cursor: pointer;
+}
+
