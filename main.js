@@ -112,6 +112,16 @@ document.addEventListener("DOMContentLoaded", () => {
       routeTo("homeSection"); // ← 初期表示をHOMEに切り替え
     }, 0);
   }
+  let allProducts = [];
+async function initList() {
+  try {
+    const snap = await getDocs(collection(db, "products"));
+    allProducts = snap.docs.map(doc => doc.data());
+  } catch (e) {
+    console.error("商品一覧の取得に失敗しました", e);
+    toast("商品一覧の取得に失敗しました", "error");
+  }
+}
 
   function initHeader() {
     const name = sessionStorage.getItem("responsibilityName") || "未設定";
@@ -207,3 +217,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 商品登録フォーム（initProductForm）と clearProductForm は既存のままでOK
 });
+
