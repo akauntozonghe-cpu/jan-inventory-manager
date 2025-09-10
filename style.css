@@ -66,3 +66,16 @@
 }
 .toast.error { background:#c0392b; }
 .toast.success { background:#1cc88a; }
+input.is-invalid {
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+  animation: shake 0.2s ease;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  50% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  100% { transform: translateX(0); }
+}
