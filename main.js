@@ -1,4 +1,3 @@
-// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -375,3 +374,4 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
