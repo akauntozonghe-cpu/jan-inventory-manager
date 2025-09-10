@@ -173,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
       menu.classList.remove("open");
     }
   });
-}
+
   function routeTo(panelId) {
     $$(".panel").forEach((p) => p.classList.add("hidden"));
     const el = $(`#${panelId}`);
@@ -234,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
