@@ -223,3 +223,6 @@ document.addEventListener("DOMContentLoaded", () => {
     ].forEach((s) => {
       const el = $(s);
       if (el) el.value = "";
+    });
+    $("#qtyUnit").value = "個";
+  }
