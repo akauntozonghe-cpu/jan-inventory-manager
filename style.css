@@ -9,41 +9,7 @@
   --ok: #1cc88a;
   --border: #e5e7eb;
 }
-.home-block h3 {
-  margin-top: 0;
-  font-size: 1.1em;
-  color: #333;
-}
-.toast {
-  position: fixed;
-  bottom: 1em;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #333;
-  color: #fff;
-  padding: 0.5em 1em;
-  border-radius: 4px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 9999;
-}
-.toast.show {
-  opacity: 1;
-}
-.toast.success { background: #4caf50; }
-.toast.error { background: #f44336; }
-  --muted: #667085;
-  --primary: #4e73df;
-  --primary-2: #2e59d9;
-  --danger: #c0392b;
-  --ok: #1cc88a;
-  --border: #e5e7eb;
-}
 
-* { box-sizing: border-box; }
-body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
-
-/* ログイン */
 .login-container {
   max-width: 420px;
   margin: 64px auto;
@@ -53,16 +19,34 @@ body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
   box-shadow: 0 4px 12px rgba(0,0,0,.08);
   text-align: center;
 }
-.login-container h1 { font-size: 1.4rem; margin-bottom: 1rem; }
-.login-container input {
-  width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px;
-}
+
+.login-container input,
 .login-container button {
-  width: 100%; padding: 12px; margin-top: 12px; font-size: 1rem;
-  background: var(--primary); color: #fff; border: 0; border-radius: 8px; cursor: pointer;
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+  display: block;
+  font-size: 1rem;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.login-container input {
+  border: 1px solid #ccc;
+}
+
+.login-container button {
+  margin-top: 12px;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
   transition: background-color .2s ease;
 }
-.login-container button:hover { background: var(--primary-2); }
+
+.login-container button:hover {
+  background: var(--primary-2);
+}
 
 /* 共通 */
 .hidden { display: none !important; }
@@ -164,5 +148,6 @@ body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
 #systemTitle {
   cursor: pointer;
 }
+
 
 
