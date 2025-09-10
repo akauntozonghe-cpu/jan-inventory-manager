@@ -65,7 +65,7 @@ loginId.addEventListener("keydown", (e) => {
   if (user.role === "admin") {
     updateAdminBadge(); // ← 管理者向け通知
   }
-});
+
   await db.collection("logs").add({
     type: "login",
     userId: user.id,
