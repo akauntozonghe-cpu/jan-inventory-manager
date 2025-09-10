@@ -113,7 +113,6 @@ document.addEventListener("DOMContentLoaded", () => {
     $("#systemTitle")?.addEventListener("click", () => {
       routeTo("homeSection");
       $("#sideMenu")?.classList.remove("open");
-      toast("ホーム画面に戻りました", "info");
     });
 
     $$(".nav-item[data-target]").forEach((btn) => {
@@ -195,3 +194,4 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
