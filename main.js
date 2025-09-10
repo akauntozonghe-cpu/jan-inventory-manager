@@ -1,5 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
+  getFirestore, collection, query, where, getDocs, addDoc
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import {
   getFirestore, collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
@@ -234,6 +237,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
