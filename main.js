@@ -169,10 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   function routeTo(panelId) {
-    $$(".panel").forEach((p) => p.classList.add("hidden"));
-    const el = $(`#${panelId}`);
-    if (el) el.classList.remove("hidden");
-  }
+  $$(".panel").forEach((p) => p.classList.add("hidden"));
+  const el = $(`#${panelId}`);
+  if (el) el.classList.remove("hidden");
+}
 
   function initHome() {
     const stats = $("#summaryStats");
@@ -221,5 +221,6 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
