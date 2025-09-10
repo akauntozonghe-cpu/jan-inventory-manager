@@ -173,3 +173,25 @@ body.dark nav#sideMenu {
   75% { transform: translateX(-5px); }
   100% { transform: translateX(0); }
 }
+
+#loginError {
+  display: none;
+  ...
+}
+#loginError.show {
+  display: block;
+  animation: fadeIn 0.25s ease, shake 0.35s ease;
+}
+
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  ...
+}
+.toast-success { background: #0078d4; }
+.toast-warning { background: #ffcc00; }
+.toast-error   { background: #d40000; }
+
+@keyframes fadeIn { ... }
+@keyframes shake { ... }
