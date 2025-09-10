@@ -220,4 +220,6 @@ document.addEventListener("DOMContentLoaded", () => {
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
   }
+});
+
 
