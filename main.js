@@ -1,8 +1,40 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import {
+  getFirestore, collection, query, where, getDocs
+} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+// Firebase設定
+const firebaseConfig = {
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.appspot.com",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
 
   let allProducts = [];
+
+  // トースト通知関数
+  function toast(msg, type = "info") {
+    const host = $("#toastHost");
+    if (!host) return;
+    const t = document.createElement("div");
+    t.className = `toast ${type}`;
+    t.textContent = msg;
+    host.appendChild(t);
+    requestAnimationFrame(() => t.classList.add("show"));
+    setTimeout(() => t.classList.remove("show"), 2200);
+    setTimeout(() => t.remove(), 2600);
+  }
 
   const loginView = $("#loginView");
   const appView = $("#appView");
