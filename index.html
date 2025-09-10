@@ -1,383 +1,182 @@
 <!DOCTYPE html>
-<htm<!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ログイン - 在庫管理</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body.login-screen {
-      font-family: sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-    }
-
-    .login-container {
-      max-width: 400px;
-      margin: 60px auto;
-      padding: 2rem;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-
-    .login-container h1 {
-      font-size: 1.4rem;
-      margin-bottom: 1.2rem;
-    }
-
-    .login-container input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .login-container input.is-invalid {
-      border-color: #e74c3c;
-      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
-      animation: shake 0.2s ease;
-    }
-
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-4px); }
-      50% { transform: translateX(4px); }
-      75% { transform: translateX(-2px); }
-      100% { transform: translateX(0); }
-    }
-
-    .login-container button {
-      margin-top: 16px;
-      padding: 12px;
-      font-size: 1rem;
-      background-color: #4e73df;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-    }
-
-    .login-container button:hover {
-      background-color: #2e59d9;
-    }
-
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%) translateY(10px);
-      background: #333;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 8px;
-      opacity: 0;
-      transition: all .25s ease;
-      z-index: 2000;
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .toast.error { background:#c0392b; }
-    .toast.success { background:#1cc88a; }
-  </style>
+  <meta charset="UTF-8" />
+  <title>在庫管理システム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="login-screen">
-  <main class="login-container">
+<body>
+  <!-- ログイン画面 -->
+  <main id="loginView" class="login-container">
     <h1>在庫管理ログイン</h1>
     <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" value="1234" />
     <button id="loginBtn">ログイン</button>
   </main>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <!-- 責任者画面 -->
+  <div id="appView" class="app hidden">
+    <header id="systemHeader">
+      <div id="systemTitle">在庫管理</div>
+      <div id="userHeader">
+        <span id="responsibilityName" class="user-name">氏名</span>
+        <span id="responsibilityRole" class="badge">ロール</span>
+        <button id="hamburgerMenu" aria-label="メニュー">☰</button>
+      </div>
+    </header>
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.firebasestorage.app",
-      messagingSenderId: "245219344089",
-      appId: "1:245219344089:web:e46105927c302e6a5788c8",
-      measurementId: "G-TRH31MJCE3"
-    };
+    <nav id="sideMenu" aria-label="サイドメニュー">
+      <button class="nav-item" data-target="productSection">商品登録</button>
+      <button class="nav-item" data-target="listSection">商品一覧</button>
+      <button class="nav-item admin-only" data-target="adminSection">管理者</button>
+      <button class="nav-item" data-target="settingsSection">設定</button>
+      <button class="nav-item" data-target="fleaSection">フリマ（仮）</button>
+      <hr />
+      <button id="logoutBtn" class="nav-item danger">ログアウト</button>
+    </nav>
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    <main class="main-content">
+      <!-- 商品登録 -->
+      <section id="productSection" class="panel">
+        <h2>商品登録</h2>
 
-    const $ = s => document.querySelector(s);
-    const toast = (msg, type='info') => {
-      const t = document.createElement('div');
-      t.className = `toast ${type}`; t.textContent = msg;
-      document.body.appendChild(t);
-      requestAnimationFrame(() => t.classList.add('show'));
-      setTimeout(() => t.classList.remove('show'), 2000);
-      setTimeout(() => t.remove(), 2600);
-    };
+        <div class="grid">
+          <label class="field">
+            <span class="label">管理番号</span>
+            <input id="mgtNo" type="text" placeholder="例: MG-0001" />
+          </label>
 
-    async function logAction(action, detail = {}) {
-      const id = sessionStorage.getItem("responsibilityId");
-      const name = sessionStorage.getItem("responsibilityName");
-      const role = sessionStorage.getItem("responsibilityRole");
-      await addDoc(collection(db, "logs"), {
-        userId: id,
-        userName: name,
-        role,
-        action,
-        detail,
-        timestamp: serverTimestamp()
-      });
-    }
+          <label class="field admin-only">
+            <span class="label">管理区別番号（管理者のみ）</span>
+            <input id="mgtDistNo" type="text" placeholder="例: AD-100" />
+          </label>
 
-    const input = $('#responsibilityId');
-    const loginBtn = $('#loginBtn');
+          <label class="field">
+            <span class="label">保管場所</span>
+            <input id="location" type="text" placeholder="例: A倉庫-棚B" />
+          </label>
 
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") loginBtn.click();
-    });
+          <label class="field">
+            <span class="label">大分類</span>
+            <input id="catL" type="text" placeholder="例: 食品" />
+          </label>
 
-    loginBtn.onclick = async () => {
-      const id = input.value.trim();
-      if (!id) {
-        input.classList.add("is-invalid");
-        setTimeout(() => input.classList.remove("is-invalid"), 1000);
-        return toast('責任者番号を入力してください', 'error');
-      }
+          <label class="field">
+            <span class="label">小分類</span>
+            <input id="catS" type="text" placeholder="例: 菓子" />
+          </label>
 
-      try {
-        const q = query(collection(db, "users"), where("id", "==", id));
-        const snap = await getDocs(q);
-        if (snap.empty) return toast('番号が見つかりません', 'error');
+          <label class="field">
+            <span class="label">JANコード</span>
+            <div class="inline">
+              <input id="jan" type="text" inputmode="numeric" placeholder="スキャンまたは入力" />
+              <button id="scanBtn" class="secondary">スキャン</button>
+            </div>
+            <video id="scanPreview" class="scan-preview hidden" playsinline></video>
+          </label>
 
-        const data = snap.docs[0].data();
-        sessionStorage.setItem("responsibilityId", id);
-        sessionStorage.setItem("responsibilityName", data.name);
-        sessionStorage.setItem("responsibilityRole", data.role);
+          <label class="field">
+            <span class="label">写真</span>
+            <input id="photo" type="file" accept="image/*" />
+          </label>
 
-        await logAction("ログイン");
+          <label class="field">
+            <span class="label">会社名</span>
+            <input id="company" type="text" placeholder="例: 〇〇株式会社" />
+          </label>
 
-        toast('ログイン成功', 'success');
-        setTimeout(() => location.href = "responsibility.html", 800);
-      } catch (e) {
-        console.error(e);
-        toast('ログイン処理に失敗しました', 'error');
-      }
-    };
-  </script>
-</body>
-</html>l lang="ja">
-<head>
-  <meta charset="UTF-8"><!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8">
-  <title>ログイン - 在庫管理</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body.login-screen {
-      font-family: sans-serif;
-      background: #f4f6f9;
-      margin: 0;
-      padding: 0;
-    }
+          <label class="field">
+            <span class="label">品名</span>
+            <input id="productName" type="text" placeholder="例: ビスケット" />
+          </label>
 
-    .login-container {
-      max-width: 400px;
-      margin: 60px auto;
-      padding: 2rem;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+          <label class="field">
+            <span class="label">Lot.No・製造番号</span>
+            <input id="lotNo" type="text" placeholder="例: LOT12345" />
+          </label>
 
-    .login-container h1 {
-      font-size: 1.4rem;
-      margin-bottom: 1.2rem;
-    }
+          <label class="field">
+            <span class="label">期限</span>
+            <input id="expire" type="date" />
+          </label>
 
-    .login-container input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      margin-top: 8px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    }
+          <label class="field">
+            <span class="label">個数</span>
+            <div class="inline">
+              <input id="qty" type="number" min="0" step="1" placeholder="0" />
+              <select id="qtyUnit">
+                <option value="個">個</option>
+                <option value="枚">枚</option>
+                <option value="パック">パック</option>
+                <option value="袋">袋</option>
+                <option value="セット">セット</option>
+                <option value="箱">箱</option>
+                <option value="包">包</option>
+                <option value="本">本</option>
+                <option value="枚入り">枚入り</option>
+              </select>
+            </div>
+          </label>
+        </div>
 
-    .login-container input.is-invalid {
-      border-color: #e74c3c;
-      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
-      animation: shake 0.2s ease;
-    }
+        <div class="actions">
+          <button id="registerBtn" class="primary">登録</button>
+        </div>
+      </section>
 
-    @keyframes shake {
-      0% { transform: translateX(0); }
-      25% { transform: translateX(-4px); }
-      50% { transform: translateX(4px); }
-      75% { transform: translateX(-2px); }
-      100% { transform: translateX(0); }
-    }
+      <!-- 商品一覧 -->
+      <section id="listSection" class="panel hidden">
+        <h2>商品一覧</h2>
+        <div class="filters">
+          <input id="filterText" type="text" placeholder="キーワードで絞り込み（会社名/品名/管理番号など）" />
+          <input id="filterJan" type="text" inputmode="numeric" placeholder="JANで検索/スキャン" />
+          <button id="filterScanBtn" class="secondary">スキャン</button>
+          <button id="filterBtn" class="primary">検索</button>
+          <button id="clearFilterBtn" class="secondary">クリア</button>
+        </div>
 
-    .login-container button {
-      margin-top: 16px;
-      padding: 12px;
-      font-size: 1rem;
-      background-color: #4e73df;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 100%;
-    }
+        <div id="listContainer" class="list"></div>
 
-    .login-container button:hover {
-      background-color: #2e59d9;
-    }
+        <div class="pager">
+          <button id="prevPage" class="secondary">&lt; 前へ</button>
+          <span id="pageInfo">1 / 1</span>
+          <button id="nextPage" class="secondary">次へ &gt;</button>
+        </div>
+      </section>
 
-    .toast {
-      position: fixed;
-      left: 50%;
-      bottom: 24px;
-      transform: translateX(-50%) translateY(10px);
-      background: #333;
-      color: #fff;
-      padding: 10px 14px;
-      border-radius: 8px;
-      opacity: 0;
-      transition: all .25s ease;
-      z-index: 2000;
-    }
+      <!-- 管理者 -->
+      <section id="adminSection" class="panel hidden">
+        <h2>管理者</h2>
+        <p class="muted">管理者権限が必要です。責任者・管理者の登録/削除、CSV入出力、各種設定を想定。（暫定）</p>
+        <div class="admin-grid">
+          <div class="card">
+            <h3>ユーザー管理（暫定）</h3>
+            <p>将来的に：ユーザーの追加、削除、ロール変更、CSV入出力</p>
+          </div>
+          <div class="card">
+            <h3>全機能アクセス</h3>
+            <p>責任者向け提供機能の全操作を管理者が実行可能に（設計済）</p>
+          </div>
+        </div>
+      </section>
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+      <!-- 設定 -->
+      <section id="settingsSection" class="panel hidden">
+        <h2>設定</h2>
+        <p class="muted">テーマ、表示件数などのユーザー別設定を想定。（暫定）</p>
+      </section>
 
-    .toast.error { background:#c0392b; }
-    .toast.success { background:#1cc88a; }
-  </style>
-</head>
-<body class="login-screen">
-  <main class="login-container">
-    <h1>在庫管理ログイン</h1>
-    <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" />
-    <button id="loginBtn">ログイン</button>
-  </main>
+      <!-- フリマ（仮） -->
+      <section id="fleaSection" class="panel hidden">
+        <h2>フリマ（仮）</h2>
+        <p class="muted">今後の新機能追加に備えたプレースホルダー。（暫定）</p>
+      </section>
+    </main>
+  </div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-    import {
-      getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp
-    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+  <!-- トースト -->
+  <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-    const firebaseConfig = {
-     apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.firebasestorage.app",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const $ = s => document.querySelector(s);
-    const toast = (msg, type='info') => {
-      const t = document.createElement('div');
-      t.className = `toast ${type}`; t.textContent = msg;
-      document.body.appendChild(t);
-      requestAnimationFrame(() => t.classList.add('show'));
-      setTimeout(() => t.classList.remove('show'), 2000);
-      setTimeout(() => t.remove(), 2600);
-    };
-
-    async function logAction(action, detail = {}) {
-      const id = sessionStorage.getItem("responsibilityId");
-      const name = sessionStorage.getItem("responsibilityName");
-      const role = sessionStorage.getItem("responsibilityRole");
-      await addDoc(collection(db, "logs"), {
-        userId: id,
-        userName: name,
-        role,
-        action,
-        detail,
-        timestamp: serverTimestamp()
-      });
-    }
-
-    const input = $('#responsibilityId');
-    const loginBtn = $('#loginBtn');
-
-    // Enterキー対応
-    input.addEventListener("keydown", e => {
-      if (e.key === "Enter") loginBtn.click();
-    });
-
-    loginBtn.onclick = async () => {
-      const id = input.value.trim();
-      if (!id) {
-        input.classList.add("is-invalid");
-        setTimeout(() => input.classList.remove("is-invalid"), 1000);
-        return toast('責任者番号を入力してください', 'error');
-      }
-
-      try {
-        const q = query(collection(db, "users"), where("id", "==", id));
-        const snap = await getDocs(q);
-        if (snap.empty) return toast('番号が見つかりません', 'error');
-
-        const data = snap.docs[0].data();
-        sessionStorage.setItem("responsibilityId", id);
-        sessionStorage.setItem("responsibilityName", data.name);
-        sessionStorage.setItem("responsibilityRole", data.role);
-
-        await logAction("ログイン");
-
-        toast('ログイン成功', 'success');
-        setTimeout(() => location.href = "responsibility.html", 800);
-      } catch (e) {
-        console.error(e);
-        toast('ログイン処理に失敗しました', 'error');
-      }
-    };
-  </script>
-</body>
-</html>
-  <title>ログイン - 在庫管理</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body class="login-screen">
-  <main class="login-container">
-    <h1>在庫管理ログイン</h1>
-    <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" />
-    <button id="loginBtn">ログイン</button>
-  </main>
   <script type="module" src="main.js"></script>
 </body>
 </html>
-
-
-
-
-
