@@ -16,13 +16,14 @@
 </head>
 <body>
   <!-- ログイン画面 -->
-  <section id="loginSection">
-    <h1>ログイン</h1>
-    <label for="loginId">責任者ID</label>
-    <input type="text" id="loginId" placeholder="責任者IDを入力" />
-    <button id="loginBtn">ログイン</button>
-    <p id="loginError" class="error"></p>
-  </section>
+<section id="loginSection">
+  <h1>在庫管理ログイン</h1>
+  <label for="loginId">責任者番号</label>
+  <input type="text" id="loginId" placeholder="責任者番号を入力してください" autocomplete="off" inputmode="text" />
+  <small class="note">※ 番号は管理者から配布されたものをご使用ください</small>
+  <button id="loginBtn">ログイン</button>
+  <p id="loginError"></p>
+</section>
 
   <!-- メイン画面 -->
   <section id="mainSection" class="hidden">
@@ -195,5 +196,6 @@
   <script src="main.js"></script>
 </body>
 </html>
+
 
 
