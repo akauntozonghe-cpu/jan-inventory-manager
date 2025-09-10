@@ -7,10 +7,16 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- ログイン画面（初期表示） -->
+  <!-- ログイン画面 -->
   <main id="loginView" class="login-container">
     <h1>在庫管理ログイン</h1>
-    <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" value="1234" />
+    <input
+      id="responsibilityId"
+      type="text"
+      inputmode="numeric"
+      placeholder="責任者番号"
+      autocomplete="off"
+    />
     <button id="loginBtn">ログイン</button>
   </main>
 
@@ -39,34 +45,29 @@
       <!-- 商品登録 -->
       <section id="productSection" class="panel">
         <h2>商品登録</h2>
-        <!-- 以下略：商品登録フォームはそのまま -->
-        <!-- ... -->
+        <!-- 商品登録フォームは JS 側で制御 -->
       </section>
 
       <!-- 商品一覧 -->
       <section id="listSection" class="panel hidden">
         <h2>商品一覧</h2>
-        <!-- 以下略：一覧・フィルター・ページング -->
-        <!-- ... -->
+        <!-- 一覧表示は JS 側で制御 -->
       </section>
 
       <!-- 管理者 -->
       <section id="adminSection" class="panel hidden">
         <h2>管理者</h2>
-        <!-- 以下略：管理者カード -->
-        <!-- ... -->
+        <!-- 管理者機能は JS 側で制御 -->
       </section>
 
       <!-- 設定 -->
       <section id="settingsSection" class="panel hidden">
         <h2>設定</h2>
-        <!-- 以下略 -->
       </section>
 
       <!-- フリマ（仮） -->
       <section id="fleaSection" class="panel hidden">
         <h2>フリマ（仮）</h2>
-        <!-- 以下略 -->
       </section>
     </main>
   </div>
@@ -74,7 +75,7 @@
   <!-- トースト通知 -->
   <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
 
-  <!-- JavaScript -->
+  <!-- JavaScript（モジュールとして読み込み） -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
