@@ -14,7 +14,7 @@
     <button id="loginBtn">ログイン</button>
   </section>
 
-  <!-- 責任者画面（初期は非表示） -->
+  <!-- 責任者画面 -->
   <div id="appView" class="app hidden">
     <header id="systemHeader">
       <div id="systemTitle">在庫管理</div>
@@ -37,7 +37,6 @@
     </nav>
 
     <div class="main-content">
-      <!-- HOME画面 -->
       <section id="homeSection" class="panel">
         <h2>ホーム</h2>
         <div id="summaryStats" class="home-block"></div>
@@ -46,39 +45,30 @@
         <div id="fleaTips" class="home-block"></div>
       </section>
 
-      <!-- 商品登録 -->
       <section id="productSection" class="panel hidden">
         <h2>商品登録</h2>
         <!-- 商品登録フォームは JS 側で制御 -->
       </section>
 
-      <!-- 商品一覧 -->
       <section id="listSection" class="panel hidden">
         <h2>商品一覧</h2>
-        <!-- 一覧表示は JS 側で制御 -->
       </section>
 
-      <!-- 管理者 -->
       <section id="adminSection" class="panel hidden">
         <h2>管理者</h2>
       </section>
 
-      <!-- 設定 -->
       <section id="settingsSection" class="panel hidden">
         <h2>設定</h2>
       </section>
 
-      <!-- フリマ -->
       <section id="fleaSection" class="panel hidden">
         <h2>フリマ（仮）</h2>
       </section>
     </div>
   </div>
 
-  <!-- トースト通知 -->
   <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
-
-  <!-- JavaScript -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
