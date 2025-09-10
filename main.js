@@ -50,8 +50,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const loginBtn = $("#loginBtn");
 
   loginInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") loginBtn?.click();
-  });
+  if (e.key === "Enter") {
+    e.preventDefault(); // ← これが重要
+    loginBtn?.click();
+  }
+});
 
   loginBtn?.addEventListener("click", async () => {
     const id = loginInput.value.trim();
@@ -594,6 +597,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
