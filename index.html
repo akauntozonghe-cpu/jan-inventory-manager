@@ -37,14 +37,26 @@
     </nav>
 
     <div class="main-content">
-      <!-- ホーム -->
-      <section id="homeSection" class="panel">
-        <h2>ホーム</h2>
-        <div id="summaryStats" class="home-block"></div>
-        <div id="expiringSoon" class="home-block"></div>
-        <div id="trendingItems" class="home-block"></div>
-        <div id="fleaTips" class="home-block"></div>
-      </section>
+      <!-- ホーム画面 -->
+<section id="homeSection" class="panel hidden">
+  <h2>ホーム</h2>
+  <div id="summaryStats" class="home-block">
+    <h3>在庫サマリー</h3>
+    <p>登録済み商品数や期限切れ商品数などを表示予定</p>
+  </div>
+  <div id="expiringSoon" class="home-block">
+    <h3>期限が近い商品</h3>
+    <ul id="expiringList"></ul>
+  </div>
+  <div id="trendingItems" class="home-block">
+    <h3>よく登録される商品</h3>
+    <ul id="trendingList"></ul>
+  </div>
+  <div id="fleaTips" class="home-block">
+    <h3>フリマ出品候補</h3>
+    <p>在庫過多や期限近い商品を出品候補として表示予定</p>
+  </div>
+</section>
 
       <!-- 商品登録 -->
       <section id="productSection" class="panel hidden">
@@ -108,3 +120,4 @@
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
