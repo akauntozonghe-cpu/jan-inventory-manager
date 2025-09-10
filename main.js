@@ -230,3 +230,4 @@ document.addEventListener("DOMContentLoaded", () => {
   const unit = document.querySelector("#qtyUnit");
   if (unit) unit.value = "個";
 }
+});
