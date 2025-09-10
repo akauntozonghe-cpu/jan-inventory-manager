@@ -37,9 +37,11 @@ async function logAction(action, detail = {}) {
 }
 
 $('#loginBtn').onclick = async () => {
-  const id = $('#responsibilityId').value.trim();
+  const input = $('#responsibilityId');
+  const id = input.value.trim();
   if (!id) {
-    $('#helpId').classList.add('show');
+    input.classList.add("is-invalid");
+    setTimeout(() => input.classList.remove("is-invalid"), 1000);
     return toast('責任者番号を入力してください', 'error');
   }
 
