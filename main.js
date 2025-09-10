@@ -1,8 +1,9 @@
 function initHome() {
+  console.log("initHome 実行"); // ← 追加
   const stats = $("#summaryStats");
   const expiring = $("#expiringList");
   const trending = $("#trendingList");
-
+  
   if (!stats || !expiring || !trending) {
     console.warn("HOMEセクションの要素が見つかりません");
     return;
@@ -49,3 +50,4 @@ function initHome() {
 // ← ここで initHome() 関数が終了
 
 }); // ← ここで DOMContentLoaded のイベントリスナーが終了
+
