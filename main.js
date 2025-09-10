@@ -4,9 +4,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID"
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.firebasestorage.app",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -64,3 +69,4 @@ $('#loginBtn').onclick = async () => {
     toast('ログイン処理に失敗しました', 'error');
   }
 };
+
