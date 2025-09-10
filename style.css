@@ -1,51 +1,11 @@
-/* 全体基本設定 */
 body {
-  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  font-family: "Segoe UI", "ヒラギノ角ゴ ProN", "メイリオ", sans-serif;
   margin: 0;
   padding: 0;
   background: #f9f9f9;
   color: #333;
 }
 
-h1, h2, h3 {
-  margin: 1em 0 0.5em;
-  font-weight: 600;
-}
-
-input, select, textarea, button {
-  font-size: 1em;
-  margin: 0.5em 0;
-  padding: 0.5em;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-button {
-  background: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background: #005fa3;
-}
-
-section.content {
-  padding: 1em;
-}
-
-.hidden {
-  display: none !important;
-}
-
-.error {
-  color: red;
-  font-size: 0.9em;
-}
-
-/* ヘッダーとメニュー */
 header {
   display: flex;
   justify-content: space-between;
@@ -55,110 +15,109 @@ header {
   padding: 0.5em 1em;
 }
 
-#menuToggle {
-  font-size: 1.5em;
-  background: none;
-  border: none;
-  color: white;
+#titleHeader {
+  cursor: pointer;
+}
+#titleHeader:hover {
+  text-decoration: underline;
 }
 
-#sideMenu {
+section.content {
+  padding: 1em;
+}
+
+input, select, textarea, button {
+  display: block;
+  margin: 0.5em 0;
+  padding: 0.5em;
+  font-size: 1em;
+  width: 100%;
+  max-width: 400px;
+}
+
+label {
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+button {
+  background: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+button:hover {
+  background: #005fa3;
+}
+
+.hidden {
+  display: none;
+}
+
+.error {
+  color: red;
+}
+
+nav#sideMenu {
   position: fixed;
-  top: 0;
+  top: 3.5em;
   left: 0;
-  width: 200px;
-  height: 100%;
   background: #eee;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  width: 200px;
+  height: calc(100% - 3.5em);
+  box-shadow: 2px 0 5px rgba(0,0,0,0.2);
   padding: 1em;
   z-index: 1000;
 }
-
-#sideMenu ul {
+nav#sideMenu ul {
   list-style: none;
   padding: 0;
 }
-
-#sideMenu li {
-  padding: 0.5em 0;
+nav#sideMenu li {
+  margin: 1em 0;
   cursor: pointer;
-  border-bottom: 1px solid #ccc;
+}
+nav#sideMenu li:hover {
+  text-decoration: underline;
 }
 
-#sideMenu li:hover {
-  background: #ddd;
+.introBox {
+  background: #eef;
+  padding: 1em;
+  border-radius: 6px;
+  margin-bottom: 1em;
 }
 
-/* 通知トースト */
 #toast {
   position: fixed;
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
-  background: #333;
-  color: white;
   padding: 1em 2em;
   border-radius: 6px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  font-weight: bold;
   z-index: 2000;
-  animation: fadeInOut 3s ease-in-out;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  transition: opacity 0.3s ease;
 }
+.toast-success { background: #0078d4; color: white; }
+.toast-warning { background: #ffcc00; color: black; }
+.toast-error   { background: #d40000; color: white; }
 
-@keyframes fadeInOut {
-  0% { opacity: 0; bottom: 0; }
-  10% { opacity: 1; bottom: 20px; }
-  90% { opacity: 1; bottom: 20px; }
-  100% { opacity: 0; bottom: 0; }
-}
-
-/* 管理者専用表示制御 */
-.admin-only {
-  display: none;
-}
-
-body.admin .admin-only {
-  display: block;
-}
-
-/* ダークモード対応 */
 body.dark {
-  background: #1e1e1e;
-  color: #ddd;
+  background: #222;
+  color: #eee;
 }
-
-body.dark input,
-body.dark select,
-body.dark textarea {
-  background: #2e2e2e;
-  color: #fff;
+body.dark input, body.dark select, body.dark textarea {
+  background: #333;
+  color: #eee;
   border: 1px solid #555;
 }
-
 body.dark button {
   background: #444;
-  color: #fff;
 }
-
-body.dark #sideMenu {
-  background: #2a2a2a;
-  color: #ccc;
-}
-
-body.dark #toast {
-  background: #555;
-}
-
-/* スマホ対応 */
-@media screen and (max-width: 600px) {
-  header h2 {
-    font-size: 1.2em;
-  }
-
-  #sideMenu {
-    width: 70%;
-  }
-
-  input, select, textarea, button {
-    font-size: 1em;
-  }
+body.dark nav#sideMenu {
+  background: #333;
+  color: #eee;
 }
