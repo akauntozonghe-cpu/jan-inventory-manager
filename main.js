@@ -594,16 +594,3 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
