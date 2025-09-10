@@ -136,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#sideMenu")?.classList.remove("open");
       });
     });
-
+   }
     $("#logoutBtn")?.addEventListener("click", async () => {
       const name = sessionStorage.getItem("responsibilityName");
       await logAction("ログアウト");
@@ -224,3 +224,4 @@ document.addEventListener("DOMContentLoaded", () => {
     [
       "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
       "#jan", "#company", "#productName", "#lotNo", "#expire", "#
+
