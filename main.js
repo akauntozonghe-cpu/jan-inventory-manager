@@ -3,7 +3,6 @@ import {
   getFirestore, collection, query, where, getDocs
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -20,10 +19,8 @@ const db = getFirestore(app);
 document.addEventListener("DOMContentLoaded", () => {
   const $ = (s) => document.querySelector(s);
   const $$ = (s) => document.querySelectorAll(s);
-
   let allProducts = [];
 
-  // トースト通知関数
   function toast(msg, type = "info") {
     const host = $("#toastHost");
     if (!host) return;
@@ -40,6 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const appView = $("#appView");
   const loginInput = $("#responsibilityId");
   const loginBtn = $("#loginBtn");
+
+  loginInput?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") loginBtn?.click();
+  });
 
   loginBtn?.addEventListener("click", async () => {
     const id = loginInput.value.trim();
@@ -75,6 +76,8 @@ document.addEventListener("DOMContentLoaded", () => {
     loginView.classList.add("hidden");
     appView.classList.remove("hidden");
     await initList();
+    initHeader();
+    initMenu();
     initHome();
     routeTo("homeSection");
   }
@@ -87,6 +90,49 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("商品一覧の取得に失敗しました", e);
       toast("商品一覧の取得に失敗しました", "error");
     }
+  }
+
+  function initHeader() {
+    const name = sessionStorage.getItem("responsibilityName") || "未設定";
+    const role = sessionStorage.getItem("responsibilityRole") || "user";
+    $("#responsibilityName").textContent = name;
+    const roleBadge = $("#responsibilityRole");
+    roleBadge.textContent = role === "admin" ? "管理者" : "責任者";
+    roleBadge.classList.remove("admin", "user");
+    roleBadge.classList.add(role);
+    $$(".admin-only").forEach((el) => {
+      el.classList.toggle("hidden", role !== "admin");
+    });
+  }
+
+  function initMenu() {
+    $("#hamburgerMenu")?.addEventListener("click", () => {
+      $("#sideMenu")?.classList.toggle("open");
+    });
+
+    $("#systemTitle")?.addEventListener("click", () => {
+      routeTo("homeSection");
+      $("#sideMenu")?.classList.remove("open");
+      toast("ホーム画面に戻りました", "info");
+    });
+
+    $$(".nav-item[data-target]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        routeTo(btn.dataset.target);
+        $("#sideMenu")?.classList.remove("open");
+      });
+    });
+
+    document.addEventListener("click", (e) => {
+      const menu = $("#sideMenu");
+      const hamburger = $("#hamburgerMenu");
+      if (!menu?.classList.contains("open")) return;
+      const clickedInsideMenu = menu.contains(e.target);
+      const clickedHamburger = hamburger?.contains(e.target);
+      if (!clickedInsideMenu && !clickedHamburger) {
+        menu.classList.remove("open");
+      }
+    });
   }
 
   function routeTo(panelId) {
