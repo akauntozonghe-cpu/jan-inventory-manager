@@ -37,6 +37,7 @@
     </nav>
 
     <div class="main-content">
+      <!-- ホーム -->
       <section id="homeSection" class="panel">
         <h2>ホーム</h2>
         <div id="summaryStats" class="home-block"></div>
@@ -45,30 +46,65 @@
         <div id="fleaTips" class="home-block"></div>
       </section>
 
+      <!-- 商品登録 -->
       <section id="productSection" class="panel hidden">
         <h2>商品登録</h2>
-        <!-- 商品登録フォームは JS 側で制御 -->
+        <div class="form-group"><label for="mgtNo">管理番号</label><input id="mgtNo" type="text" /></div>
+        <div class="form-group admin-only"><label for="mgtDistNo">配布先管理番号</label><input id="mgtDistNo" type="text" /></div>
+        <div class="form-group"><label for="location">保管場所</label><input id="location" type="text" /></div>
+        <div class="form-group"><label for="catL">カテゴリ（大）</label><input id="catL" type="text" /></div>
+        <div class="form-group"><label for="catS">カテゴリ（小）</label><input id="catS" type="text" /></div>
+        <div class="form-group"><label for="jan">JANコード</label><input id="jan" type="text" inputmode="numeric" /></div>
+        <div class="form-group"><label for="company">メーカー</label><input id="company" type="text" /></div>
+        <div class="form-group"><label for="productName">商品名</label><input id="productName" type="text" /></div>
+        <div class="form-group"><label for="lotNo">ロット番号</label><input id="lotNo" type="text" /></div>
+        <div class="form-group"><label for="expire">期限</label><input id="expire" type="date" /></div>
+        <div class="form-group"><label for="qty">数量</label><input id="qty" type="number" min="0" /></div>
+        <div class="form-group"><label for="qtyUnit">単位</label>
+          <select id="qtyUnit">
+            <option value="個">個</option>
+            <option value="箱">箱</option>
+            <option value="袋">袋</option>
+          </select>
+        </div>
+        <div class="form-group"><label for="photo">商品画像（任意）</label><input id="photo" type="file" accept="image/*" /></div>
+        <button id="registerBtn">登録する</button>
       </section>
 
+      <!-- 商品一覧 -->
       <section id="listSection" class="panel hidden">
         <h2>商品一覧</h2>
+        <div class="filter-bar">
+          <input id="searchInput" type="text" placeholder="商品名またはJANコードで検索" />
+          <button id="filterMine">自分の商品だけ</button>
+        </div>
+        <div id="productList" class="list-container"></div>
       </section>
 
+      <!-- 管理者 -->
       <section id="adminSection" class="panel hidden">
         <h2>管理者</h2>
+        <p>管理者専用機能をここに追加予定です。</p>
       </section>
 
+      <!-- 設定 -->
       <section id="settingsSection" class="panel hidden">
         <h2>設定</h2>
+        <p>表示言語やテーマ切替などをここに追加予定です。</p>
       </section>
 
+      <!-- フリマ -->
       <section id="fleaSection" class="panel hidden">
         <h2>フリマ（仮）</h2>
+        <p>期限が近い商品や在庫過多の商品を出品候補として表示予定です。</p>
       </section>
     </div>
   </div>
 
+  <!-- トースト通知 -->
   <div id="toastHost" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- JavaScript -->
   <script type="module" src="main.js"></script>
 </body>
 </html>
