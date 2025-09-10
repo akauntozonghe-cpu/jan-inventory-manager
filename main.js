@@ -8,7 +8,6 @@ const firebaseConfig = {
   appId: "1:245219344089:web:e46105927c302e6a5788c8",
   measurementId: "G-TRH31MJCE3"
 };
-
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -37,6 +36,10 @@ loginBtn.addEventListener("click", async () => {
   sessionStorage.setItem("role", user.role);
 
   document.body.classList.toggle("admin", user.role === "admin");
+  document.querySelectorAll(".admin-only").forEach(el => {
+    el.style.display = user.role === "admin" ? "block" : "none";
+  });
+
   loginSection.classList.add("hidden");
   mainSection.classList.remove("hidden");
   userBadge.textContent = `${user.name}（${user.role}）`;
@@ -51,32 +54,99 @@ loginBtn.addEventListener("click", async () => {
 
   routeTo("homeSection");
 });
+
+// タイトルバーに日時表示
+function updateDateTime() {
+  const now = new Date();
+  const formatted = now.toLocaleString("ja-JP", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit"
+  });
+  document.getElementById("titleHeader").textContent = `在庫管理（${formatted}）`;
+}
+setInterval(updateDateTime, 60000);
+updateDateTime();
+
+// タイトルクリックでホームへ戻る
+document.getElementById("titleHeader").addEventListener("click", () => {
+  routeTo("homeSection");
+});
+
+// メニュー開閉＋外部クリックで閉じる
+document.getElementById("menuToggle").addEventListener("click", () => {
+  document.getElementById("sideMenu").classList.toggle("hidden");
+});
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("sideMenu");
+  const toggle = document.getElementById("menuToggle");
+  if (!menu.classList.contains("hidden") && !menu.contains(e.target) && e.target !== toggle) {
+    menu.classList.add("hidden");
+  }
+});
+
+// Enterキー送信対応（全フォーム）
+["productForm", "alertForm", "marketForm"].forEach(formId => {
+  const form = document.getElementById(formId);
+  form?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      form.querySelector("button[type='submit']")?.click();
+    }
+  });
+});
 // 画面切替処理
 const routeTo = (sectionId) => {
   document.querySelectorAll("section.content").forEach(sec => sec.classList.add("hidden"));
   document.getElementById(sectionId).classList.remove("hidden");
 };
 
-// メニュー操作
-document.querySelectorAll("#sideMenu li").forEach(item => {
-  item.addEventListener("click", () => {
-    const target = item.dataset.route;
-    if (target) routeTo(target);
-    document.getElementById("sideMenu").classList.add("hidden");
+// ホーム画面の可視化
+async function renderHomeDashboard() {
+  const snapshot = await db.collection("products").get();
+  const products = snapshot.docs.map(doc => doc.data());
+
+  const total = products.length;
+  const approved = products.filter(p => p.status === "approved").length;
+  const expired = products.filter(p => new Date(p.expire) < new Date()).length;
+  const soon = products.filter(p => {
+    const d = new Date(p.expire);
+    const now = new Date();
+    const diff = (d - now) / (1000 * 60 * 60 * 24);
+    return diff >= 0 && diff <= 7;
   });
-});
 
-document.getElementById("menuToggle").addEventListener("click", () => {
-  document.getElementById("sideMenu").classList.toggle("hidden");
-});
+  document.getElementById("summaryStats").innerHTML = `
+    <p>登録：${total}件 / 承認済：${approved}件 / 期限切れ：${expired}件</p>
+  `;
 
-// トースト通知
-const showToast = (message) => {
+  document.getElementById("expiringSoon").innerHTML = `
+    <h4>期限間近の商品</h4>
+    <ul>${soon.map(p => `<li>${p.productName}（${p.expire}）</li>`).join("")}</ul>
+  `;
+
+  const marketSnap = await db.collection("marketItems").orderBy("createdAt", "desc").limit(5).get();
+  const marketHtml = marketSnap.docs.map(doc => {
+    const item = doc.data();
+    return `<li>${item.productName}（¥${item.price} / ${item.condition}）</li>`;
+  }).join("");
+  document.getElementById("topProducts").innerHTML = `
+    <h4>最新フリマ出品</h4>
+    <ul>${marketHtml}</ul>
+  `;
+}
+document.querySelector('[data-route="homeSection"]').addEventListener("click", renderHomeDashboard);
+window.addEventListener("load", renderHomeDashboard);
+
+// トースト通知表示
+function showToast(message, type = "success") {
   const toast = document.getElementById("toast");
   toast.textContent = message;
-  toast.classList.remove("hidden");
-  setTimeout(() => toast.classList.add("hidden"), 3000);
-};
+  toast.className = `toast-${type}`;
+  if (document.body.dataset.toast !== "off") {
+    toast.classList.remove("hidden");
+    setTimeout(() => toast.classList.add("hidden"), 3000);
+  }
+}
 
 // 商品登録処理
 document.getElementById("productForm").addEventListener("submit", async (e) => {
@@ -113,7 +183,7 @@ document.getElementById("productForm").addEventListener("submit", async (e) => {
     timestamp: new Date().toISOString()
   });
 
-  showToast("商品を登録しました");
+  showToast("商品を登録しました", "success");
   e.target.reset();
 });
 // 商品検索処理
@@ -138,24 +208,41 @@ document.getElementById("searchBtn").addEventListener("click", async () => {
   const list = document.getElementById("searchResultList");
   list.innerHTML = "";
 
-  filtered.forEach(p => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${p.productName}</strong>（${p.quantity}個）<br>
-      ${isAdmin ? `<button class="editBtn" data-id="${p.id}">編集</button>` : ""}
-      ${isAdmin && p.status === "pending" ? `<button class="approveBtn" data-id="${p.id}">承認</button>` : ""}
-      <button class="changeQtyBtn" data-id="${p.id}">個数変更</button>
-    `;
-    list.appendChild(li);
-  });
+  const initialCount = 10;
+  const visible = filtered.slice(0, initialCount);
+  const hidden = filtered.slice(initialCount);
+
+  visible.forEach(p => list.appendChild(createProductItem(p, isAdmin)));
+
+  if (hidden.length > 0) {
+    const moreBtn = document.createElement("button");
+    moreBtn.textContent = `＋ ${hidden.length}件を表示`;
+    moreBtn.addEventListener("click", () => {
+      hidden.forEach(p => list.appendChild(createProductItem(p, isAdmin)));
+      moreBtn.remove();
+    });
+    list.appendChild(moreBtn);
+  }
 });
 
-// 編集処理（管理者のみ）
+function createProductItem(p, isAdmin) {
+  const li = document.createElement("li");
+  li.innerHTML = `
+    <strong>${p.productName}</strong>（${p.quantity}個）<br>
+    ${isAdmin ? `<button class="editBtn" data-id="${p.id}">編集</button>` : ""}
+    ${isAdmin && p.status === "pending" ? `<button class="approveBtn" data-id="${p.id}">承認</button>` : ""}
+    <button class="changeQtyBtn" data-id="${p.id}">個数変更</button>
+  `;
+  return li;
+}
+
+// 編集・承認・個数変更
 document.getElementById("searchResultList").addEventListener("click", async (e) => {
+  const id = e.target.dataset.id;
+  const doc = await db.collection("products").doc(id).get();
+  const data = doc.data();
+
   if (e.target.classList.contains("editBtn")) {
-    const id = e.target.dataset.id;
-    const doc = await db.collection("products").doc(id).get();
-    const data = doc.data();
     const newQty = prompt(`数量を変更（現在: ${data.quantity}）`, data.quantity);
     if (newQty !== null) {
       await db.collection("products").doc(id).update({ quantity: parseInt(newQty) });
@@ -166,13 +253,11 @@ document.getElementById("searchResultList").addEventListener("click", async (e) 
         changes: { quantity: newQty },
         timestamp: new Date().toISOString()
       });
-      showToast("数量を更新しました");
+      showToast("数量を更新しました", "success");
     }
   }
 
-  // 承認処理（管理者のみ）
   if (e.target.classList.contains("approveBtn")) {
-    const id = e.target.dataset.id;
     await db.collection("products").doc(id).update({ status: "approved" });
     await db.collection("logs").add({
       type: "approve",
@@ -180,14 +265,10 @@ document.getElementById("searchResultList").addEventListener("click", async (e) 
       productId: id,
       timestamp: new Date().toISOString()
     });
-    showToast("商品を承認しました");
+    showToast("商品を承認しました", "success");
   }
 
-  // 個数変更（全ユーザー）
   if (e.target.classList.contains("changeQtyBtn")) {
-    const id = e.target.dataset.id;
-    const doc = await db.collection("products").doc(id).get();
-    const data = doc.data();
     const newQty = prompt(`数量を変更（現在: ${data.quantity}）`, data.quantity);
     if (newQty !== null) {
       await db.collection("products").doc(id).update({ quantity: parseInt(newQty) });
@@ -198,24 +279,12 @@ document.getElementById("searchResultList").addEventListener("click", async (e) 
         changes: { quantity: newQty },
         timestamp: new Date().toISOString()
       });
-      showToast("数量を変更しました");
+      showToast("数量を変更しました", "success");
     }
   }
 });
-// 操作履歴表示
-const logList = document.getElementById("logList");
-document.querySelector('[data-route="historySection"]').addEventListener("click", async () => {
-  const logs = await db.collection("logs").orderBy("timestamp", "desc").limit(50).get();
-  logList.innerHTML = "";
-  logs.forEach(doc => {
-    const log = doc.data();
-    const li = document.createElement("li");
-    li.textContent = `${new Date(log.timestamp).toLocaleString("ja-JP")} - ${log.userName || log.userId} が ${log.type} を実行`;
-    logList.appendChild(li);
-  });
-});
 
-// フリマ出品処理
+// フリマ出品
 document.getElementById("marketForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const item = {
@@ -232,29 +301,26 @@ document.getElementById("marketForm").addEventListener("submit", async (e) => {
     productName: item.productName,
     timestamp: item.createdAt
   });
-  showToast("出品しました");
+  showToast("出品しました", "success");
   e.target.reset();
 });
 
-// 設定画面：ダークモード・通知切替
+// 設定画面
 document.getElementById("darkModeToggle").addEventListener("change", (e) => {
   document.body.classList.toggle("dark", e.target.checked);
 });
-
 document.getElementById("toastToggle").addEventListener("change", (e) => {
   document.body.dataset.toast = e.target.checked ? "on" : "off";
 });
-
-// 管理者設定保存（プリセット）
 document.getElementById("saveAdminSettings").addEventListener("click", () => {
   const preset = document.getElementById("adminPresetCategory").value.trim();
   if (preset) {
     localStorage.setItem("adminPresetCategory", preset);
-    showToast("管理プリセットを保存しました");
+    showToast("管理プリセットを保存しました", "success");
   }
 });
 
-// 問題報告処理
+// 問題報告
 document.getElementById("alertForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const alert = {
@@ -264,8 +330,38 @@ document.getElementById("alertForm").addEventListener("submit", async (e) => {
     timestamp: new Date().toISOString()
   };
   await db.collection("alerts").add(alert);
-  showToast("問題を報告しました");
+  showToast("問題を報告しました", "success");
   e.target.reset();
+});
+
+// 管理者画面：未承認・履歴・報告一覧・CSV出力
+document.querySelector('[data-route="adminSection"]').addEventListener("click", async () => {
+  const pendingSnap = await db.collection("products").where("status", "==", "pending").get();
+  const logSnap = await db.collection("logs").orderBy("timestamp", "desc").limit(50).get();
+  const alertSnap = await db.collection("alerts").orderBy("timestamp", "desc").limit(20).get();
+
+  const pendingList = document.getElementById("pendingList");
+  const adminLogList = document.getElementById("adminLogList");
+  const alertListAdmin = document.getElementById("alertListAdmin");
+
+  pendingList.innerHTML = "";
+  adminLogList.innerHTML = "";
+  alertListAdmin.innerHTML = "";
+
+  pendingSnap.forEach(doc => {
+    const p = doc.data();
+    pendingList.innerHTML += `<li>${p.productName}（${p.quantity}個）</li>`;
+  });
+
+  logSnap.forEach(doc => {
+    const log = doc.data();
+    adminLogList.innerHTML += `<li>${new Date(log.timestamp).toLocaleString("ja-JP")} - ${log.userName || log.userId} が ${log.type} を実行</li>`;
+  });
+
+  alertSnap.forEach(doc => {
+    const alert = doc.data();
+    alertListAdmin.innerHTML += `<li>${new Date(alert.timestamp).toLocaleString("ja-JP")} - ${alert.screen}：${alert.message}</li>`;
+  });
 });
 
 // ログアウト処理
