@@ -1,141 +1,132 @@
-body.login-screen {
-  font-family: sans-serif;
-  background: #f4f6f9;
-  margin: 0;
-  padding: 0;
+:root {
+  --bg: #f4f6f9;
+  --card: #ffffff;
+  --text: #222;
+  --muted: #667085;
+  --primary: #4e73df;
+  --primary-2: #2e59d9;
+  --danger: #c0392b;
+  --ok: #1cc88a;
+  --border: #e5e7eb;
 }
 
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; color: var(--text); background: var(--bg); }
+
+/* ログイン */
 .login-container {
-  max-width: 400px;
-  margin: 60px auto;
+  max-width: 420px;
+  margin: 64px auto;
   padding: 2rem;
-  background: #fff;
+  background: var(--card);
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,.08);
   text-align: center;
 }
-
-.login-container h1 {
-  font-size: 1.4rem;
-  margin-bottom: 1.2rem;
-}
-
+.login-container h1 { font-size: 1.4rem; margin-bottom: 1rem; }
 .login-container input {
-  width: 100%;
-  padding: 12px;
-  font-size: 1rem;
-  margin-top: 8px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  width: 100%; padding: 12px; font-size: 1rem; border: 1px solid #ccc; border-radius: 8px;
 }
-
-.login-container input.is-invalid {
-  border-color: #e74c3c;
-  box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
-  animation: shake 0.2s ease;
-}
-
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-4px); }
-  50% { transform: translateX(4px); }
-  75% { transform: translateX(-2px); }
-  100% { transform: translateX(0); }
-}
-
 .login-container button {
-  margin-top: 16px;
-  padding: 12px;
-  font-size: 1rem;
-  background-color: #4e73df;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-  width: 100%;
+  width: 100%; padding: 12px; margin-top: 12px; font-size: 1rem;
+  background: var(--primary); color: #fff; border: 0; border-radius: 8px; cursor: pointer;
+  transition: background-color .2s ease;
 }
+.login-container button:hover { background: var(--primary-2); }
 
-.login-container button:hover {
-  background-color: #2e59d9;
-}
+/* 共通 */
+.hidden { display: none !important; }
+.muted { color: var(--muted); }
 
-.toast {
-  position: fixed;
-  left: 50%;
-  bottom: 24px;
-  transform: translateX(-50%) translateY(10px);
-  background: #333;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  opacity: 0;
-  transition: all .25s ease;
-  z-index: 2000;
-}
-
-.toast.show {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.toast.error { background:#c0392b; }
-.toast.success { background:#1cc88a; }
+/* App */
 #systemHeader {
-  background: #f0f0f0;
-  padding: 8px;
-  border-bottom: 1px solid #ccc;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  position: sticky; top: 0; z-index: 5;
+  background: #f8fafc; border-bottom: 1px solid var(--border);
+  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
 }
+#systemTitle { font-size: 1.1rem; font-weight: 700; }
+#userHeader { display: flex; align-items: center; gap: 12px; }
+.user-name { font-weight: 600; }
+.badge { padding: 4px 8px; color: #fff; border-radius: 6px; font-weight: 700; font-size: .85rem; }
+.badge.admin { background: var(--ok); }
+.badge.user { background: var(--primary); }
 
-#userHeader {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.badge {
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: white;
-}
-.badge.admin { background-color: #1cc88a; }
-.badge.user  { background-color: #4e73df; }
-
-#hamburgerMenu {
-  font-size: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-}
+#hamburgerMenu { font-size: 24px; background: none; border: none; cursor: pointer; }
 
 #sideMenu {
-  position: fixed;
-  top: 60px;
-  left: -220px;
-  width: 200px;
-  background-color: #f9f9f9;
-  border-right: 1px solid #ccc;
-  padding: 10px;
-  transition: left 0.3s ease;
-  z-index: 1000;
+  position: fixed; top: 56px; left: -240px; width: 220px; height: calc(100% - 56px);
+  background: #fff; border-right: 1px solid var(--border); padding: 10px; transition: left .25s ease; z-index: 10;
 }
-#sideMenu.open {
-  left: 0;
+#sideMenu.open { left: 0; }
+#sideMenu .nav-item {
+  display: block; width: 100%; text-align: left; padding: 10px; margin: 6px 0;
+  background: #fff; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
 }
-#sideMenu button {
-  display: block;
-  width: 100%;
-  margin: 6px 0;
-  padding: 8px;
-  font-size: 14px;
-  background-color: #fff;
-  border: 1px solid #aaa;
-  border-radius: 4px;
-  cursor: pointer;
+#sideMenu .nav-item.danger { color: #fff; background: var(--danger); border-color: var(--danger); }
+
+.main-content { padding: 16px; max-width: 1100px; margin: 0 auto; }
+
+/* パネル */
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+.panel + .panel { margin-top: 16px; }
+
+/* 商品登録フォーム */
+.grid {
+  display: grid; gap: 12px;
+  grid-template-columns: repeat(1, minmax(0,1fr));
 }
+@media (min-width: 768px) {
+  .grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+.field .label { display: block; font-weight: 600; margin-bottom: 6px; }
+.field input, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+.inline { display: flex; gap: 8px; align-items: center; }
+.actions { margin-top: 8px; display: flex; gap: 8px; }
+.primary { background: var(--primary); color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+.secondary { background: #f3f4f6; color: #111; border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; cursor: pointer; }
+.primary:hover { background: var(--primary-2); }
+
+.scan-preview { width: 100%; max-width: 360px; border-radius: 12px; margin-top: 8px; background: #000; }
+
+/* 商品一覧 */
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.filters input { padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
+.list { display: grid; gap: 10px; }
+.list-row { border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; }
+.row-head { padding: 12px; display: grid; gap: 6px; grid-template-columns: 1fr auto; align-items: center; }
+.row-main { font-size: 1rem; }
+.row-sub { color: var(--muted); font-size: .9rem; grid-column: 1 / -1; }
+.row-head .toggle { border: 1px solid var(--border); background: #f8fafc; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.row-body { padding: 12px; border-top: 1px solid var(--border); }
+.row-body .kv { display: grid; grid-template-columns: repeat(1, minmax(0,1fr)); gap: 8px; }
+@media (min-width: 768px) {
+  .row-body .kv { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+.k { font-weight: 600; color: #374151; margin-right: 6px; }
+.v { color: #111827; }
+.photo img { width: 100%; max-width: 300px; border-radius: 10px; border: 1px solid var(--border); }
+.row-actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.qty-input { width: 120px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
+.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; }
+
+/* 入力エラー演出 */
+.is-invalid {
+  border-color: #e74c3c !important;
+  box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+  animation: shake .18s ease;
+}
+@keyframes shake { 0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)} }
+
+/* トースト */
+#toastHost { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 2000; }
+.toast {
+  background: #333; color: #fff; padding: 10px 14px; border-radius: 10px;
+  opacity: 0; transform: translateY(10px); transition: all .22s ease;
+  margin-top: 8px; text-align: center; min-width: 220px;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.error { background: var(--danger); }
+.toast.success { background: var(--ok); }
+
+/* 権限制御の見た目 */
+.admin-only.hidden { display: none !important; }
