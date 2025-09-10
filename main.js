@@ -18,9 +18,24 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 
-function showInlineError(el, message) { ... }
-function clearInlineError(el) { ... }
-function showToast(message, type = "success", duration = 3000) { ... }
+ {function showInlineError(el, message) {
+  el.textContent = message;
+  el.classList.add("show");
+}
+function clearInlineError(el) {
+  el.textContent = "";
+  el.classList.remove("show");
+}
+function showToast(message, type = "success", duration = 3000) {
+  const toast = document.getElementById("toast");
+  if (!toast || document.body.dataset.toast === "off") return;
+
+  toast.textContent = message;
+  toast.className = `toast-${type} show`;
+
+  setTimeout(() => toast.classList.remove("show"), duration);
+}
+  
 loginId.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
@@ -411,6 +426,7 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
 
 
 
