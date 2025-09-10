@@ -1,8 +1,9 @@
+listimport { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore, collection, query, where, getDocs, addDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
+ 
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -226,7 +227,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="log-user">責任者：${log.userName || "不明"}</div>
           <div class="log-action">操作：${translateAction(log.action)}</div>
         `;
-        //listimport { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        list.appendChild(item); // ← これで完了
         
 import {
   getFirestore, collection, query, where, getDocs, addDoc
@@ -598,6 +599,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
