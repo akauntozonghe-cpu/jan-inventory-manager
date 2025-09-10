@@ -1,8 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import {
-  getFirestore, collection, query, where, getDocs, addDoc
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
+// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -13,492 +9,273 @@ const firebaseConfig = {
   measurementId: "G-TRH31MJCE3"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-document.addEventListener("DOMContentLoaded", () => {
-  const $ = (s) => document.querySelector(s);
-  const $$ = (s) => document.querySelectorAll(s);
-  let allProducts = [];
+// DOM取得
+const loginSection = document.getElementById("loginSection");
+const mainSection = document.getElementById("mainSection");
+const loginBtn = document.getElementById("loginBtn");
+const loginId = document.getElementById("loginId");
+const loginError = document.getElementById("loginError");
+const userBadge = document.getElementById("userBadge");
 
-  function toast(msg, type = "info") {
-    const host = $("#toastHost");
-    if (!host) return;
-    const t = document.createElement("div");
-    t.className = `toast ${type}`;
-    t.textContent = msg;
-    host.appendChild(t);
-    requestAnimationFrame(() => t.classList.add("show"));
-    setTimeout(() => t.classList.remove("show"), 2200);
-    setTimeout(() => t.remove(), 2600);
-  }
+// ログイン処理
+loginBtn.addEventListener("click", async () => {
+  const id = loginId.value.trim();
+  if (!id) return (loginError.textContent = "IDを入力してください");
 
-  function routeTo(panelId) {
-    $$(".panel").forEach((p) => p.classList.add("hidden"));
-    const el = $(`#${panelId}`);
-    if (el) {
-      el.classList.remove("hidden");
-      el.classList.remove("fade");
-      void el.offsetWidth;
-      el.classList.add("fade");
-    }
-  }
-
-  const loginView = $("#loginView");
-  const appView = $("#appView");
-  const loginInput = $("#responsibilityId");
-  const loginBtn = $("#loginBtn");
-
-  loginInput?.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") loginBtn?.click();
-  });
-
-  loginBtn?.addEventListener("click", async () => {
-    const id = loginInput.value.trim();
-    if (!id) {
-      loginInput.classList.add("is-invalid");
-      setTimeout(() => loginInput.classList.remove("is-invalid"), 800);
-      toast("責任者番号を入力してください", "error");
-      return;
-    }
-
-    try {
-      const qy = query(collection(db, "users"), where("id", "==", id));
-      const snap = await getDocs(qy);
-      if (snap.empty) {
-        toast("番号が見つかりません", "error");
-        return;
-      }
-
-      const data = snap.docs[0].data();
-      sessionStorage.setItem("responsibilityId", id);
-      sessionStorage.setItem("responsibilityName", data.name || "未設定");
-      sessionStorage.setItem("responsibilityRole", data.role || "user");
-
-      toast("ログイン成功", "success");
-      setTimeout(() => showApp(), 500);
-    } catch (e) {
-      console.error("ログイン失敗:", e);
-      toast("ログイン処理に失敗しました", "error");
-    }
-  });
-
-  async function showApp() {
-    loginView.classList.add("hidden");
-    appView.classList.remove("hidden");
-    await initList();
-    initHeader();
-    initMenu();
-    initHome();
-    routeTo("homeSection");
-  }
-
-  async function initList() {
-    try {
-      const snap = await getDocs(collection(db, "products"));
-      allProducts = snap.docs.map(doc => doc.data());
-    } catch (e) {
-      console.error("商品一覧の取得に失敗しました", e);
-      toast("商品一覧の取得に失敗しました", "error");
-    }
-  }
-
-  function initHeader() {
-    const name = sessionStorage.getItem("responsibilityName") || "未設定";
-    const role = sessionStorage.getItem("responsibilityRole") || "user";
-    $("#responsibilityName").textContent = name;
-    const roleBadge = $("#responsibilityRole");
-    roleBadge.textContent = role === "admin" ? "管理者" : "責任者";
-    roleBadge.classList.remove("admin", "user");
-    roleBadge.classList.add(role);
-    $$(".admin-only").forEach((el) => {
-      el.classList.toggle("hidden", role !== "admin");
-    });
-  }
-
-  $("#productForm")?.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const location = $("#locationCustom")?.value.trim() || $("#locationPreset")?.value;
-    const unit = $("#unitCustom")?.value.trim() || $("#unitPreset")?.value;
-
-    const data = {
-      id: $("#productId")?.value.trim(),
-      adminCode: $("#adminCode")?.value.trim() || "",
-      location,
-      category: {
-        major: $("#majorCategory")?.value,
-        minor: $("#minorCategory")?.value.trim()
-      },
-      jan: $("#janCode")?.value.trim(),
-      company: $("#company")?.value.trim(),
-      productName: $("#productName")?.value.trim(),
-      lot: $("#lotNumber")?.value.trim(),
-      expire: $("#expireDate")?.value,
-      unit,
-      quantity: parseInt($("#quantity")?.value, 10) || 0,
-      status: "pending",
-      createdBy: sessionStorage.getItem("responsibilityId"),
-      createdAt: new Date().toISOString()
-    };
-
-    try {
-      await addDoc(collection(db, "products"), data);
-      await addDoc(collection(db, "logs"), {
-        userId: sessionStorage.getItem("responsibilityId"),
-        userName: sessionStorage.getItem("responsibilityName"),
-        role: sessionStorage.getItem("responsibilityRole"),
-        action: "商品登録",
-        timestamp: new Date()
-      });
-      toast("商品を登録しました", "success");
-      routeTo("productListSection");
-      initProductList();
-    } catch (e) {
-      console.error("商品登録失敗:", e);
-      toast("登録に失敗しました", "error");
-    }
-  });
-
-  async function initProductList() {
-    try {
-      const snap = await getDocs(collection(db, "products"));
-      const list = $("#productList");
-      list.innerHTML = "";
-
-      const isAdmin = sessionStorage.getItem("responsibilityRole") === "admin";
-
-      snap.docs.forEach(doc => {
-        const data = doc.data();
-        const item = document.createElement("div");
-        item.className = "product-item";
-
-        const statusLabel = data.status === "pending"
-          ? `<span class="badge warning">未承認</span>`
-          : `<span class="badge success">承認済</span>`;
-
-        item.innerHTML = `
-          <div class="name">${data.productName}</div>
-          <div class="company">${data.company}</div>
-          <div class="expire">期限：${data.expire || "未設定"}</div>
-          <div class="location">保管：${data.location}</div>
-          <div class="unit">単位：${data.unit} × ${data.quantity}</div>
-          <div class="status">${statusLabel}</div>
-          ${isAdmin ? `<button class="editBtn" data-id="${doc.id}">編集</button>` : ""}
-          <button class="qtyBtn" data-id="${doc.id}">個数変更</button>
-        `;
-        list.appendChild(item);
-      });
-    } catch (e) {
-      console.error("商品一覧表示失敗:", e);
-      toast("一覧の表示に失敗しました", "error");
-    }
-  }
-
-  $("#backToListBtn")?.addEventListener("click", () => {
-    routeTo("productListSection");
-    initProductList();
-  });
-
-  async function initLogList() {
-    try {
-      const snap = await getDocs(collection(db, "logs"));
-      const list = $("#logList");
-      list.innerHTML = "";
-
-      const logs = snap.docs.map(doc => doc.data()).sort((a, b) => {
-        return new Date(b.timestamp) - new Date(a.timestamp);
-      });
-
-      logs.forEach(log => {
-        const time = new Date(log.timestamp).toLocaleString("ja-JP", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit"
-        });
-
-        const item = document.createElement("div");
-        item.className = "log-item";
-        item.innerHTML = `
-          <div class="log-time">${time}</div>
-          <div class="log-user">責任者：${log.userName || "不明"}</div>
-          <div class="log-action">操作：${translateAction(log.action)}</div>
-        `;
-        list.appendChild(item);
-      });
-          } catch (e) {
-      console.error("履歴の取得に失敗しました:", e);
-      toast("履歴の取得に失敗しました", "error");
-    }
-  }
-
-  function translateAction(action) {
-    switch (action) {
-      case "ログイン": return "ログインしました";
-      case "ログアウト": return "ログアウトしました";
-      case "商品登録": return "商品を登録しました";
-      case "商品承認": return "商品を承認しました";
-      case "保留": return "後で確認にしました";
-      default: return action;
-    }
-  }
-
-  $("#backToHomeBtn")?.addEventListener("click", () => {
-    routeTo("homeSection");
-  });
-
-  function initMenu() {
-    $("#hamburgerMenu")?.addEventListener("click", () => {
-      $("#sideMenu")?.classList.toggle("open");
-    });
-
-    $("#systemTitle")?.addEventListener("click", () => {
-      routeTo("homeSection");
-      $("#sideMenu")?.classList.remove("open");
-    });
-
-    $$(".nav-item[data-target]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        routeTo(btn.dataset.target);
-        $("#sideMenu")?.classList.remove("open");
-      });
-    });
-
-    $("#logoutBtn")?.addEventListener("click", async () => {
-      const id = sessionStorage.getItem("responsibilityId");
-      const name = sessionStorage.getItem("responsibilityName");
-      const role = sessionStorage.getItem("responsibilityRole");
-
-      try {
-        await addDoc(collection(db, "logs"), {
-          userId: id,
-          userName: name,
-          role,
-          action: "ログアウト",
-          timestamp: new Date()
-        });
-      } catch (e) {
-        console.warn("ログアウト履歴の記録に失敗:", e);
-      }
-
-      sessionStorage.clear();
-      toast(`${name || "ユーザー"} をログアウトしました`, "success");
-
-      $("#appView").classList.add("hidden");
-      $("#loginView").classList.remove("hidden");
-      $("#responsibilityId").value = "";
-    });
-  }
-
-  // サイドメニュー外クリックで閉じる
-  document.addEventListener("click", (e) => {
-    const menu = $("#sideMenu");
-    const hamburger = $("#hamburgerMenu");
-    if (!menu?.classList.contains("open")) return;
-    const clickedInsideMenu = menu.contains(e.target);
-    const clickedHamburger = hamburger?.contains(e.target);
-    if (!clickedInsideMenu && !clickedHamburger) {
-      menu.classList.remove("open");
-    }
-  });
-
-  function initHome() {
-    console.log("initHome 実行");
-    const stats = $("#summaryStats");
-    const expiring = $("#expiringList");
-    const trending = $("#trendingList");
-
-    if (!stats || !expiring || !trending) {
-      console.warn("HOMEセクションの要素が見つかりません");
-      return;
-    }
-
-    const total = allProducts.length;
-    const expired = allProducts.filter(p => {
-      const today = new Date().toISOString().slice(0, 10);
-      return p.expire && p.expire < today;
-    }).length;
-
-    stats.innerHTML = `
-      <h3>在庫サマリー</h3>
-      <p>登録商品数：${total} 件</p>
-      <p>期限切れ商品：${expired} 件</p>
-    `;
-
-    const soon = allProducts.filter(p => {
-      if (!p.expire) return false;
-      const today = new Date();
-      const exp = new Date(p.expire);
-      const diff = (exp - today) / (1000 * 60 * 60 * 24);
-      return diff >= 0 && diff <= 7;
-    });
-
-    expiring.innerHTML = soon.length
-      ? soon.map(p => `<li>${p.productName}（期限: ${p.expire}）</li>`).join("")
-      : "<li>該当なし</li>";
-
-    const freq = {};
-    allProducts.forEach(p => {
-      freq[p.productName] = (freq[p.productName] || 0) + 1;
-    });
-
-    const topItems = Object.entries(freq)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-
-       trending.innerHTML = topItems.length
-      ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
-      : "<li>該当なし</li>";
-  }
-
-  async function initLogList() {
-    try {
-      const snap = await getDocs(collection(db, "logs"));
-      const list = $("#logList");
-      list.innerHTML = "";
-
-      const logs = snap.docs.map(doc => doc.data()).sort((a, b) => {
-        return new Date(b.timestamp) - new Date(a.timestamp);
-      });
-
-      logs.forEach(log => {
-        const time = new Date(log.timestamp).toLocaleString("ja-JP", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit"
-        });
-
-        const item = document.createElement("div");
-        item.className = "log-item";
-        item.innerHTML = `
-          <div class="log-time">${time}</div>
-          <div class="log-user">責任者：${log.userName || "不明"}</div>
-          <div class="log-action">操作：${translateAction(log.action)}</div>
-        `;
-        list.appendChild(item);
-      });
-    } catch (e) {
-      console.error("履歴の取得に失敗しました:", e);
-      toast("履歴の取得に失敗しました", "error");
-    }
-  }
-
-  function translateAction(action) {
-    switch (action) {
-      case "ログイン": return "ログインしました";
-      case "ログアウト": return "ログアウトしました";
-      case "商品登録": return "商品を登録しました";
-      case "商品承認": return "商品を承認しました";
-      case "保留": return "後で確認にしました";
-      default: return action;
-    }
-  }
-
-  $("#backToHomeBtn")?.addEventListener("click", () => {
-    routeTo("homeSection");
-  });
-});
-
-  function initMenu() {
-    $("#hamburgerMenu")?.addEventListener("click", () => {
-      $("#sideMenu")?.classList.toggle("open");
-    });
-
-    $("#systemTitle")?.addEventListener("click", () => {
-      routeTo("homeSection");
-      $("#sideMenu")?.classList.remove("open");
-    });
-
-    $$(".nav-item[data-target]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        routeTo(btn.dataset.target);
-        $("#sideMenu")?.classList.remove("open");
-      });
-    });
-
-    $("#logoutBtn")?.addEventListener("click", async () => {
-      const id = sessionStorage.getItem("responsibilityId");
-      const name = sessionStorage.getItem("responsibilityName");
-      const role = sessionStorage.getItem("responsibilityRole");
-
-      try {
-        await addDoc(collection(db, "logs"), {
-          userId: id,
-          userName: name,
-          role,
-          action: "ログアウト",
-          timestamp: new Date()
-        });
-      } catch (e) {
-        console.warn("ログアウト履歴の記録に失敗:", e);
-      }
-
-      sessionStorage.clear();
-      toast(`${name || "ユーザー"} をログアウトしました`, "success");
-
-      $("#appView").classList.add("hidden");
-      $("#loginView").classList.remove("hidden");
-      $("#responsibilityId").value = "";
-    });
-  }
-
-  // サイドメニュー外クリックで閉じる
-  document.addEventListener("click", (e) => {
-    const menu = $("#sideMenu");
-    const hamburger = $("#hamburgerMenu");
-    if (!menu?.classList.contains("open")) return;
-    const clickedInsideMenu = menu.contains(e.target);
-    const clickedHamburger = hamburger?.contains(e.target);
-    if (!clickedInsideMenu && !clickedHamburger) {
-      menu.classList.remove("open");
-    }
-  });
-
-  function initHome() {
-  console.log("initHome 実行");
-  const stats = $("#summaryStats");
-  const expiring = $("#expiringList");
-  const trending = $("#trendingList");
-
-  if (!stats || !expiring || !trending) {
-    console.warn("HOMEセクションの要素が見つかりません");
+  const snapshot = await db.collection("users").where("id", "==", id).get();
+  if (snapshot.empty) {
+    loginError.textContent = "IDが見つかりません";
     return;
   }
 
-  const total = allProducts.length;
-  const expired = allProducts.filter(p => {
-    const today = new Date().toISOString().slice(0, 10);
-    return p.expire && p.expire < today;
-  }).length;
+  const user = snapshot.docs[0].data();
+  sessionStorage.setItem("userId", user.id);
+  sessionStorage.setItem("userName", user.name);
+  sessionStorage.setItem("role", user.role);
 
-  stats.innerHTML = `
-    <h3>在庫サマリー</h3>
-    <p>登録商品数：${total} 件</p>
-    <p>期限切れ商品：${expired} 件</p>
-  `;
+  document.body.classList.toggle("admin", user.role === "admin");
+  loginSection.classList.add("hidden");
+  mainSection.classList.remove("hidden");
+  userBadge.textContent = `${user.name}（${user.role}）`;
 
-  const soon = allProducts.filter(p => {
-    if (!p.expire) return false;
-    const today = new Date();
-    const exp = new Date(p.expire);
-    const diff = (exp - today) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 7;
+  await db.collection("logs").add({
+    type: "login",
+    userId: user.id,
+    userName: user.name,
+    role: user.role,
+    timestamp: new Date().toISOString()
   });
 
-  expiring.innerHTML = soon.length
-    ? soon.map(p => `<li>${p.productName}（期限: ${p.expire}）</li>`).join("")
-    : "<li>該当なし</li>";
+  routeTo("homeSection");
+});
+// 画面切替処理
+const routeTo = (sectionId) => {
+  document.querySelectorAll("section.content").forEach(sec => sec.classList.add("hidden"));
+  document.getElementById(sectionId).classList.remove("hidden");
+};
 
-  const freq = {};
-  allProducts.forEach(p => {
-    freq[p.productName] = (freq[p.productName] || 0) + 1;
+// メニュー操作
+document.querySelectorAll("#sideMenu li").forEach(item => {
+  item.addEventListener("click", () => {
+    const target = item.dataset.route;
+    if (target) routeTo(target);
+    document.getElementById("sideMenu").classList.add("hidden");
+  });
+});
+
+document.getElementById("menuToggle").addEventListener("click", () => {
+  document.getElementById("sideMenu").classList.toggle("hidden");
+});
+
+// トースト通知
+const showToast = (message) => {
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.remove("hidden");
+  setTimeout(() => toast.classList.add("hidden"), 3000);
+};
+
+// 商品登録処理
+document.getElementById("productForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const uid = sessionStorage.getItem("userId");
+  const role = sessionStorage.getItem("role");
+
+  const product = {
+    productName: document.getElementById("productName").value.trim(),
+    janCode: document.getElementById("janCode").value.trim(),
+    adminCode: document.getElementById("adminCode").value.trim(),
+    adminCategoryCode: role === "admin" ? document.getElementById("adminCategoryCode").value.trim() : "",
+    company: document.getElementById("company").value.trim(),
+    location: document.getElementById("location").value.trim(),
+    unit: document.getElementById("unit").value.trim(),
+    quantity: parseInt(document.getElementById("quantity").value) || 0,
+    expire: document.getElementById("expire").value,
+    lotNumber: document.getElementById("lotNumber").value.trim(),
+    category: {
+      major: document.getElementById("majorCategory").value,
+      minor: document.getElementById("minorCategory").value.trim()
+    },
+    status: "pending",
+    createdBy: uid,
+    createdAt: new Date().toISOString()
+  };
+
+  await db.collection("products").add(product);
+
+  await db.collection("logs").add({
+    type: "register",
+    userId: uid,
+    productName: product.productName,
+    timestamp: new Date().toISOString()
   });
 
-  const topItems = Object.entries(freq)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
+  showToast("商品を登録しました");
+  e.target.reset();
+});
+// 商品検索処理
+document.getElementById("searchBtn").addEventListener("click", async () => {
+  const keyword = document.getElementById("searchKeyword").value.trim();
+  const status = document.getElementById("searchStatus").value;
+  const major = document.getElementById("searchMajor").value;
+  const minor = document.getElementById("searchMinor").value.trim();
+  const isAdmin = sessionStorage.getItem("role") === "admin";
 
-  trending.innerHTML = topItems.length
-    ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
-    : "<li>該当なし</li>";
-} // ✅ ← initHome 関数の閉じ括弧
+  const snapshot = await db.collection("products").get();
+  const products = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 
-}); // ✅ ← DOMContentLoaded の閉じ括弧
+  const filtered = products.filter(p => {
+    const matchKeyword = keyword ? (p.productName?.includes(keyword) || p.janCode?.includes(keyword)) : true;
+    const matchStatus = status ? p.status === status : true;
+    const matchMajor = major ? p.category?.major === major : true;
+    const matchMinor = minor ? p.category?.minor?.includes(minor) : true;
+    return matchKeyword && matchStatus && matchMajor && matchMinor;
+  });
+
+  const list = document.getElementById("searchResultList");
+  list.innerHTML = "";
+
+  filtered.forEach(p => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <strong>${p.productName}</strong>（${p.quantity}個）<br>
+      ${isAdmin ? `<button class="editBtn" data-id="${p.id}">編集</button>` : ""}
+      ${isAdmin && p.status === "pending" ? `<button class="approveBtn" data-id="${p.id}">承認</button>` : ""}
+      <button class="changeQtyBtn" data-id="${p.id}">個数変更</button>
+    `;
+    list.appendChild(li);
+  });
+});
+
+// 編集処理（管理者のみ）
+document.getElementById("searchResultList").addEventListener("click", async (e) => {
+  if (e.target.classList.contains("editBtn")) {
+    const id = e.target.dataset.id;
+    const doc = await db.collection("products").doc(id).get();
+    const data = doc.data();
+    const newQty = prompt(`数量を変更（現在: ${data.quantity}）`, data.quantity);
+    if (newQty !== null) {
+      await db.collection("products").doc(id).update({ quantity: parseInt(newQty) });
+      await db.collection("logs").add({
+        type: "edit",
+        userId: sessionStorage.getItem("userId"),
+        productId: id,
+        changes: { quantity: newQty },
+        timestamp: new Date().toISOString()
+      });
+      showToast("数量を更新しました");
+    }
+  }
+
+  // 承認処理（管理者のみ）
+  if (e.target.classList.contains("approveBtn")) {
+    const id = e.target.dataset.id;
+    await db.collection("products").doc(id).update({ status: "approved" });
+    await db.collection("logs").add({
+      type: "approve",
+      userId: sessionStorage.getItem("userId"),
+      productId: id,
+      timestamp: new Date().toISOString()
+    });
+    showToast("商品を承認しました");
+  }
+
+  // 個数変更（全ユーザー）
+  if (e.target.classList.contains("changeQtyBtn")) {
+    const id = e.target.dataset.id;
+    const doc = await db.collection("products").doc(id).get();
+    const data = doc.data();
+    const newQty = prompt(`数量を変更（現在: ${data.quantity}）`, data.quantity);
+    if (newQty !== null) {
+      await db.collection("products").doc(id).update({ quantity: parseInt(newQty) });
+      await db.collection("logs").add({
+        type: "changeQty",
+        userId: sessionStorage.getItem("userId"),
+        productId: id,
+        changes: { quantity: newQty },
+        timestamp: new Date().toISOString()
+      });
+      showToast("数量を変更しました");
+    }
+  }
+});
+// 操作履歴表示
+const logList = document.getElementById("logList");
+document.querySelector('[data-route="historySection"]').addEventListener("click", async () => {
+  const logs = await db.collection("logs").orderBy("timestamp", "desc").limit(50).get();
+  logList.innerHTML = "";
+  logs.forEach(doc => {
+    const log = doc.data();
+    const li = document.createElement("li");
+    li.textContent = `${new Date(log.timestamp).toLocaleString("ja-JP")} - ${log.userName || log.userId} が ${log.type} を実行`;
+    logList.appendChild(li);
+  });
+});
+
+// フリマ出品処理
+document.getElementById("marketForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const item = {
+    productName: document.getElementById("marketProductName").value.trim(),
+    price: parseInt(document.getElementById("marketPrice").value),
+    condition: document.getElementById("marketCondition").value,
+    sellerId: sessionStorage.getItem("userId"),
+    createdAt: new Date().toISOString()
+  };
+  await db.collection("marketItems").add(item);
+  await db.collection("marketLogs").add({
+    type: "list",
+    sellerId: item.sellerId,
+    productName: item.productName,
+    timestamp: item.createdAt
+  });
+  showToast("出品しました");
+  e.target.reset();
+});
+
+// 設定画面：ダークモード・通知切替
+document.getElementById("darkModeToggle").addEventListener("change", (e) => {
+  document.body.classList.toggle("dark", e.target.checked);
+});
+
+document.getElementById("toastToggle").addEventListener("change", (e) => {
+  document.body.dataset.toast = e.target.checked ? "on" : "off";
+});
+
+// 管理者設定保存（プリセット）
+document.getElementById("saveAdminSettings").addEventListener("click", () => {
+  const preset = document.getElementById("adminPresetCategory").value.trim();
+  if (preset) {
+    localStorage.setItem("adminPresetCategory", preset);
+    showToast("管理プリセットを保存しました");
+  }
+});
+
+// 問題報告処理
+document.getElementById("alertForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const alert = {
+    screen: document.getElementById("alertScreen").value.trim(),
+    message: document.getElementById("alertMessage").value.trim(),
+    userId: sessionStorage.getItem("userId"),
+    timestamp: new Date().toISOString()
+  };
+  await db.collection("alerts").add(alert);
+  showToast("問題を報告しました");
+  e.target.reset();
+});
+
+// ログアウト処理
+document.getElementById("logoutBtn").addEventListener("click", async () => {
+  const uid = sessionStorage.getItem("userId");
+  await db.collection("logs").add({
+    type: "logout",
+    userId: uid,
+    timestamp: new Date().toISOString()
+  });
+  sessionStorage.clear();
+  location.reload();
+});
