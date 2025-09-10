@@ -1,5 +1,185 @@
 <!DOCTYPE html>
+<htm<!DOCTYPE html>
 <html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ログイン - 在庫管理</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body.login-screen {
+      font-family: sans-serif;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 0;
+    }
+
+    .login-container {
+      max-width: 400px;
+      margin: 60px auto;
+      padding: 2rem;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .login-container h1 {
+      font-size: 1.4rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .login-container input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      margin-top: 8px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .login-container input.is-invalid {
+      border-color: #e74c3c;
+      box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
+      animation: shake 0.2s ease;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      50% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+      100% { transform: translateX(0); }
+    }
+
+    .login-container button {
+      margin-top: 16px;
+      padding: 12px;
+      font-size: 1rem;
+      background-color: #4e73df;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+    }
+
+    .login-container button:hover {
+      background-color: #2e59d9;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 24px;
+      transform: translateX(-50%) translateY(10px);
+      background: #333;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      opacity: 0;
+      transition: all .25s ease;
+      z-index: 2000;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.error { background:#c0392b; }
+    .toast.success { background:#1cc88a; }
+  </style>
+</head>
+<body class="login-screen">
+  <main class="login-container">
+    <h1>在庫管理ログイン</h1>
+    <input id="responsibilityId" type="text" inputmode="numeric" placeholder="責任者番号" value="1234" />
+    <button id="loginBtn">ログイン</button>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import {
+      getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.firebasestorage.app",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8",
+      measurementId: "G-TRH31MJCE3"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const $ = s => document.querySelector(s);
+    const toast = (msg, type='info') => {
+      const t = document.createElement('div');
+      t.className = `toast ${type}`; t.textContent = msg;
+      document.body.appendChild(t);
+      requestAnimationFrame(() => t.classList.add('show'));
+      setTimeout(() => t.classList.remove('show'), 2000);
+      setTimeout(() => t.remove(), 2600);
+    };
+
+    async function logAction(action, detail = {}) {
+      const id = sessionStorage.getItem("responsibilityId");
+      const name = sessionStorage.getItem("responsibilityName");
+      const role = sessionStorage.getItem("responsibilityRole");
+      await addDoc(collection(db, "logs"), {
+        userId: id,
+        userName: name,
+        role,
+        action,
+        detail,
+        timestamp: serverTimestamp()
+      });
+    }
+
+    const input = $('#responsibilityId');
+    const loginBtn = $('#loginBtn');
+
+    input.addEventListener("keydown", e => {
+      if (e.key === "Enter") loginBtn.click();
+    });
+
+    loginBtn.onclick = async () => {
+      const id = input.value.trim();
+      if (!id) {
+        input.classList.add("is-invalid");
+        setTimeout(() => input.classList.remove("is-invalid"), 1000);
+        return toast('責任者番号を入力してください', 'error');
+      }
+
+      try {
+        const q = query(collection(db, "users"), where("id", "==", id));
+        const snap = await getDocs(q);
+        if (snap.empty) return toast('番号が見つかりません', 'error');
+
+        const data = snap.docs[0].data();
+        sessionStorage.setItem("responsibilityId", id);
+        sessionStorage.setItem("responsibilityName", data.name);
+        sessionStorage.setItem("responsibilityRole", data.role);
+
+        await logAction("ログイン");
+
+        toast('ログイン成功', 'success');
+        setTimeout(() => location.href = "responsibility.html", 800);
+      } catch (e) {
+        console.error(e);
+        toast('ログイン処理に失敗しました', 'error');
+      }
+    };
+  </script>
+</body>
+</html>l lang="ja">
 <head>
   <meta charset="UTF-8"><!DOCTYPE html>
 <html lang="ja">
@@ -196,6 +376,7 @@
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
 
 
 
