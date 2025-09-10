@@ -225,3 +225,58 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el) el.value = "";
     });
     $("#qtyUnit").value = "個";
+  }
+
+  let allProducts = [];
+
+  async function loadProducts() {
+    const snap = await getDocs(collection(db, "products"));
+    allProducts = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0));
+  }
+
+  function initList() {
+    loadProducts();
+  }
+
+  function initHome() {
+    const stats = $("#summaryStats");
+    const expiring = $("#expiringSoon");
+    const trending = $("#trendingItems");
+    const flea = $("#fleaTips");
+
+    const total = allProducts.length;
+    const byCategory = {};
+    allProducts.forEach(p => {
+      const cat = p.catL || "未分類";
+      byCategory[cat] = (byCategory[cat] || 0) + 1;
+    });
+
+    stats.innerHTML = `<h3>現在の在庫数</h3><p>登録商品数: ${total}</p>` +
+      Object.entries(byCategory).map(([k,v]) => `<p>${k}: ${v}件</p>`).join("");
+
+    const soon = allProducts
+      .filter(p => p.expire)
+      .sort((a,b) => new Date(a.expire) - new Date(b.expire))
+      .slice(0,5);
+    expiring.innerHTML = `<h3>期限が近い商品</h3>` +
+      soon.map(p => `<p>${escapeHtml(p.productName)}（${p.expire}）</p>`).join("");
+
+    const janCount = {};
+    allProducts.forEach(p => {
+      if (p.jan) janCount[p.jan] = (janCount[p.jan] || 0) + 1;
+    });
+    const trendingList = Object.entries(janCount)
+      .sort((a,b) => b[1] - a[1])
+      .slice(0,5);
+    trending.innerHTML = `<h3>注目JANコード</h3>` +
+      trendingList.map(([jan,count]) => `<p>${jan}: ${count}件</p>`).join("");
+
+    flea.innerHTML = `<h3>フリマ運営ヒント</h3><p>在庫が多い商品は出品候補に。期限が近いものは値引き対象に。</p>`;
+  }
+
+  $("#systemTitle")?.addEventListener("click", () => {
+    routeTo("homeSection");
+    initHome();
+  });
+});
