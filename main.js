@@ -350,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
-    } catch (e) {
+      catch (e) {
       console.error("履歴の取得
     } catch (e) {
       console.error("履歴の取得に失敗しました:", e);
@@ -477,3 +477,4 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
