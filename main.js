@@ -225,4 +225,3 @@ document.addEventListener("DOMContentLoaded", () => {
       if (el) el.value = "";
     });
     $("#qtyUnit").value = "個";
-  }
