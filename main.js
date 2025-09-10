@@ -101,17 +101,17 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function showApp() {
-    loginView.classList.add("hidden");
-    appView.classList.remove("hidden");
-    setTimeout(async () => {
-      initHeader();
-      initMenu();
-      initProductForm();
-      await initList();     // ← 商品一覧データを取得
-      initHome();           // ← ホーム画面を初期化
-      routeTo("homeSection"); // ← 初期表示をHOMEに切り替え
-    }, 0);
-  }
+  loginView.classList.add("hidden");
+  appView.classList.remove("hidden");
+  setTimeout(async () => {
+    initHeader();
+    initMenu();
+    initProductForm();
+    await initList();     // ← 商品一覧取得
+    initHome();           // ← ホーム初期化
+    routeTo("homeSection"); // ← 初期表示をHOMEに
+  }, 0);
+}
   let allProducts = [];
 async function initList() {
   try {
@@ -140,7 +140,10 @@ async function initList() {
     $("#hamburgerMenu")?.addEventListener("click", () => {
       $("#sideMenu")?.classList.toggle("open");
     });
-
+$("#systemTitle")?.addEventListener("click", () => {
+  routeTo("homeSection");
+  $("#sideMenu")?.classList.remove("open");
+});
     $$(".nav-item[data-target]").forEach((btn) => {
       btn.addEventListener("click", () => {
         routeTo(btn.dataset.target);
@@ -156,7 +159,18 @@ async function initList() {
       location.reload();
     });
   }
+document.addEventListener("click", (e) => {
+  const menu = $("#sideMenu");
+  const hamburger = $("#hamburgerMenu");
+  if (!menu?.classList.contains("open")) return;
 
+  const clickedInsideMenu = menu.contains(e.target);
+  const clickedHamburger = hamburger?.contains(e.target);
+
+  if (!clickedInsideMenu && !clickedHamburger) {
+    menu.classList.remove("open");
+  }
+});
   function routeTo(panelId) {
     $$(".panel").forEach((p) => p.classList.add("hidden"));
     const el = $(`#${panelId}`);
@@ -217,4 +231,5 @@ async function initList() {
 
   // 商品登録フォーム（initProductForm）と clearProductForm は既存のままでOK
 });
+
 
