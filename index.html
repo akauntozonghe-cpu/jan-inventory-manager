@@ -59,29 +59,82 @@
 </section>
 
       <!-- 商品登録 -->
-      <section id="productSection" class="panel hidden">
-        <h2>商品登録</h2>
-        <div class="form-group"><label for="mgtNo">管理番号</label><input id="mgtNo" type="text" /></div>
-        <div class="form-group admin-only"><label for="mgtDistNo">配布先管理番号</label><input id="mgtDistNo" type="text" /></div>
-        <div class="form-group"><label for="location">保管場所</label><input id="location" type="text" /></div>
-        <div class="form-group"><label for="catL">カテゴリ（大）</label><input id="catL" type="text" /></div>
-        <div class="form-group"><label for="catS">カテゴリ（小）</label><input id="catS" type="text" /></div>
-        <div class="form-group"><label for="jan">JANコード</label><input id="jan" type="text" inputmode="numeric" /></div>
-        <div class="form-group"><label for="company">メーカー</label><input id="company" type="text" /></div>
-        <div class="form-group"><label for="productName">商品名</label><input id="productName" type="text" /></div>
-        <div class="form-group"><label for="lotNo">ロット番号</label><input id="lotNo" type="text" /></div>
-        <div class="form-group"><label for="expire">期限</label><input id="expire" type="date" /></div>
-        <div class="form-group"><label for="qty">数量</label><input id="qty" type="number" min="0" /></div>
-        <div class="form-group"><label for="qtyUnit">単位</label>
-          <select id="qtyUnit">
-            <option value="個">個</option>
-            <option value="箱">箱</option>
-            <option value="袋">袋</option>
-          </select>
-        </div>
-        <div class="form-group"><label for="photo">商品画像（任意）</label><input id="photo" type="file" accept="image/*" /></div>
-        <button id="registerBtn">登録する</button>
-      </section>
+      <section id="productRegisterSection" class="panel hidden">
+  <h2>商品登録</h2>
+  <form id="productForm">
+    <!-- 管理番号 -->
+    <input type="text" id="productId" placeholder="管理番号" required />
+
+    <!-- 管理区別番号（管理者のみ） -->
+    <input type="text" id="adminCode" placeholder="管理区別番号" class="admin-only" />
+
+    <!-- 保管場所：選択＋手入力 -->
+    <label>保管場所</label>
+    <select id="locationPreset">
+      <option value="">選択してください</option>
+      <option value="キッチン">キッチン</option>
+      <option value="三段引き出し">三段引き出し</option>
+      <option value="倉庫">倉庫</option>
+      <option value="フリマ">フリマ</option>
+      <option value="洗面所">洗面所</option>
+    </select>
+    <input type="text" id="locationCustom" placeholder="その他の保管場所を入力" />
+
+    <!-- 大分類・小分類 -->
+    <label>大分類</label>
+    <select id="majorCategory">
+      <option value="">選択してください</option>
+      <option value="医療">医療</option>
+      <option value="薬">薬</option>
+      <option value="小林">小林</option>
+      <option value="シャンプーセット">シャンプーセット</option>
+      <option value="洗剤">洗剤</option>
+      <option value="洗面台下">洗面台下</option>
+      <option value="台所下">台所下</option>
+      <option value="フリマ">フリマ</option>
+    </select>
+
+    <label>小分類</label>
+    <input type="text" id="minorCategory" placeholder="小分類を入力（選択式も可）" />
+
+    <!-- JANコード -->
+    <input type="text" id="janCode" placeholder="JANコード" />
+
+    <!-- 写真 -->
+    <input type="file" id="productPhoto" accept="image/*" />
+
+    <!-- 会社名・品名 -->
+    <input type="text" id="company" placeholder="会社名" />
+    <input type="text" id="productName" placeholder="品名" />
+
+    <!-- Lot番号・期限 -->
+    <input type="text" id="lotNumber" placeholder="Lot.No・製造番号" />
+    <input type="date" id="expireDate" />
+
+    <!-- 個数単位：選択＋手入力 -->
+    <label>単位</label>
+    <select id="unitPreset">
+      <option value="">選択してください</option>
+      <option value="個">個</option>
+      <option value="枚">枚</option>
+      <option value="パック">パック</option>
+      <option value="袋">袋</option>
+      <option value="セット">セット</option>
+      <option value="箱">箱</option>
+      <option value="包">包</option>
+      <option value="本">本</option>
+      <option value="枚入り">枚入り</option>
+    </select>
+    <input type="text" id="unitCustom" placeholder="その他の単位を入力" />
+
+    <!-- 数量 -->
+    <input type="number" id="quantity" placeholder="数量" min="1" />
+
+    <!-- ボタン -->
+    <button type="submit">登録</button>
+    <button type="button" id="backToListBtn">一覧に戻る</button>
+  </form>
+</section>
 
       <!-- 商品一覧 -->
       <section id="listSection" class="panel hidden">
@@ -120,4 +173,5 @@
   <script type="module" src="main.js"></script>
 </body>
 </html>
+
 
