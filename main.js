@@ -53,6 +53,8 @@ async function logAction(action, detail = {}) {
   }
 }
 
+// ...（Firebase初期化・ユーティリティ関数はそのまま）
+
 document.addEventListener("DOMContentLoaded", () => {
   const loginView = $("#loginView");
   const appView = $("#appView");
@@ -106,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
       initMenu();
       initProductForm();
       initList();
-      initHome();
+      initHome(); // ← ホーム初期化
       routeTo("homeSection");
     }, 0);
   }
@@ -154,6 +156,16 @@ document.addEventListener("DOMContentLoaded", () => {
   function initProductForm() {
     const registerBtn = $("#registerBtn");
     const photoInput = $("#photo");
+
+    photoInput?.addEventListener("change", () => {
+      const file = photoInput.files?.[0];
+      const preview = $("#photoPreview");
+      if (file && preview) {
+        const reader = new FileReader();
+        reader.onload = () => preview.src = reader.result;
+        reader.readAsDataURL(file);
+      }
+    });
 
     registerBtn?.addEventListener("click", async () => {
       const role = sessionStorage.getItem("responsibilityRole") || "user";
@@ -220,14 +232,56 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function clearProductForm() {
-  [
-    "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
-    "#jan", "#company", "#productName", "#lotNo", "#expire", "#qty", "#photo"
-  ].forEach((selector) => {
-    const el = document.querySelector(selector);
-    if (el) el.value = "";
-  });
-  const unit = document.querySelector("#qtyUnit");
-  if (unit) unit.value = "個";
-}
+    [
+      "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
+      "#jan", "#company", "#productName", "#lotNo", "#expire", "#qty", "#photo"
+    ].forEach((selector) => {
+      const el = document.querySelector(selector);
+      if (el) el.value = "";
+    });
+    const unit = document.querySelector("#qtyUnit");
+    if (unit) unit.value = "個";
+  }
+
+  function initHome() {
+    const stats = $("#summaryStats");
+    const expiring = $("#expiringList");
+    const trending = $("#trendingList");
+
+    const total = allProducts?.length || 0;
+    const expired = allProducts?.filter(p => {
+      const today = new Date().toISOString().slice(0, 10);
+      return p.expire && p.expire < today;
+    }).length || 0;
+
+    stats.innerHTML = `
+      <h3>在庫サマリー</h3>
+      <p>登録商品数：${total} 件</p>
+      <p>期限切れ商品：${expired} 件</p>
+    `;
+
+    const soon = allProducts?.filter(p => {
+      if (!p.expire) return false;
+      const today = new Date();
+      const exp = new Date(p.expire);
+      const diff = (exp - today) / (1000 * 60 * 60 * 24);
+      return diff >= 0 && diff <= 7;
+    }) || [];
+
+    $("#expiringList").innerHTML = soon.length
+      ? soon.map(p => `<li>${p.productName}（期限: ${p.expire}）</li>`).join("")
+      : "<li>該当なし</li>";
+
+    const freq = {};
+    allProducts?.forEach(p => {
+      freq[p.productName] = (freq[p.productName] || 0) + 1;
+    });
+    const topItems = Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+
+    $("#trendingList").innerHTML = topItems.length
+      ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
+      : "<li>該当なし</li>";
+  }
 });
