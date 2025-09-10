@@ -226,7 +226,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <div class="log-user">責任者：${log.userName || "不明"}</div>
           <div class="log-action">操作：${translateAction(log.action)}</div>
         `;
-        listimport { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        //listimport { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        
 import {
   getFirestore, collection, query, where, getDocs, addDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
@@ -597,6 +598,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
