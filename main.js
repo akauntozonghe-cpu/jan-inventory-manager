@@ -100,17 +100,15 @@ document.addEventListener("DOMContentLoaded", () => {
     showApp();
   }
 
-  function showApp() {
+  async function showApp() {
   loginView.classList.add("hidden");
   appView.classList.remove("hidden");
-  setTimeout(async () => {
-    initHeader();
-    initMenu();
-    initProductForm();
-    await initList();     // ← 商品一覧取得
-    initHome();           // ← ホーム初期化
-    routeTo("homeSection"); // ← 初期表示をHOMEに
-  }, 0);
+  await initList();     // 商品一覧取得
+  initHeader();
+  initMenu();
+  initProductForm();
+  initHome();           // HOME初期化
+  routeTo("homeSection"); // 初期表示をHOMEに
 }
   let allProducts = [];
 async function initList() {
@@ -231,5 +229,6 @@ document.addEventListener("click", (e) => {
 
   // 商品登録フォーム（initProductForm）と clearProductForm は既存のままでOK
 });
+
 
 
