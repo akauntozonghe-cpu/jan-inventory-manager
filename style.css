@@ -1,182 +1,164 @@
-:root {
-  --bg: #f4f6f9;
-  --card: #ffffff;
-  --text: #222;
-  --muted: #667085;
-  --primary: #4e73df;
-  --primary-2: #2e59d9;
-  --danger: #c0392b;
-  --ok: #1cc88a;
-  --border: #e5e7eb;
+/* 全体基本設定 */
+body {
+  font-family: "Segoe UI", "Hiragino Kaku Gothic ProN", sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #f9f9f9;
+  color: #333;
 }
 
-
-.login-container {
-  max-width: 420px;
-  margin: 64px auto;
-  padding: 2rem;
-  background: var(--card);
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,.08);
-  text-align: center;
+h1, h2, h3 {
+  margin: 1em 0 0.5em;
+  font-weight: 600;
 }
 
-.login-container input,
-.login-container button {
+input, select, textarea, button {
+  font-size: 1em;
+  margin: 0.5em 0;
+  padding: 0.5em;
   width: 100%;
-  max-width: 360px;
-  margin: 0 auto;
-  display: block;
-  font-size: 1rem;
-  padding: 12px;
-  border-radius: 8px;
+  box-sizing: border-box;
 }
 
-.login-container input {
-  border: 1px solid #ccc;
-}
-
-.login-container button {
-  margin-top: 12px;
-  background: var(--primary);
-  color: #fff;
+button {
+  background: #0078d4;
+  color: white;
   border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color .2s ease;
 }
 
-.login-container button:hover {
-  background: var(--primary-2);
+button:hover {
+  background: #005fa3;
 }
 
-/* 共通 */
-.hidden { display: none !important; }
-.muted { color: var(--muted); }
-
-/* App */
-#systemHeader {
-  position: sticky; top: 0; z-index: 5;
-  background: #f8fafc; border-bottom: 1px solid var(--border);
-  padding: 10px 16px; display: flex; align-items: center; justify-content: space-between;
+section.content {
+  padding: 1em;
 }
-#systemTitle { font-size: 1.1rem; font-weight: 700; }
-#userHeader { display: flex; align-items: center; gap: 12px; }
-.user-name { font-weight: 600; }
-.badge { padding: 4px 8px; color: #fff; border-radius: 6px; font-weight: 700; font-size: .85rem; }
-.badge.admin { background: var(--ok); }
-.badge.user { background: var(--primary); }
 
-#hamburgerMenu { font-size: 24px; background: none; border: none; cursor: pointer; }
+.hidden {
+  display: none !important;
+}
+
+.error {
+  color: red;
+  font-size: 0.9em;
+}
+
+/* ヘッダーとメニュー */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0078d4;
+  color: white;
+  padding: 0.5em 1em;
+}
+
+#menuToggle {
+  font-size: 1.5em;
+  background: none;
+  border: none;
+  color: white;
+}
 
 #sideMenu {
-  position: fixed; top: 56px; left: -240px; width: 220px; height: calc(100% - 56px);
-  background: #fff; border-right: 1px solid var(--border); padding: 10px; transition: left .25s ease; z-index: 10;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 200px;
+  height: 100%;
+  background: #eee;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  padding: 1em;
+  z-index: 1000;
 }
-#sideMenu.open { left: 0; }
-#sideMenu .nav-item {
-  display: block; width: 100%; text-align: left; padding: 10px; margin: 6px 0;
-  background: #fff; border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+
+#sideMenu ul {
+  list-style: none;
+  padding: 0;
 }
-#sideMenu .nav-item.danger { color: #fff; background: var(--danger); border-color: var(--danger); }
 
-.main-content { padding: 16px; max-width: 1100px; margin: 0 auto; }
-
-/* パネル */
-.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
-.panel + .panel { margin-top: 16px; }
-
-/* 商品登録フォーム */
-.grid {
-  display: grid; gap: 12px;
-  grid-template-columns: repeat(1, minmax(0,1fr));
-}
-@media (min-width: 768px) {
-  .grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-.field .label { display: block; font-weight: 600; margin-bottom: 6px; }
-.field input, .field select { width: 100%; padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
-.inline { display: flex; gap: 8px; align-items: center; }
-.actions { margin-top: 8px; display: flex; gap: 8px; }
-.primary { background: var(--primary); color: #fff; border: none; padding: 10px 14px; border-radius: 8px; cursor: pointer; }
-.secondary { background: #f3f4f6; color: #111; border: 1px solid var(--border); padding: 10px 14px; border-radius: 8px; cursor: pointer; }
-.primary:hover { background: var(--primary-2); }
-
-.scan-preview { width: 100%; max-width: 360px; border-radius: 12px; margin-top: 8px; background: #000; }
-
-/* 商品一覧 */
-.filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.filters input { padding: 10px; border: 1px solid var(--border); border-radius: 8px; }
-.list { display: grid; gap: 10px; }
-.list-row { border: 1px solid var(--border); border-radius: 10px; background: #fff; overflow: hidden; }
-.row-head { padding: 12px; display: grid; gap: 6px; grid-template-columns: 1fr auto; align-items: center; }
-.row-main { font-size: 1rem; }
-.row-sub { color: var(--muted); font-size: .9rem; grid-column: 1 / -1; }
-.row-head .toggle { border: 1px solid var(--border); background: #f8fafc; border-radius: 8px; padding: 6px 10px; cursor: pointer; }
-.row-body { padding: 12px; border-top: 1px solid var(--border); }
-.row-body .kv { display: grid; grid-template-columns: repeat(1, minmax(0,1fr)); gap: 8px; }
-@media (min-width: 768px) {
-  .row-body .kv { grid-template-columns: repeat(2, minmax(0,1fr)); }
-}
-.k { font-weight: 600; color: #374151; margin-right: 6px; }
-.v { color: #111827; }
-.photo img { width: 100%; max-width: 300px; border-radius: 10px; border: 1px solid var(--border); }
-.row-actions { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.qty-input { width: 120px; padding: 8px; border: 1px solid var(--border); border-radius: 8px; }
-.pager { display: flex; gap: 12px; align-items: center; justify-content: center; margin-top: 12px; }
-
-/* 入力エラー演出 */
-.is-invalid {
-  border-color: #e74c3c !important;
-  box-shadow: 0 0 0 3px rgba(231,76,60,0.15);
-  animation: shake .18s ease;
-}
-@keyframes shake { 0%{transform:translateX(0)}25%{transform:translateX(-4px)}50%{transform:translateX(4px)}75%{transform:translateX(-2px)}100%{transform:translateX(0)} }
-
-/* トースト */
-#toastHost { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 2000; }
-.toast {
-  background: #333; color: #fff; padding: 10px 14px; border-radius: 10px;
-  opacity: 0; transform: translateY(10px); transition: all .22s ease;
-  margin-top: 8px; text-align: center; min-width: 220px;
-}
-.toast.show { opacity: 1; transform: translateY(0); }
-.toast.error { background: var(--danger); }
-.toast.success { background: var(--ok); }
-
-/* 権限制御の見た目 */
-.admin-only.hidden { display: none !important; }
-
-#systemTitle {
+#sideMenu li {
+  padding: 0.5em 0;
   cursor: pointer;
-  transition: color 0.2s ease, transform 0.2s ease;
+  border-bottom: 1px solid #ccc;
 }
 
-#systemTitle:hover {
-  color: var(--primary);
-  transform: scale(1.05);
+#sideMenu li:hover {
+  background: #ddd;
 }
 
-/* HOMEセクションの表示アニメーション */
-#homeSection {
-  animation: fadeIn 0.4s ease;
+/* 通知トースト */
+#toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 1em 2em;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 2000;
+  animation: fadeInOut 3s ease-in-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
+@keyframes fadeInOut {
+  0% { opacity: 0; bottom: 0; }
+  10% { opacity: 1; bottom: 20px; }
+  90% { opacity: 1; bottom: 20px; }
+  100% { opacity: 0; bottom: 0; }
+}
+
+/* 管理者専用表示制御 */
+.admin-only {
+  display: none;
+}
+
+body.admin .admin-only {
+  display: block;
+}
+
+/* ダークモード対応 */
+body.dark {
+  background: #1e1e1e;
+  color: #ddd;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea {
+  background: #2e2e2e;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+body.dark button {
+  background: #444;
+  color: #fff;
+}
+
+body.dark #sideMenu {
+  background: #2a2a2a;
+  color: #ccc;
+}
+
+body.dark #toast {
+  background: #555;
+}
+
+/* スマホ対応 */
+@media screen and (max-width: 600px) {
+  header h2 {
+    font-size: 1.2em;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+
+  #sideMenu {
+    width: 70%;
+  }
+
+  input, select, textarea, button {
+    font-size: 1em;
   }
 }
-
-/* 再表示用のクラス（JSで付け外し可能） */
-.fade {
-  animation: fadeIn 0.4s ease;
-}
-
-
-
-
