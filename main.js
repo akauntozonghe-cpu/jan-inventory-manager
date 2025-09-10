@@ -18,21 +18,29 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 
-// ログイン処理
-loginBtn.addEventListener("click", async () => {
-  const id = loginId.value.trim();
-  // Enterキーでログイン送信対応
+function showInlineError(el, message) { ... }
+function clearInlineError(el) { ... }
+function showToast(message, type = "success", duration = 3000) { ... }
 loginId.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
-    e.preventDefault(); // フォーム送信を防ぐ
-    loginBtn.click();   // ログインボタンをクリック
+    e.preventDefault();
+    loginBtn.click();
   }
 });
-  if (!id) return (loginError.textContent = "IDを入力してください");
+
+ loginBtn.addEventListener("click", async () => {
+  clearInlineError(loginError);
+  const id = loginId.value.trim();
+  if (!id) {
+    showInlineError(loginError, "責任者番号を入力してください");
+    loginId.focus();
+    return;
+  }
 
   const snapshot = await db.collection("users").where("id", "==", id).get();
   if (snapshot.empty) {
-    loginError.textContent = "IDが見つかりません";
+    showInlineError(loginError, "責任者番号が見つかりません");
+    loginId.focus();
     return;
   }
 
@@ -50,6 +58,16 @@ loginId.addEventListener("keydown", (e) => {
   mainSection.classList.remove("hidden");
   userBadge.textContent = `${user.name}（${user.role}）`;
 
+  showToast("ログインしました", "success");
+  routeTo("homeSection");
+  renderHomeDashboard();
+
+  if (user.role === "admin") {
+    updateAdminBadge(); // ← 管理者向け通知
+  }
+
+  await db.collection("logs").add({ ... });
+});
   await db.collection("logs").add({
     type: "login",
     userId: user.id,
@@ -59,6 +77,20 @@ loginId.addEventListener("keydown", (e) => {
   });
 
   routeTo("homeSection");
+});
+async function updateAdminBadge() {
+  const snap = await db.collection("products").where("status", "==", "pending").get();
+  const count = snap.size;
+  const badge = document.querySelector('[data-route="adminSection"]');
+  badge.textContent = count > 0 ? `🛡️ 管理者画面（${count}件）` : "🛡️ 管理者画面";
+
+  if (count > 0) {
+    showToast(`承認待ちの商品が ${count} 件あります`, "warning");
+  }
+}
+document.querySelector('[data-route="adminSection"]').addEventListener("click", async () => {
+  await updateAdminBadge();
+  // 他の履歴・報告取得処理…
 });
 
 // タイトルバーに日時表示
@@ -381,5 +413,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
 
 
