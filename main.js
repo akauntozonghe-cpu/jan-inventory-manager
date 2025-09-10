@@ -345,13 +345,36 @@ document.addEventListener("DOMContentLoaded", () => {
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    trending.innerHTML = topItems.length
+       trending.innerHTML = topItems.length
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
   }
-});
-      catch (e) {
-      console.error("履歴の取得
+
+  async function initLogList() {
+    try {
+      const snap = await getDocs(collection(db, "logs"));
+      const list = $("#logList");
+      list.innerHTML = "";
+
+      const logs = snap.docs.map(doc => doc.data()).sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+
+      logs.forEach(log => {
+        const time = new Date(log.timestamp).toLocaleString("ja-JP", {
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit"
+        });
+
+        const item = document.createElement("div");
+        item.className = "log-item";
+        item.innerHTML = `
+          <div class="log-time">${time}</div>
+          <div class="log-user">責任者：${log.userName || "不明"}</div>
+          <div class="log-action">操作：${translateAction(log.action)}</div>
+        `;
+        list.appendChild(item);
+      });
     } catch (e) {
       console.error("履歴の取得に失敗しました:", e);
       toast("履歴の取得に失敗しました", "error");
@@ -372,6 +395,7 @@ document.addEventListener("DOMContentLoaded", () => {
   $("#backToHomeBtn")?.addEventListener("click", () => {
     routeTo("homeSection");
   });
+});
 
   function initMenu() {
     $("#hamburgerMenu")?.addEventListener("click", () => {
@@ -477,4 +501,5 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
