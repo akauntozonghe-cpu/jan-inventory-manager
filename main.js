@@ -228,10 +228,6 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
         list.appendChild(item); // ← これで完了
         
-import {
-  getFirestore, collection, query, where, getDocs, addDoc
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -598,6 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
