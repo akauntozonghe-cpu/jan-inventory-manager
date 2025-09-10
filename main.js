@@ -1,5 +1,72 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // ここにすべての初期化処理（loginBtn, showApp, initHomeなど）が入る
+  const $ = (s) => document.querySelector(s);
+  const $$ = (s) => document.querySelectorAll(s);
+
+  let allProducts = [];
+
+  const loginView = $("#loginView");
+  const appView = $("#appView");
+  const loginInput = $("#responsibilityId");
+  const loginBtn = $("#loginBtn");
+
+  loginBtn?.addEventListener("click", async () => {
+    const id = loginInput.value.trim();
+    if (!id) {
+      loginInput.classList.add("is-invalid");
+      setTimeout(() => loginInput.classList.remove("is-invalid"), 800);
+      toast("責任者番号を入力してください", "error");
+      return;
+    }
+
+    try {
+      const qy = query(collection(db, "users"), where("id", "==", id));
+      const snap = await getDocs(qy);
+      if (snap.empty) {
+        toast("番号が見つかりません", "error");
+        return;
+      }
+
+      const data = snap.docs[0].data();
+      sessionStorage.setItem("responsibilityId", id);
+      sessionStorage.setItem("responsibilityName", data.name || "未設定");
+      sessionStorage.setItem("responsibilityRole", data.role || "user");
+
+      toast("ログイン成功", "success");
+      setTimeout(() => showApp(), 500);
+    } catch (e) {
+      console.error("ログイン失敗:", e);
+      toast("ログイン処理に失敗しました", "error");
+    }
+  });
+
+  async function showApp() {
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+    await initList();
+    initHome();
+    routeTo("homeSection");
+  }
+
+  async function initList() {
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error("商品一覧の取得に失敗しました", e);
+      toast("商品一覧の取得に失敗しました", "error");
+    }
+  }
+
+  function routeTo(panelId) {
+    $$(".panel").forEach((p) => p.classList.add("hidden"));
+    const el = $(`#${panelId}`);
+    if (el) {
+      el.classList.remove("hidden");
+      el.classList.remove("fade");
+      void el.offsetWidth;
+      el.classList.add("fade");
+    }
+  }
 
   function initHome() {
     console.log("initHome 実行");
@@ -49,5 +116,4 @@ document.addEventListener("DOMContentLoaded", () => {
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
   }
-
-}); // ← これがないとJSが止まる！
+});
