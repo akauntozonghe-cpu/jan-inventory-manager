@@ -53,7 +53,6 @@ async function logAction(action, detail = {}) {
   }
 }
 
-// 初期化
 document.addEventListener("DOMContentLoaded", () => {
   const loginView = $("#loginView");
   const appView = $("#appView");
@@ -136,7 +135,7 @@ document.addEventListener("DOMContentLoaded", () => {
         $("#sideMenu")?.classList.remove("open");
       });
     });
-   }
+
     $("#logoutBtn")?.addEventListener("click", async () => {
       const name = sessionStorage.getItem("responsibilityName");
       await logAction("ログアウト");
@@ -221,7 +220,13 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function clearProductForm() {
-    [
-      "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
-      "#jan", "#company", "#productName", "#lotNo", "#expire", "#
-
+  [
+    "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
+    "#jan", "#company", "#productName", "#lotNo", "#expire", "#qty", "#photo"
+  ].forEach((selector) => {
+    const el = document.querySelector(selector);
+    if (el) el.value = "";
+  });
+  const unit = document.querySelector("#qtyUnit");
+  if (unit) unit.value = "個";
+}
