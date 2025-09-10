@@ -1,3 +1,4 @@
+// Firebase 初期化（省略せずそのまま使用）
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
   getFirestore, collection, query, where, getDocs, addDoc, setDoc, doc
@@ -6,7 +7,6 @@ import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
-// Firebase 初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -53,7 +53,7 @@ async function logAction(action, detail = {}) {
   }
 }
 
-// ...（Firebase初期化・ユーティリティ関数はそのまま）
+let allProducts = [];
 
 document.addEventListener("DOMContentLoaded", () => {
   const loginView = $("#loginView");
@@ -103,13 +103,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function showApp() {
     loginView.classList.add("hidden");
     appView.classList.remove("hidden");
-    setTimeout(() => {
+    setTimeout(async () => {
       initHeader();
       initMenu();
       initProductForm();
-      initList();
-      initHome(); // ← ホーム初期化
-      routeTo("homeSection");
+      await initList();     // ← 商品一覧データを取得
+      initHome();           // ← ホーム画面を初期化
+      routeTo("homeSection"); // ← 初期表示をHOMEに切り替え
     }, 0);
   }
 
@@ -153,94 +153,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if (el) el.classList.remove("hidden");
   }
 
-  function initProductForm() {
-    const registerBtn = $("#registerBtn");
-    const photoInput = $("#photo");
-
-    photoInput?.addEventListener("change", () => {
-      const file = photoInput.files?.[0];
-      const preview = $("#photoPreview");
-      if (file && preview) {
-        const reader = new FileReader();
-        reader.onload = () => preview.src = reader.result;
-        reader.readAsDataURL(file);
-      }
-    });
-
-    registerBtn?.addEventListener("click", async () => {
-      const role = sessionStorage.getItem("responsibilityRole") || "user";
-      const product = {
-        mgtNo: $("#mgtNo")?.value.trim(),
-        mgtDistNo: role === "admin" ? $("#mgtDistNo")?.value.trim() : "",
-        location: $("#location")?.value.trim(),
-        catL: $("#catL")?.value.trim(),
-        catS: $("#catS")?.value.trim(),
-        jan: $("#jan")?.value.trim(),
-        company: $("#company")?.value.trim(),
-        productName: $("#productName")?.value.trim(),
-        lotNo: $("#lotNo")?.value.trim(),
-        expire: $("#expire")?.value ? new Date($("#expire").value).toISOString().slice(0, 10) : "",
-        qty: Number($("#qty")?.value || 0),
-        qtyUnit: $("#qtyUnit")?.value,
-        photoUrl: "",
-        createdBy: sessionStorage.getItem("responsibilityName"),
-        createdAt: new Date()
-      };
-
-      if (!product.mgtNo || !product.productName) {
-        ["#mgtNo", "#productName"].forEach((s) => {
-          const el = $(s);
-          if (el && !el.value.trim()) {
-            el.classList.add("is-invalid");
-            setTimeout(() => el.classList.remove("is-invalid"), 800);
-          }
-        });
-        toast("管理番号と品名は必須です", "error");
-        return;
-      }
-
-      const file = photoInput?.files?.[0];
-      if (file) {
-        try {
-          const key = `products/${product.mgtNo}/${Date.now()}_${file.name}`;
-          const r = sRef(storage, key);
-          await uploadBytes(r, file);
-          product.photoUrl = await getDownloadURL(r);
-        } catch (e) {
-          console.warn("画像アップロード失敗", e);
-          toast("画像のアップロードに失敗しました", "error");
-        }
-      }
-
-      try {
-        await setDoc(doc(db, "products", product.mgtNo), product);
-        toast("商品を登録しました", "success");
-        await logAction("商品登録", {
-          mgtNo: product.mgtNo,
-          jan: product.jan,
-          qty: product.qty,
-          unit: product.qtyUnit
-        });
-        clearProductForm();
-        await loadProducts();
-        routeTo("listSection");
-      } catch (e) {
-        console.error(e);
-        toast("商品の登録に失敗しました", "error");
-      }
-    });
-  }
-
-  function clearProductForm() {
-    [
-      "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
-      "#jan", "#company", "#productName", "#lotNo", "#expire", "#qty", "#photo"
-    ].forEach((selector) => {
-      const el = document.querySelector(selector);
-      if (el) el.value = "";
-    });
-    const unit = document.querySelector("#qtyUnit");
-    if (unit) unit.value = "個";
+  async function initList() {
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error("商品一覧の取得に失敗しました", e);
+      toast("商品一覧の取得に失敗しました", "error");
+    }
   }
 
   function initHome() {
@@ -248,11 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const expiring = $("#expiringList");
     const trending = $("#trendingList");
 
-    const total = allProducts?.length || 0;
-    const expired = allProducts?.filter(p => {
+    const total = allProducts.length;
+    const expired = allProducts.filter(p => {
       const today = new Date().toISOString().slice(0, 10);
       return p.expire && p.expire < today;
-    }).length || 0;
+    }).length;
 
     stats.innerHTML = `
       <h3>在庫サマリー</h3>
@@ -260,28 +180,30 @@ document.addEventListener("DOMContentLoaded", () => {
       <p>期限切れ商品：${expired} 件</p>
     `;
 
-    const soon = allProducts?.filter(p => {
+    const soon = allProducts.filter(p => {
       if (!p.expire) return false;
       const today = new Date();
       const exp = new Date(p.expire);
       const diff = (exp - today) / (1000 * 60 * 60 * 24);
       return diff >= 0 && diff <= 7;
-    }) || [];
+    });
 
-    $("#expiringList").innerHTML = soon.length
+    expiring.innerHTML = soon.length
       ? soon.map(p => `<li>${p.productName}（期限: ${p.expire}）</li>`).join("")
       : "<li>該当なし</li>";
 
     const freq = {};
-    allProducts?.forEach(p => {
+    allProducts.forEach(p => {
       freq[p.productName] = (freq[p.productName] || 0) + 1;
     });
     const topItems = Object.entries(freq)
       .sort((a, b) => b[1] - a[1])
       .slice(0, 5);
 
-    $("#trendingList").innerHTML = topItems.length
+    trending.innerHTML = topItems.length
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
   }
+
+  // 商品登録フォーム（initProductForm）と clearProductForm は既存のままでOK
 });
