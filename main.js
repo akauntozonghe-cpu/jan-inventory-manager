@@ -1,10 +1,9 @@
-// Firebase 初期化（省略せずそのまま使用）
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
-  getFirestore, collection, query, where, getDocs, addDoc, setDoc, doc
+  getFirestore, collection, query, where, getDocs, addDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
-  getStorage, ref as sRef, uploadBytes, getDownloadURL
+  getStorage
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-storage.js";
 
 const firebaseConfig = {
@@ -21,14 +20,9 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
 
-// ユーティリティ
 const $ = (s) => document.querySelector(s);
 const $$ = (s) => document.querySelectorAll(s);
-function escapeHtml(s) {
-  return (s ?? "").toString().replace(/[&<>"']/g, m => ({
-    "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-  }));
-}
+
 function toast(msg, type = "info") {
   const host = $("#toastHost");
   if (!host) return;
@@ -40,6 +34,7 @@ function toast(msg, type = "info") {
   setTimeout(() => t.classList.remove("show"), 2200);
   setTimeout(() => t.remove(), 2600);
 }
+
 async function logAction(action, detail = {}) {
   const id = sessionStorage.getItem("responsibilityId");
   const name = sessionStorage.getItem("responsibilityName");
@@ -101,25 +96,25 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   async function showApp() {
-  loginView.classList.add("hidden");
-  appView.classList.remove("hidden");
-  await initList();     // 商品一覧取得
-  initHeader();
-  initMenu();
-  initProductForm();
-  initHome();           // HOME初期化
-  routeTo("homeSection"); // 初期表示をHOMEに
-}
-  let allProducts = [];
-async function initList() {
-  try {
-    const snap = await getDocs(collection(db, "products"));
-    allProducts = snap.docs.map(doc => doc.data());
-  } catch (e) {
-    console.error("商品一覧の取得に失敗しました", e);
-    toast("商品一覧の取得に失敗しました", "error");
+    loginView.classList.add("hidden");
+    appView.classList.remove("hidden");
+    await initList();
+    initHeader();
+    initMenu();
+    initProductForm();
+    initHome();
+    routeTo("homeSection");
   }
-}
+
+  async function initList() {
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      allProducts = snap.docs.map(doc => doc.data());
+    } catch (e) {
+      console.error("商品一覧の取得に失敗しました", e);
+      toast("商品一覧の取得に失敗しました", "error");
+    }
+  }
 
   function initHeader() {
     const name = sessionStorage.getItem("responsibilityName") || "未設定";
@@ -138,10 +133,12 @@ async function initList() {
     $("#hamburgerMenu")?.addEventListener("click", () => {
       $("#sideMenu")?.classList.toggle("open");
     });
-$("#systemTitle")?.addEventListener("click", () => {
-  routeTo("homeSection");
-  $("#sideMenu")?.classList.remove("open");
-});
+
+    $("#systemTitle")?.addEventListener("click", () => {
+      routeTo("homeSection");
+      $("#sideMenu")?.classList.remove("open");
+    });
+
     $$(".nav-item[data-target]").forEach((btn) => {
       btn.addEventListener("click", () => {
         routeTo(btn.dataset.target);
@@ -157,38 +154,35 @@ $("#systemTitle")?.addEventListener("click", () => {
       location.reload();
     });
   }
-document.addEventListener("click", (e) => {
-  const menu = $("#sideMenu");
-  const hamburger = $("#hamburgerMenu");
-  if (!menu?.classList.contains("open")) return;
 
-  const clickedInsideMenu = menu.contains(e.target);
-  const clickedHamburger = hamburger?.contains(e.target);
+  document.addEventListener("click", (e) => {
+    const menu = $("#sideMenu");
+    const hamburger = $("#hamburgerMenu");
+    if (!menu?.classList.contains("open")) return;
 
-  if (!clickedInsideMenu && !clickedHamburger) {
-    menu.classList.remove("open");
-  }
-});
+    const clickedInsideMenu = menu.contains(e.target);
+    const clickedHamburger = hamburger?.contains(e.target);
+
+    if (!clickedInsideMenu && !clickedHamburger) {
+      menu.classList.remove("open");
+    }
+  });
+
   function routeTo(panelId) {
     $$(".panel").forEach((p) => p.classList.add("hidden"));
     const el = $(`#${panelId}`);
     if (el) el.classList.remove("hidden");
   }
 
-  async function initList() {
-    try {
-      const snap = await getDocs(collection(db, "products"));
-      allProducts = snap.docs.map(doc => doc.data());
-    } catch (e) {
-      console.error("商品一覧の取得に失敗しました", e);
-      toast("商品一覧の取得に失敗しました", "error");
-    }
-  }
-
   function initHome() {
     const stats = $("#summaryStats");
     const expiring = $("#expiringList");
     const trending = $("#trendingList");
+
+    if (!stats || !expiring || !trending) {
+      console.warn("HOMEセクションの要素が見つかりません");
+      return;
+    }
 
     const total = allProducts.length;
     const expired = allProducts.filter(p => {
@@ -225,10 +219,4 @@ document.addEventListener("click", (e) => {
     trending.innerHTML = topItems.length
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
-  }
-
-  // 商品登録フォーム（initProductForm）と clearProductForm は既存のままでOK
-});
-
-
-
+ 
