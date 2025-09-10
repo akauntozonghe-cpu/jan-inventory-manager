@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import {
-  getFirestore, collection, query, where, getDocs, addDoc, setDoc, doc, getDoc
+  getFirestore, collection, query, where, getDocs, addDoc, setDoc, doc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 import {
   getStorage, ref as sRef, uploadBytes, getDownloadURL
@@ -12,7 +12,7 @@ const firebaseConfig = {
   authDomain: "inventory-app-312ca.firebaseapp.com",
   databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.firebasestorage.app",
+  storageBucket: "inventory-app-312ca.appspot.com",
   messagingSenderId: "245219344089",
   appId: "1:245219344089:web:e46105927c302e6a5788c8",
   measurementId: "G-TRH31MJCE3"
@@ -153,10 +153,80 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function initProductForm() {
-    // 商品登録フォームのコード（前回の内容）をここに統合
-  }
+    const inputs = [
+      "#mgtNo", "#mgtDistNo", "#location", "#catL", "#catS",
+      "#jan", "#company", "#productName", "#lotNo", "#expire", "#qty"
+    ];
+    const registerBtn = $("#registerBtn");
+    const photoInput = $("#photo");
 
-  function initList() {
-    // 商品一覧のコード（前回の内容）をここに統合
-  }
-});
+    inputs.forEach((sel) => {
+      const el = $(sel);
+      if (!el) return;
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") registerBtn.click();
+      });
+    });
+
+    const scanBtn = $("#scanBtn");
+    const scanPreview = $("#scanPreview");
+    let stream = null;
+
+    scanBtn.addEventListener("click", async () => {
+      if (stream) return stopScan();
+      if (!("BarcodeDetector" in window)) {
+        toast("バーコードスキャン非対応のため手入力をご利用ください", "error");
+        return;
+      }
+      try {
+        const detector = new BarcodeDetector({ formats: ["ean_13", "ean_8", "code_128", "upc_e"] });
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+        scanPreview.srcObject = stream;
+        scanPreview.classList.remove("hidden");
+        await scanPreview.play();
+
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        let active = true;
+
+        const loop = async () => {
+          if (!active) return;
+          canvas.width = scanPreview.videoWidth;
+          canvas.height = scanPreview.videoHeight;
+          ctx.drawImage(scanPreview, 0, 0, canvas.width, canvas.height);
+          const bitmap = await createImageBitmap(canvas);
+          try {
+            const codes = await detector.detect(bitmap);
+            if (codes.length) {
+              const code = codes[0].rawValue;
+              $("#jan").value = code;
+              toast(`JAN検出: ${code}`, "success");
+              stopScan();
+              return;
+            }
+          } catch {}
+          requestAnimationFrame(loop);
+        };
+        requestAnimationFrame(loop);
+
+        function stopScan() {
+          active = false;
+          if (stream) {
+            stream.getTracks().forEach((t) => t.stop());
+            stream = null;
+          }
+          scanPreview.pause();
+          scanPreview.srcObject = null;
+          scanPreview.classList.add("hidden");
+        }
+      } catch (e) {
+        console.error(e);
+        toast("カメラの起動に失敗しました", "error");
+      }
+    });
+
+    registerBtn.addEventListener("click", async () => {
+      const role = sessionStorage.getItem("responsibilityRole") || "user";
+      const product = {
+        mgtNo: $("#mgtNo").value.trim(),
+        mgtDistNo: role === "
