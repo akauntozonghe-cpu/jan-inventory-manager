@@ -72,7 +72,10 @@ document.addEventListener("DOMContentLoaded", () => {
     try {
       const qy = query(collection(db, "users"), where("id", "==", id));
       const snap = await getDocs(qy);
-      if (snap.empty) return toast("番号が見つかりません", "error");
+      if (snap.empty) {
+        toast("番号が見つかりません", "error");
+        return;
+      }
 
       const data = snap.docs[0].data();
       sessionStorage.setItem("responsibilityId", id);
@@ -220,8 +223,3 @@ document.addEventListener("DOMContentLoaded", () => {
     ].forEach((s) => {
       const el = $(s);
       if (el) el.value = "";
-    });
-    $("#qtyUnit").value = "個";
-  }
-
-  let allProducts =
