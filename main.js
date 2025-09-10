@@ -2,9 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase
 import {
   getFirestore, collection, query, where, getDocs, addDoc
 } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
-import {
-  getFirestore, collection, query, where, getDocs
-} from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
@@ -237,6 +234,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
