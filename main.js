@@ -219,4 +219,5 @@ document.addEventListener("DOMContentLoaded", () => {
     trending.innerHTML = topItems.length
       ? topItems.map(([name, count]) => `<li>${name}（${count}件）</li>`).join("")
       : "<li>該当なし</li>";
- 
+  }
+
