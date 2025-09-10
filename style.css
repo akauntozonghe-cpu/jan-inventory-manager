@@ -82,3 +82,60 @@ body.login-screen {
 
 .toast.error { background:#c0392b; }
 .toast.success { background:#1cc88a; }
+#systemHeader {
+  background: #f0f0f0;
+  padding: 8px;
+  border-bottom: 1px solid #ccc;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#userHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.badge {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: bold;
+  color: white;
+}
+.badge.admin { background-color: #1cc88a; }
+.badge.user  { background-color: #4e73df; }
+
+#hamburgerMenu {
+  font-size: 24px;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+#sideMenu {
+  position: fixed;
+  top: 60px;
+  left: -220px;
+  width: 200px;
+  background-color: #f9f9f9;
+  border-right: 1px solid #ccc;
+  padding: 10px;
+  transition: left 0.3s ease;
+  z-index: 1000;
+}
+#sideMenu.open {
+  left: 0;
+}
+#sideMenu button {
+  display: block;
+  width: 100%;
+  margin: 6px 0;
+  padding: 8px;
+  font-size: 14px;
+  background-color: #fff;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  cursor: pointer;
+}
