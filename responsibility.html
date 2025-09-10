@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>在庫管理 - 責任者画面</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="systemHeader">
+    <div id="systemTitle">在庫管理 - 責任者画面</div>
+    <div id="userHeader">
+      <span id="responsibilityName">氏名</span>
+      <span id="responsibilityRole" class="badge">ロール</span>
+      <button id="hamburgerMenu">☰</button>
+    </div>
+  </header>
+
+  <nav id="sideMenu">
+    <button id="menuProduct">商品登録</button>
+    <button id="menuSearch">商品検索</button>
+    <button id="menuFeedback">管理者に連絡</button>
+    <button id="menuLogout">ログアウト</button>
+  </nav>
+
+  <main class="main-content">
+    <section id="productSection">
+      <h2>商品登録</h2>
+      <input id="productName" type="text" placeholder="商品名を入力" />
+      <button id="registerBtn">登録</button>
+    </section>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
