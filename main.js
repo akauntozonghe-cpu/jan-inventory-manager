@@ -105,6 +105,141 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+    // 商品登録処理
+  $("#productForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const location = $("#locationCustom")?.value.trim() || $("#locationPreset")?.value;
+    const unit = $("#unitCustom")?.value.trim() || $("#unitPreset")?.value;
+
+    const data = {
+      id: $("#productId")?.value.trim(),
+      adminCode: $("#adminCode")?.value.trim() || "",
+      location,
+      category: {
+        major: $("#majorCategory")?.value,
+        minor: $("#minorCategory")?.value.trim()
+      },
+      jan: $("#janCode")?.value.trim(),
+      company: $("#company")?.value.trim(),
+      productName: $("#productName")?.value.trim(),
+      lot: $("#lotNumber")?.value.trim(),
+      expire: $("#expireDate")?.value,
+      unit,
+      quantity: parseInt($("#quantity")?.value, 10) || 0,
+      status: "pending",
+      createdBy: sessionStorage.getItem("responsibilityId"),
+      createdAt: new Date().toISOString()
+    };
+
+    try {
+      await addDoc(collection(db, "products"), data);
+      await addDoc(collection(db, "logs"), {
+        userId: sessionStorage.getItem("responsibilityId"),
+        userName: sessionStorage.getItem("responsibilityName"),
+        role: sessionStorage.getItem("responsibilityRole"),
+        action: "商品登録",
+        timestamp: new Date()
+      });
+      toast("商品を登録しました", "success");
+      routeTo("productListSection");
+      initProductList();
+    } catch (e) {
+      console.error("商品登録失敗:", e);
+      toast("登録に失敗しました", "error");
+    }
+  });
+
+  // 商品一覧表示処理
+  async function initProductList() {
+    try {
+      const snap = await getDocs(collection(db, "products"));
+      const list = $("#productList");
+      list.innerHTML = "";
+
+      const isAdmin = sessionStorage.getItem("responsibilityRole") === "admin";
+
+      snap.docs.forEach(doc => {
+        const data = doc.data();
+        const item = document.createElement("div");
+        item.className = "product-item";
+
+        const statusLabel = data.status === "pending"
+          ? `<span class="badge warning">未承認</span>`
+          : `<span class="badge success">承認済</span>`;
+
+        item.innerHTML = `
+          <div class="name">${data.productName}</div>
+          <div class="company">${data.company}</div>
+          <div class="expire">期限：${data.expire || "未設定"}</div>
+          <div class="location">保管：${data.location}</div>
+          <div class="unit">単位：${data.unit} × ${data.quantity}</div>
+          <div class="status">${statusLabel}</div>
+          ${isAdmin ? `<button class="editBtn" data-id="${doc.id}">編集</button>` : ""}
+          <button class="qtyBtn" data-id="${doc.id}">個数変更</button>
+        `;
+        list.appendChild(item);
+      });
+    } catch (e) {
+      console.error("商品一覧表示失敗:", e);
+      toast("一覧の表示に失敗しました", "error");
+    }
+  }
+
+  // 登録画面 → 一覧に戻るボタン
+  $("#backToListBtn")?.addEventListener("click", () => {
+    routeTo("productListSection");
+    initProductList();
+  });
+
+  // 履歴表示（責任者名＋日本語）
+  async function initLogList() {
+    try {
+      const snap = await getDocs(collection(db, "logs"));
+      const list = $("#logList");
+      list.innerHTML = "";
+
+      const logs = snap.docs.map(doc => doc.data()).sort((a, b) => {
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+
+      logs.forEach(log => {
+        const time = new Date(log.timestamp).toLocaleString("ja-JP", {
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit"
+        });
+
+        const item = document.createElement("div");
+        item.className = "log-item";
+        item.innerHTML = `
+          <div class="log-time">${time}</div>
+          <div class="log-user">責任者：${log.userName || "不明"}</div>
+          <div class="log-action">操作：${translateAction(log.action)}</div>
+        `;
+        list.appendChild(item);
+      });
+    } catch (e) {
+      console.error("履歴の取得に失敗しました:", e);
+      toast("履歴の取得に失敗しました", "error");
+    }
+  }
+
+  function translateAction(action) {
+    switch (action) {
+      case "ログイン": return "ログインしました";
+      case "ログアウト": return "ログアウトしました";
+      case "商品登録": return "商品を登録しました";
+      case "商品承認": return "商品を承認しました";
+      case "保留": return "後で確認にしました";
+      default: return action;
+    }
+  }
+
+  // 履歴 → ホームに戻るボタン
+  $("#backToHomeBtn")?.addEventListener("click", () => {
+    routeTo("homeSection");
+  });
+  
   function initMenu() {
   $("#hamburgerMenu")?.addEventListener("click", () => {
     $("#sideMenu")?.classList.toggle("open");
@@ -234,6 +369,7 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
 
