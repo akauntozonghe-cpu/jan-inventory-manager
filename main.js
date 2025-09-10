@@ -122,14 +122,46 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  $("#logoutBtn")?.addEventListener("click", () => {
+  $("#logoutBtn")?.addEventListener("click", async () => {
+    const id = sessionStorage.getItem("responsibilityId");
     const name = sessionStorage.getItem("responsibilityName");
+    const role = sessionStorage.getItem("responsibilityRole");
+
+    // ログアウト履歴を記録
+    try {
+      const logsRef = collection(db, "logs");
+      await getDocs(logsRef); // Firestoreの初期化確認用（省略可）
+      await db.collection("logs").add({
+        userId: id,
+        userName: name,
+        role,
+        action: "ログアウト",
+        timestamp: new Date()
+      });
+    } catch (e) {
+      console.warn("ログアウト履歴の記録に失敗:", e);
+    }
+
+    // セッション削除とUI切り替え
     sessionStorage.clear();
     toast(`${name || "ユーザー"} をログアウトしました`, "success");
-    setTimeout(() => {
-      location.reload();
-    }, 600);
+
+    $("#appView").classList.add("hidden");
+    $("#loginView").classList.remove("hidden");
+    $("#responsibilityId").value = ""; // 入力欄を初期化
   });
+
+  document.addEventListener("click", (e) => {
+    const menu = $("#sideMenu");
+    const hamburger = $("#hamburgerMenu");
+    if (!menu?.classList.contains("open")) return;
+    const clickedInsideMenu = menu.contains(e.target);
+    const clickedHamburger = hamburger?.contains(e.target);
+    if (!clickedInsideMenu && !clickedHamburger) {
+      menu.classList.remove("open");
+    }
+  });
+}
 
   document.addEventListener("click", (e) => {
     const menu = $("#sideMenu");
@@ -202,5 +234,6 @@ document.addEventListener("DOMContentLoaded", () => {
       : "<li>該当なし</li>";
   }
 });
+
 
 
