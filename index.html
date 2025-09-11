@@ -5,33 +5,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理システム - ログイン</title>
   <link rel="stylesheet" href="style.css" />
-
-  <!-- Firebase SDKs（非モジュール構成） -->
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
   <script src="login.js" defer></script>
 </head>
 <body>
-  <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
     <div class="header-left">
       <h1>在庫管理</h1>
     </div>
     <div class="header-right">
-      <div class="timestamp" id="currentTime"></div>
+      <div id="currentTime" class="timestamp"></div>
     </div>
   </header>
 
-  <!-- ✅ ページタイトル -->
   <div class="page-title">
     <h2>ログイン</h2>
   </div>
 
-  <!-- ✅ ログインフォーム -->
   <main>
-    <div class="card login-container">
-      <label for="userIdInput">在庫管理システム</label>
+    <div class="card login-box">
+      <h2 class="login-title">在庫管理システム</h2>
       <input type="text" id="userIdInput" placeholder="責任者番号を登録" />
       <button onclick="login()">ログイン</button>
       <p id="loginStatus"></p>
@@ -39,4 +33,3 @@
   </main>
 </body>
 </html>
-
