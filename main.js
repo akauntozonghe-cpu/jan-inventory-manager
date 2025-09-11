@@ -65,6 +65,14 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   loadProducts();
 });
 
+function showCustomAlert(message) {
+  document.getElementById("alertMessage").textContent = message;
+  document.getElementById("customAlert").classList.remove("hidden");
+}
+
+function closeCustomAlert() {
+  document.getElementById("customAlert").classList.add("hidden");
+}
 // 商品一覧表示
 async function loadProducts() {
   const list = document.getElementById("productList");
@@ -155,6 +163,7 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
+
 
 
 
