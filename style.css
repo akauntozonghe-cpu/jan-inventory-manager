@@ -5,126 +5,29 @@ body {
 .hidden {
   display: none;
 }
-#loginArea, #mainArea {
-  max-width: 400px;
-  margin: auto;
-}
-input {
+input, select, button {
   width: 100%;
   margin: 8px 0;
   padding: 8px;
 }
 button {
-  width: 100%;
   padding: 10px;
-  margin-top: 10px;
 }
-h1 {
+h1, h2 {
   text-align: center;
-}
-#customAlert {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-.alertBox {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-body {
-  font-family: sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #f9f9f9;
-}
-header {
-  background: #333;
-  color: white;
-  padding: 10px 20px;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  flex-wrap: wrap;
-}
-
-h1 {
-  cursor: pointer;
-  font-weight: bold;
-  margin: 0;
-}
-h1:hover {
-  text-decoration: underline;
 }
 .header-info {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 4px;
-  font-size: 14px;
+  justify-content: space-between;
+  margin-bottom: 20px;
 }
-
-main {
-  padding: 20px;
-}
-section {
-  margin-bottom: 30px;
-}
-input, select {
-  margin: 5px;
-  padding: 8px;
-  width: 200px;
-}
-button {
-  padding: 8px 16px;
-  background: #007bff;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-button:hover {
-  background: #0056b3;
-}
-ul {
-  list-style: none;
-  padding: 0;
-}
-li {
-  background: white;
-  margin: 5px 0;
-  padding: 10px;
-  border: 1px solid #ccc;
-}
-.modal {
-  position: fixed;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
+.alertBox {
   background: white;
   padding: 20px;
-  border: 2px solid #333;
-  z-index: 1000;
-}
-.hidden {
-  display: none;
-}
-@media screen and (max-width: 600px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .header-info {
-    align-items: flex-start;
-    margin-top: 8px;
-  }
+  border-radius: 8px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
 #customAlert {
   position: fixed;
@@ -136,18 +39,3 @@ li {
   align-items: center;
   z-index: 9999;
 }
-
-.alertBox {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 300px;
-  text-align: center;
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.hidden {
-  display: none;
-}
-
-
