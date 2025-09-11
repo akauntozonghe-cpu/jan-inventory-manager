@@ -39,6 +39,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const loc = document.getElementById("location").value;
   const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
   const timestamp = new Date();
+  const loc = document.getElementById("location").value;
 
   if (!name || !jan || !qty || !loc || !categorySmall || !unit) {
   return alert("必須項目が未入力です");
@@ -73,10 +74,14 @@ async function loadProducts() {
     const data = doc.data();
     const li = document.createElement("li");
 li.innerHTML = `
-  ${data.name}（${data.qty}個）＠${data.loc}｜分類：${data.categoryLarge}
+  管理番号：${doc.id}<br>
+  ${data.name}（${data.qty}${data.unit}）＠${data.loc}<br>
+  分類：${data.categoryLarge || "未設定"}／${data.categorySmall || "未設定"}<br>
+  <small>最終更新：${formatDate(data.updatedAt?.toDate?.())}</small><br>
   <button class="editRequestBtn" data-id="${doc.id}">編集申請</button>
-`;   
-    list.appendChild(li);
+  ＠${data.loc}
+`; 
+ ;   list.appendChild(li);
   });
 }
 loadProducts();
@@ -140,6 +145,7 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
     requestedBy: user,
     requestedAt: timestamp,
     status: "pending"
+    loc,
   });
 
   closeModal();
@@ -149,6 +155,7 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
+
 
 
 
