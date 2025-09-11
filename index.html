@@ -32,10 +32,35 @@
         <input type="text" id="productName" placeholder="商品名" />
         <input type="text" id="janCode" placeholder="JANコード" />
         <input type="number" id="quantity" placeholder="数量" />
-        <select id="unit">...</select>
-        <select id="location">...</select>
-        <select id="categoryLarge">...</select>
-        <select id="categorySmall">...</select>
+        <select id="unit">
+          <option value="">単位を選択</option>
+          <option value="個">個</option>
+          <option value="袋">袋</option>
+          <option value="本">本</option>
+          <option value="枚">枚</option>
+          <option value="包">包</option>
+          <option value="箱">箱</option>
+          <option value="セット">セット</option>
+          <option value="パック">パック</option>
+        </select>
+        <select id="location">
+          <option value="">保管場所を選択</option>
+          <option value="倉庫A">倉庫A</option>
+          <option value="店舗B">店舗B</option>
+          <option value="棚C">棚C</option>
+        </select>
+        <select id="categoryLarge">
+          <option value="">大分類を選択</option>
+          <option value="衣類">衣類</option>
+          <option value="食品">食品</option>
+          <option value="雑貨">雑貨</option>
+        </select>
+        <select id="categorySmall">
+          <option value="">小分類を選択</option>
+          <option value="Tシャツ">Tシャツ</option>
+          <option value="缶詰">缶詰</option>
+          <option value="洗剤">洗剤</option>
+        </select>
         <input type="text" id="lotNo" placeholder="Lot.No" />
         <input type="date" id="expiry" />
         <input type="text" id="maker" placeholder="メーカー名" />
@@ -53,7 +78,11 @@
   <!-- 編集申請モーダル -->
   <div id="editModal" class="modal hidden">
     <h3>編集申請</h3>
-    <select id="editField">...</select>
+    <select id="editField">
+      <option value="quantity">数量</option>
+      <option value="location">保管場所</option>
+      <option value="categoryLarge">大分類</option>
+    </select>
     <div id="editInputArea">
       <input type="text" id="newValue" placeholder="新しい値" />
     </div>
