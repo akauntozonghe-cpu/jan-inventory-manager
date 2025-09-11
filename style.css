@@ -219,6 +219,39 @@ main {
   transform: translateX(0);
 }
 
+.menu-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+.menu-buttons li {
+  list-style: none;
+  margin: 10px 0;
+}
+
+.menu-buttons a {
+  display: block;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.menu-buttons a:hover {
+  background-color: #dfe6e9;
+}
+
+#sideMenu.visible {
+  transform: translateX(0);
+}
+
 .menu-buttons li {
   list-style: none;
   margin: 10px 0;
@@ -305,4 +338,5 @@ main {
   border-bottom: 1px solid #ccc;
   padding-bottom: 5px;
 }
+
 
