@@ -25,7 +25,7 @@ setInterval(updateTime, 60000);
 // タイトルクリックでホーム（リロード）
 document.getElementById("title").addEventListener("click", () => location.reload());
 
-// カスタムアラート関数（在庫管理）
+// カスタムアラート（在庫管理）
 function showCustomAlert(message) {
   document.getElementById("alertMessage").textContent = message;
   document.getElementById("customAlert").classList.remove("hidden");
@@ -64,6 +64,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   });
 
   await ref.update({ productId: ref.id });
+  showCustomAlert("商品を登録しました。商品一覧に反映されました。");
   loadProducts();
 });
 
@@ -157,7 +158,7 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
   });
 
   closeModal();
-  showCustomAlert("申請を送信しました");
+  showCustomAlert("申請を送信しました。承認待ちです。");
 });
 
 // Firebase Auth（匿名ログイン）
