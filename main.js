@@ -13,7 +13,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 日時表示
+// 日時表示（右寄せ）
 function updateTime() {
   const now = new Date();
   const days = ['日','月','火','水','木','金','土'];
@@ -32,7 +32,7 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const jan = document.getElementById("janCode").value;
   const qty = parseInt(document.getElementById("quantity").value);
   const loc = document.getElementById("location").value;
-  const user = firebase.auth().currentUser?.displayName || "未ログイン";
+  const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
   const timestamp = new Date();
 
   if (!name || !jan || !qty || !loc) return alert("すべて入力してください");
@@ -60,5 +60,5 @@ loadProducts();
 
 // Firebase Auth（匿名ログイン）
 firebase.auth().signInAnonymously().then(() => {
-  document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
+  document.getElementById("userInfo").textContent = "｜ 責任者：匿名ユーザー";
 });
