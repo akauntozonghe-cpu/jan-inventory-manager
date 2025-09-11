@@ -12,7 +12,7 @@ window.onload = async function () {
   const role = sessionStorage.getItem("userRole");
   const roleJp = roleMap[role] || role;
 
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
+  document.getElementById("userInfo").textContent = `${name}（${roleJp}）`;
   updateTime();
   setInterval(updateTime, 1000);
 
