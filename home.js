@@ -35,7 +35,8 @@ function goHome() {
 }
 
 function toggleMenu() {
-  document.getElementById("sideMenu").classList.toggle("hidden");
+  const menu = document.getElementById("sideMenu");
+  menu.classList.toggle("visible");
 }
 
 function setupMenu(role) {
@@ -50,6 +51,7 @@ function setupMenu(role) {
   ];
 
   const ul = document.getElementById("menuList");
+  ul.innerHTML = "";
   menu.forEach(item => {
     const li = document.createElement("li");
     li.innerHTML = `<a href="${item.link}">${item.icon} ${item.label}</a>`;
@@ -92,8 +94,4 @@ async function loadUpcomingItems() {
     let label = "📅";
     if (diff <= 1) label = "🔥";
     else if (diff <= 3) label = "⚠️";
-    return `<li>${label} ${data.name}（期限：${data.期限}）</li>`;
-  }).join("");
-
-  document.getElementById("upcoming").innerHTML = `<h2>⏰ 期限の近い商品</h2><ul>${list || "<li>該当なし</li>"}</ul>`;
-}
+    return `<li>${label} ${data.name}（期限：${data.期限}）</li
