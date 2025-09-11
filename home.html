@@ -12,31 +12,20 @@
 <body>
   <header>
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <h1>在庫管理ダッシュボード</h1>
+    <h1 onclick="goHome()">在庫管理ダッシュボード</h1>
     <p id="userInfo"></p>
     <p id="currentTime"></p>
   </header>
 
   <nav id="sideMenu" class="hidden">
-    <ul>
-      <li><a href="register.html">商品登録</a></li>
-      <li><a href="list.html">商品一覧</a></li>
-      <li><a href="report.html">問題報告</a></li>
-      <li><a href="settings.html">設定</a></li>
-      <li><a href="login.html">ログアウト</a></li>
-    </ul>
+    <ul id="menuList"></ul>
   </nav>
 
   <main>
     <section id="summary"></section>
-
-    <section id="adminList" class="hidden">
-      <h2>他の管理者一覧</h2>
-      <table>
-        <thead><tr><th>氏名</th><th>責任者番号</th><th>通知</th></tr></thead>
-        <tbody id="adminTableBody"></tbody>
-      </table>
-    </section>
+    <section id="fleamarket"></section>
+    <section id="upcoming"></section>
+    <section id="aiSection"><h2>AI予測・提案（準備中）</h2></section>
   </main>
 </body>
 </html>
