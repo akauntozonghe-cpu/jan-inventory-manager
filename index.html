@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <!-- ログイン画面 -->
   <section id="loginSection">
     <h1>在庫管理システム</h1>
     <input type="text" id="userIdInput" placeholder="責任者番号を入力" />
@@ -14,6 +15,7 @@
     <p id="loginError" class="error"></p>
   </section>
 
+  <!-- ホーム画面 -->
   <section id="homeSection" class="hidden">
     <header>
       <div class="title-block">
@@ -27,248 +29,74 @@
       <button id="menuToggle">☰</button>
     </header>
 
+    <!-- ハンバーガーメニュー -->
     <nav id="sideMenu" class="hidden">
       <button id="introToggle">💡 機能紹介</button>
       <ul>
-        <li><a href="#">商品登録</a></li>
-        <li><a href="#">商品一覧</a></li>
-        <li><a href="#">フリマ出品</a></li>
-        <li><a href="#">問題報告</a></li>
+        <li><a href="#" id="navRegister">商品登録</a></li>
+        <li><a href="#" id="navList">商品一覧</a></li>
+        <li><a href="#" id="navReport">問題報告</a></li>
+        <li><a href="#" id="navAdmin" class="admin-only hidden">管理者画面</a></li>
       </ul>
     </nav>
 
+    <!-- メイン画面 -->
     <main>
-      <section id="inventorySummary">
-        <h3>在庫状況</h3>
-        <div class="summary-block">登録数: <span id="totalItems">0</span></div>
-        <div class="summary-block">承認済: <span id="approvedItems">0</span></div>
-        <div class="summary-block">期限切れ: <span id="expiredItems">0</span></div>
+      <!-- 商品登録画面 -->
+      <section id="registerSection" class="hidden">
+        <h3>商品登録</h3>
+        <input type="text" id="productName" placeholder="商品名" />
+        <input type="text" id="janCode" placeholder="JANコード" />
+        <input type="text" id="lotNo" placeholder="製造番号 / Lot.No" />
+        <input type="number" id="quantity" placeholder="数量" />
+        <select id="unitSelect">
+          <option value="個">個</option>
+          <option value="袋">袋</option>
+          <option value="パック">パック</option>
+          <option value="セット">セット</option>
+          <option value="本">本</option>
+          <option value="包">包</option>
+          <option value="枚">枚</option>
+        </select>
+        <select id="locationSelect"></select>
+        <select id="categorySelect"></select>
+        <input type="text" id="subcategoryInput" placeholder="小分類（任意）" />
+        <button id="registerBtn">登録</button>
+      </section>
+
+      <!-- 商品一覧画面 -->
+      <section id="listSection" class="hidden">
+        <h3>商品一覧</h3>
+        <input type="text" id="searchInput" placeholder="商品名またはJANコードで検索" />
+        <button id="searchBtn">検索</button>
+        <ul id="productList"></ul>
+      </section>
+
+      <!-- 問題報告画面 -->
+      <section id="reportSection" class="hidden">
+        <h3>問題報告</h3>
+        <input type="text" id="reportScreen" placeholder="画面名" />
+        <textarea id="reportContent" placeholder="内容を入力"></textarea>
+        <button id="reportBtn">報告する</button>
+      </section>
+
+      <!-- 管理者画面 -->
+      <section id="adminSection" class="hidden">
+        <h3>管理者画面</h3>
+        <button id="exportCsvBtn">CSV出力</button>
+        <ul id="pendingApprovalList"></ul>
+        <ul id="changeRequestList"></ul>
+        <ul id="reportList"></ul>
       </section>
     </main>
   </section>
 
+  <!-- 通知 -->
   <div id="toast" class="hidden"></div>
 
-  <script src="main.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理</title>
-  <link rel="stylesheet" href="style.css" />
- <!-- Firebase SDK v8（非モジュール形式） -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-
-<!-- JavaScript（main.js） -->
-  <script src="main.js" defer></script>
-  <link rel="icon" href="data:,">
-</head>
-<body>
- <!-- ログイン画面 -->
-<section id="loginSection">
-  <h2>在庫管理システム</h2>
-  <input id="loginId" placeholder="責任者番号">
-  <button id="loginBtn">ログイン</button>
-  <p id="loginError"></p>
-</section>
-
-<!-- メイン画面 -->
-<section id="mainSection" class="hidden">
-  <header>
-    <h2 id="titleHeader">在庫管理</h2>
-    <span id="userBadge"></span>
-    <button id="menuToggle">≡</button>
-  </header>
-
-  <!-- ホーム画面 -->
-  <section id="homeSection" class="content">
-    <div id="summaryStats"></div>
-    <div id="expiringSoon"></div>
-    <div id="fleaMarketInfo"></div>
-  </section>
-
-  <!-- 管理者画面（ハンバーガーから遷移） -->
-  <section id="adminSection" class="content admin-only hidden" data-route="adminSection">
-    <h3>管理者画面</h3>
-    <!-- 管理者専用機能 -->
-  </section>
-</section>
-
-    <!-- サイドメニュー -->
-    <nav id="sideMenu" class="hidden">
-      <ul>
-        <li data-route="homeSection">🏠 ホーム</li>
-        <li data-route="registerSection">📦 商品登録</li>
-        <li data-route="searchSection">🔍 商品一覧・検索</li>
-        <li data-route="marketSection">🛍️ フリマ</li>
-        <li data-route="settingsSection">⚙️ 設定</li>
-        <li data-route="alertSection">🚨 問題報告</li>
-        <li data-route="adminSection" class="admin-only">🛡️ 管理者画面</li>
-        <li id="logoutBtn">🔓 ログアウト</li>
-      </ul>
-    </nav>
-        <!-- ホーム画面 -->
-    <section id="homeSection" class="content">
-      <div id="featureIntro" class="introBox">
-        <h4>このシステムでできること</h4>
-        <ul>
-          <li>📦 商品の登録・編集・承認</li>
-          <li>🔍 商品の検索・バーコード読み取り</li>
-          <li>📊 在庫状況の確認（期限・分類・数量）</li>
-          <li>🛍️ フリマ出品と履歴管理</li>
-          <li>📜 操作履歴の確認（管理者のみ）</li>
-          <li>🚨 問題報告と対応履歴</li>
-          <li>⚙️ 設定（テーマ・通知・管理プリセット）</li>
-        </ul>
-      </div>
-      <div id="summaryStats"></div>
-      <div id="expiringSoon"></div>
-      <div id="topProducts"></div>
-    </section>
-
-    <!-- 商品登録画面 -->
-    <section id="registerSection" class="content hidden">
-      <h3>商品登録</h3>
-      <form id="productForm">
-        <label for="productName">商品名</label>
-        <input type="text" id="productName" placeholder="商品名を入力" />
-        <label for="janCode">JANコード</label>
-        <input type="text" id="janCode" placeholder="JANコードを入力" />
-        <button type="button" id="scanRegisterBarcodeBtn">バーコード読み取り</button>
-        <label for="adminCode">管理番号</label>
-        <input type="text" id="adminCode" placeholder="管理番号を入力" />
-        <label for="adminCategoryCode">管理区別番号</label>
-        <input type="text" id="adminCategoryCode" placeholder="管理区別番号（管理者のみ）" />
-        <label for="company">会社名</label>
-        <input type="text" id="company" placeholder="会社名を入力" />
-        <label for="location">保管場所</label>
-        <input type="text" id="location" placeholder="保管場所を入力" />
-        <label for="unit">単位</label>
-        <input type="text" id="unit" placeholder="単位（例：個、箱）" />
-        <label for="quantity">数量</label>
-        <input type="number" id="quantity" placeholder="数量を入力" />
-        <label for="expire">期限</label>
-        <input type="date" id="expire" />
-        <label for="lotNumber">ロット番号</label>
-        <input type="text" id="lotNumber" placeholder="ロット番号を入力" />
-        <label for="majorCategory">分類（大）</label>
-        <select id="majorCategory">
-          <option value="">選択してください</option>
-          <option value="食品">食品</option>
-          <option value="衛生">衛生</option>
-          <option value="医療">医療</option>
-        </select>
-        <label for="minorCategory">分類（小）</label>
-        <input type="text" id="minorCategory" placeholder="分類（小）を入力" />
-        <button type="submit">登録</button>
-      </form>
-    </section>
-        <!-- 商品一覧・検索画面 -->
-    <section id="searchSection" class="content hidden">
-      <h3>商品一覧・検索</h3>
-      <input type="text" id="searchKeyword" placeholder="商品名またはJANコードで検索" class="filterInput" />
-      <select id="searchStatus" class="filterInput">
-        <option value="">ステータスで絞り込み</option>
-        <option value="pending">未承認</option>
-        <option value="approved">承認済</option>
-      </select>
-      <select id="searchMajor" class="filterInput">
-        <option value="">分類（大）で絞り込み</option>
-        <option value="食品">食品</option>
-        <option value="衛生">衛生</option>
-        <option value="医療">医療</option>
-      </select>
-      <input type="text" id="searchMinor" placeholder="分類（小）で絞り込み" class="filterInput" />
-      <button id="searchBtn">検索</button>
-      <ul id="searchResultList"></ul>
-    </section>
-
-    <!-- フリマ出品画面 -->
-    <section id="marketSection" class="content hidden">
-      <h3>フリマ出品</h3>
-      <form id="marketForm">
-        <label for="marketProductName">商品名</label>
-        <input type="text" id="marketProductName" placeholder="商品名を入力" />
-        <label for="marketPrice">価格</label>
-        <input type="number" id="marketPrice" placeholder="価格を入力（円）" />
-        <label for="marketCondition">状態</label>
-        <select id="marketCondition">
-          <option value="新品">新品</option>
-          <option value="未開封">未開封</option>
-          <option value="使用済">使用済</option>
-        </select>
-        <button type="submit">出品する</button>
-      </form>
-    </section>
-
-    <!-- 設定画面 -->
-    <section id="settingsSection" class="content hidden">
-      <h3>設定</h3>
-      <label>
-        <input type="checkbox" id="darkModeToggle" />
-        ダークモードを有効にする
-      </label>
-      <label>
-        <input type="checkbox" id="toastToggle" checked />
-        通知を表示する
-      </label>
-      <label for="adminPresetCategory">管理区別プリセット</label>
-      <input type="text" id="adminPresetCategory" placeholder="管理区別プリセットを入力" />
-      <button id="saveAdminSettings">保存</button>
-    </section>
-
-    <!-- 問題報告画面 -->
-    <section id="alertSection" class="content hidden">
-      <h3>問題報告</h3>
-      <form id="alertForm">
-        <label for="alertScreen">画面名</label>
-        <input type="text" id="alertScreen" placeholder="問題のある画面名を入力" />
-        <label for="alertMessage">内容</label>
-        <textarea id="alertMessage" placeholder="問題の内容を詳しく入力"></textarea>
-        <button type="submit">報告する</button>
-      </form>
-    </section>
-
-    <!-- 管理者専用画面 -->
-    <section id="adminSection" class="content hidden admin-only">
-      <h3>管理者専用画面</h3>
-      <div>
-        <h4>未承認商品</h4>
-        <ul id="pendingList"></ul>
-      </div>
-      <div>
-        <h4>操作履歴</h4>
-        <ul id="adminLogList"></ul>
-      </div>
-      <div>
-        <h4>問題報告一覧</h4>
-        <ul id="alertListAdmin"></ul>
-      </div>
-      <div>
-        <h4>CSV出力</h4>
-        <button id="exportCsvBtn">CSVを出力</button>
-      </div>
-    </section>
-
-    <!-- 通知表示 -->
-    <div id="toast" class="hidden"></div>
-  </section>
-  
+  <!-- スクリプト -->
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="utils.js"></script>
+  <script type="module" src="main.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
