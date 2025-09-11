@@ -1,0 +1,105 @@
+/* 共通設定 */
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+h1, h2, h3 {
+  margin: 0.5em 0;
+  color: #2c3e50;
+}
+
+button {
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  margin-top: 10px;
+  font-size: 1em;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005a9e;
+}
+
+input[type="text"], input[type="number"], select {
+  padding: 10px;
+  font-size: 1em;
+  width: 100%;
+  margin-top: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.login-container {
+  max-width: 400px;
+  margin: 80px auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.dashboard {
+  padding: 20px;
+}
+
+.user-info {
+  font-size: 1em;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.menu button {
+  flex: 1 1 150px;
+}
+
+/* 通知ラベル */
+.label {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  color: white;
+}
+
+.label-承認待ち {
+  background-color: #f39c12;
+}
+
+.label-期限切れ {
+  background-color: #e74c3c;
+}
+
+.label-完了 {
+  background-color: #2ecc71;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+  .login-container, .dashboard {
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .menu {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>設定画面</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <h1>設定</h1>
+    <div class="user-info" id="userInfo"></div>
+
+    <h2>通知設定</h2>
+    <label><input type="checkbox" id="notifyToggle" /> 通知を受け取る</label>
+    <p id="notifyStatus"></p>
+
+    <h2>バージョン履歴</h2>
+    <div id="versionList"></div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const userId = sessionStorage.getItem("userId");
+    const userName = sessionStorage.getItem("userName");
+    const userRole = sessionStorage.getItem("userRole");
+    document.getElementById("userInfo").textContent = `${userName}（${userRole}）として操作中`;
+
+    // 通知設定の読み込み
+    const notifyRef = ref(db, "users/" + userId + "/通知設定");
+    onValue(notifyRef, (snapshot) => {
+      const enabled = snapshot.val();
+      document.getElementById("notifyToggle").checked = enabled === true;
+      document.getElementById("notifyStatus").textContent = enabled ? "通知は有効です。" : "通知は無効です。";
+    });
+
+    // 通知設定の変更
+    document.getElementById("notifyToggle").addEventListener("change", async (e) => {
+      const enabled = e.target.checked;
+      await set(notifyRef, enabled);
+      document.getElementById("notifyStatus").textContent = enabled ? "通知を有効にしました。" : "通知を無効にしました。";
+    });
+
+    // バージョン履歴の表示
+    const versionRef = ref(db, "versionHistory");
+    onValue(versionRef, (snapshot) => {
+      const data = snapshot.val();
+      const list = document.getElementById("versionList");
+      list.innerHTML = "";
+
+      Object.values(data || {}).reverse().forEach(ver => {
+        const div = document.createElement("div");
+        div.style.border = "1px solid #ccc";
+        div.style.padding = "10px";
+        div.style.marginTop = "10px";
+
+        div.innerHTML = `
+          <strong>バージョン：${ver.番号}</strong><br>
+          更新日：${new Date(ver.日時).toLocaleDateString("ja-JP")}<br>
+          更新者：${ver.更新者}<br>
+          内容：${ver.内容}<br>
+          影響範囲：${ver.影響範囲}<br>
+        `;
+        list.appendChild(div);
+      });
+    });
+  </script>
+</body>
+</html>

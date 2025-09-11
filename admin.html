@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理者メニュー</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <h1>管理者メニュー</h1>
+    <div class="user-info" id="userInfo"></div>
+    <div id="adminArea"></div>
+    <p id="statusMsg"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const userName = sessionStorage.getItem("userName");
+    const userRole = sessionStorage.getItem("userRole");
+    document.getElementById("userInfo").textContent = `${userName}（${userRole}）として操作中`;
+
+    if (userRole !== "管理者") {
+      document.getElementById("adminArea").innerHTML = "<p>この画面は管理者専用です。</p>";
+      return;
+    }
+
+    const area = document.getElementById("adminArea");
+
+    // 変更申請一覧
+    onValue(ref(db, "changeRequests"), (snapshot) => {
+      const data = snapshot.val();
+      if (!data) return;
+
+      area.innerHTML = "<h2>変更申請一覧</h2>";
+      Object.entries(data).forEach(([key, req]) => {
+        const div = document.createElement("div");
+        div.style.border = "1px solid #ccc";
+        div.style.padding = "10px";
+        div.style.marginTop = "10px";
+
+        div.innerHTML = `
+          <strong>${req.商品ID}</strong><br>
+          申請者：${req.申請者}（${req.権限））<br>
+          申請日時：${new Date(req.申請日時).toLocaleString("ja-JP")}<br>
+          <span class="label label-承認待ち">${req.状態}</span><br><br>
+          <strong>変更前：</strong><br>
+          数量：${req.変更前.数量}<br>
+          保管場所：${req.変更前.保管場所}<br><br>
+          <strong>変更後：</strong><br>
+          数量：${req.変更後.数量}<br>
+          保管場所：${req.変更後.保管場所}<br><br>
+          <button onclick="approve('${key}')">承認</button>
+          <button onclick="reject('${key}')">却下</button>
+        `;
+        area.appendChild(div);
+      });
+    });
+
+    window.approve = async function (key) {
+      await set(ref(db, "changeRequests/" + key + "/状態"), "承認済み");
+      document.getElementById("statusMsg").textContent = "承認しました。";
+    };
+
+    window.reject = async function (key) {
+      await set(ref(db, "changeRequests/" + key + "/状態"), "却下");
+      document.getElementById("statusMsg").textContent = "却下しました。";
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在庫管理システム - ホーム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <h1>在庫管理ダッシュボード</h1>
+    <div class="user-info" id="userInfo"></div>
+    <div id="currentTime"></div>
+
+    <div class="menu" id="menuArea">
+      <button onclick="location.href='register.html'">商品登録</button>
+      <button onclick="location.href='list.html'">商品一覧</button>
+      <button onclick="location.href='report.html'">問題報告</button>
+      <button id="adminBtn" style="display:none;" onclick="location.href='admin.html'">管理者メニュー</button>
+      <button onclick="location.href='settings.html'">設定</button>
+    </div>
+  </div>
+
+  <script>
+    // ユーザー情報の表示
+    const name = sessionStorage.getItem("userName");
+    const role = sessionStorage.getItem("userRole");
+    document.getElementById("userInfo").textContent = `${name}（${role}）としてログイン中`;
+
+    // 管理者のみ管理者メニュー表示
+    if (role === "管理者") {
+      document.getElementById("adminBtn").style.display = "inline-block";
+    }
+
+    // 日時表示
+    function updateTime() {
+      const now = new Date();
+      const formatted = now.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" });
+      document.getElementById("currentTime").textContent = `現在時刻：${formatted}`;
+    }
+    setInterval(updateTime, 1000);
+    updateTime();
+  </script>
+</body>
+</html>

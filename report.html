@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>問題報告</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="dashboard">
+    <h1>問題報告</h1>
+    <div class="user-info" id="userInfo"></div>
+
+    <div>
+      <label>対象商品JANコード</label>
+      <input type="text" id="janInput" placeholder="JANコードを入力" />
+    </div>
+
+    <div>
+      <label>問題種別</label>
+      <select id="issueType">
+        <option value="破損">破損</option>
+        <option value="期限切れ">期限切れ</option>
+        <option value="登録ミス">登録ミス</option>
+        <option value="その他">その他</option>
+      </select>
+    </div>
+
+    <div>
+      <label>状況説明</label>
+      <textarea id="description" rows="4" placeholder="問題の詳細を記入してください"></textarea>
+    </div>
+
+    <div>
+      <label>写真URL（任意）</label>
+      <input type="text" id="photoUrl" placeholder="画像URLを入力（任意）" />
+    </div>
+
+    <button onclick="submitReport()">報告する</button>
+    <p id="statusMsg"></p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+    import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const userName = sessionStorage.getItem("userName");
+    const userRole = sessionStorage.getItem("userRole");
+    document.getElementById("userInfo").textContent = `${userName}（${userRole}）として操作中`;
+
+    window.submitReport = async function () {
+      const jan = document.getElementById("janInput").value.trim();
+      const type = document.getElementById("issueType").value;
+      const desc = document.getElementById("description").value.trim();
+      const photo = document.getElementById("photoUrl").value.trim();
+
+      if (!jan || !desc) {
+        document.getElementById("statusMsg").textContent = "JANコードと状況説明は必須です。";
+        return;
+      }
+
+      const reportRef = push(ref(db, "reports"));
+      await set(reportRef, {
+        JANコード: jan,
+        問題種別: type,
+        状況説明: desc,
+        写真URL: photo || null,
+        報告者: userName,
+        権限: userRole,
+        報告日時: new Date().toISOString(),
+        対応状況: "未対応"
+      });
+
+      document.getElementById("statusMsg").textContent = "報告を送信しました。";
+    };
+  </script>
+</body>
+</html>
