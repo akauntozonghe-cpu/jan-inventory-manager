@@ -19,6 +19,12 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 
+// ✅ 初期表示制御（ログイン画面のみ表示）
+window.addEventListener("DOMContentLoaded", () => {
+  loginSection.classList.remove("hidden");
+  mainSection.classList.add("hidden");
+});
+
 // エラー表示関数
 function showInlineError(el, message) {
   el.textContent = message;
@@ -149,5 +155,5 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     timestamp: new Date().toISOString()
   });
   sessionStorage.clear();
-  location.reload();
+  location.reload(); // ✅ 表示状態を初期化
 });
