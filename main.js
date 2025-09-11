@@ -28,17 +28,38 @@ document.getElementById("title").addEventListener("click", () => location.reload
 // 商品登録処理
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const name = document.getElementById("productName").value;
+  const unit = document.getElementById("unit").value;
+  const categorySmall = document.getElementById("categorySmall").value;
+  const lotNo = document.getElementById("lotNo").value;
+  const expiry = document.getElementById("expiry").value;
+  const maker = document.getElementById("maker").value;
+  const adminCode = document.getElementById("adminCode").value;
   const jan = document.getElementById("janCode").value;
   const qty = parseInt(document.getElementById("quantity").value);
   const loc = document.getElementById("location").value;
   const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
   const timestamp = new Date();
 
-  if (!name || !jan || !qty || !loc) return alert("すべて入力してください");
+  if (!name || !jan || !qty || !loc || !categorySmall || !unit) {
+  return alert("必須項目が未入力です");
+}
 
   await db.collection("products").add({
-    name, jan, qty, loc, registeredBy: user, registeredAt: timestamp
-  });
+  name,
+  jan,
+  qty,
+  unit,
+  loc,
+  categoryLarge,
+  categorySmall,
+  lotNo,
+  expiry,
+  maker,
+  adminCode,
+  registeredBy: user,
+  registeredAt: timestamp,
+  updatedAt: timestamp
+});
 
   loadProducts();
 });
@@ -128,5 +149,6 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
+
 
 
