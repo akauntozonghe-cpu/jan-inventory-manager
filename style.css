@@ -1,9 +1,22 @@
 body {
-  font-family: "Segoe UI", "ヒラギノ角ゴ ProN", "メイリオ", sans-serif;
+  font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
-  background: #f9f9f9;
-  color: #333;
+  background: #f5f5f5;
+}
+
+.hidden {
+  display: none;
+}
+
+h1, h2, h3 {
+  margin: 0.5em 0;
+}
+
+input, button {
+  padding: 0.6em;
+  margin: 0.5em 0;
+  font-size: 1em;
 }
 
 header {
@@ -12,81 +25,54 @@ header {
   align-items: center;
   background: #0078d4;
   color: white;
-  padding: 0.5em 1em;
-}
-
-#titleHeader {
-  cursor: pointer;
-}
-#titleHeader:hover {
-  text-decoration: underline;
-}
-
-section.content {
   padding: 1em;
 }
 
-input, select, textarea, button {
-  display: block;
-  margin: 0.5em 0;
-  padding: 0.5em;
-  font-size: 1em;
-  width: 100%;
-  max-width: 400px;
+.title-block h2 {
+  margin: 0;
 }
 
-label {
-  margin-top: 1em;
-  font-weight: bold;
+#currentTime {
+  font-size: 0.9em;
+  color: #e0e0e0;
 }
 
-button {
-  background: #0078d4;
-  color: white;
-  border: none;
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.badge {
+  padding: 0.3em 0.6em;
   border-radius: 4px;
-  cursor: pointer;
-}
-button:hover {
-  background: #005fa3;
-}
-
-.hidden {
-  display: none;
+  font-size: 0.8em;
+  background: #ffcc00;
+  color: #333;
 }
 
-.error {
-  color: red;
+.badge.admin {
+  background: #ff6666;
+  color: white;
 }
 
 nav#sideMenu {
-  position: fixed;
-  top: 3.5em;
+  position: absolute;
+  top: 60px;
   left: 0;
-  background: #eee;
+  background: white;
   width: 200px;
-  height: calc(100% - 3.5em);
   box-shadow: 2px 0 5px rgba(0,0,0,0.2);
   padding: 1em;
-  z-index: 1000;
 }
+
 nav#sideMenu ul {
   list-style: none;
   padding: 0;
 }
-nav#sideMenu li {
-  margin: 1em 0;
-  cursor: pointer;
-}
-nav#sideMenu li:hover {
-  text-decoration: underline;
-}
 
-.introBox {
-  background: #eef;
-  padding: 1em;
-  border-radius: 6px;
-  margin-bottom: 1em;
+nav#sideMenu li {
+  margin: 0.5em 0;
 }
 
 #toast {
@@ -94,148 +80,31 @@ nav#sideMenu li:hover {
   bottom: 20px;
   left: 50%;
   transform: translateX(-50%);
+  background: #333;
+  color: white;
   padding: 1em 2em;
   border-radius: 6px;
-  font-weight: bold;
-  z-index: 2000;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-  transition: opacity 0.3s ease;
-}
-.toast-success { background: #0078d4; color: white; }
-.toast-warning { background: #ffcc00; color: black; }
-.toast-error   { background: #d40000; color: white; }
-
-body.dark {
-  background: #222;
-  color: #eee;
-}
-body.dark input, body.dark select, body.dark textarea {
-  background: #333;
-  color: #eee;
-  border: 1px solid #555;
-}
-body.dark button {
-  background: #444;
-}
-body.dark nav#sideMenu {
-  background: #333;
-  color: #eee;
-}
-/* ログインセクションのレイアウト */
-#loginSection {
-  max-width: 400px;
-  margin: 10vh auto;
-  padding: 2em;
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-size: 0.9em;
+  z-index: 999;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
 }
 
-/* タイトル */
-#loginSection h1 {
-  font-size: 1.8em;
-  margin-bottom: 1em;
-  color: #0078d4;
+@keyframes fadein {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-/* 入力欄とボタン */
-#loginId,
-#loginBtn {
-  width: 100%;
-  max-width: 300px;
-  margin: 0.5em 0;
-  padding: 0.8em;
-  font-size: 1em;
-  box-sizing: border-box;
+@keyframes fadeout {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
-/* ボタンスタイル */
-#loginBtn {
-  background: #0078d4;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-#loginBtn:hover {
-  background: #005fa3;
-}
-
-/* ログインエラー表示（アニメーション付き） */
-#loginError {
-  background: #d40000;
-  color: white;
-  padding: 0.5em 1em;
-  border-radius: 4px;
-  margin-top: 0.8em;
-  font-weight: bold;
-  display: none;
-}
-#loginError.show {
-  display: block;
-  animation: fadeIn 0.3s ease, shake 0.4s ease;
-}
-
-/* アニメーション定義 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-@keyframes shake {
-  0% { transform: translateX(0); }
-  25% { transform: translateX(-5px); }
-  50% { transform: translateX(5px); }
-  75% { transform: translateX(-5px); }
-  100% { transform: translateX(0); }
-}
-
-#loginError {
-  display: none;
-  ...
-}
-#loginError.show {
-  display: block;
-  animation: fadeIn 0.25s ease, shake 0.35s ease;
-}
-
-#toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  ...
-}
-.toast-success { background: #0078d4; }
-.toast-warning { background: #ffcc00; }
-.toast-error   { background: #d40000; }
-
-@keyframes fadeIn { ... }
-@keyframes shake { ... }
-
-/* ログイン成功時のフェードイン演出 */
-.fade-in {
-  animation: fadeInMain 0.5s ease forwards;
-}
-@keyframes fadeInMain {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-/* 管理者ログイン時のバッジ強調 */
-.admin-badge {
-  background: #0078d4;
-  color: white;
-  padding: 0.3em 0.6em;
-  border-radius: 4px;
-  font-weight: bold;
-  box-shadow: 0 0 5px rgba(0,120,212,0.5);
-  animation: pulseBadge 1s ease;
-}
-@keyframes pulseBadge {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.1); }
-  100% { transform: scale(1); }
+@media screen and (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  nav#sideMenu {
+    width: 100%;
+  }
 }
