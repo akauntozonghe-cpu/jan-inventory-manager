@@ -68,15 +68,6 @@ function setupMenu(role) {
   });
 }
 
-  const ul = document.getElementById("menuList");
-  ul.innerHTML = "";
-  menu.forEach(item => {
-    const li = document.createElement("li");
-    li.innerHTML = `<a href="${item.link}">${item.icon} ${item.label}</a>`;
-    ul.appendChild(li);
-  });
-}
-
 async function loadInventorySummary() {
   const snapshot = await db.collection("products").get();
   const total = snapshot.size;
