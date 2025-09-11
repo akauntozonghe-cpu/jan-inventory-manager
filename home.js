@@ -38,6 +38,15 @@ function toggleMenu() {
   document.getElementById("sideMenu").classList.toggle("visible");
 }
 
+// メニュー外クリックで閉じる
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("sideMenu");
+  const toggle = document.querySelector(".menu-toggle");
+  if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+    menu.classList.remove("visible");
+  }
+});
+
 function setupMenu(role) {
   const menu = [
     { label: "ホーム", link: "home.html", icon: "🏠" },
