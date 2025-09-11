@@ -19,10 +19,11 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 const titleHeader = document.getElementById("titleHeader");
+const sideMenu = document.getElementById("sideMenu");
 
 // 権限ラベル（日本語）
 function getRoleLabel(role) {
-  return role === "admin" ? "管理者" : "責任者";
+  return role === "admin" ? "管理者" : "一般";
 }
 
 // ログイン状態判定
@@ -122,10 +123,8 @@ function showToast(message, type = "success") {
   const toast = document.getElementById("toast");
   toast.textContent = message;
   toast.className = `toast-${type}`;
-  if (document.body.dataset.toast !== "off") {
-    toast.classList.remove("hidden");
-    setTimeout(() => toast.classList.add("hidden"), 3000);
-  }
+  toast.classList.remove("hidden");
+  setTimeout(() => toast.classList.add("hidden"), 3000);
 }
 
 // Enterキー送信対応
@@ -196,4 +195,5 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
 
