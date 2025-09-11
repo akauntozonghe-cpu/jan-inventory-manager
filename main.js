@@ -25,10 +25,20 @@ setInterval(updateTime, 60000);
 // タイトルクリックでホーム（リロード）
 document.getElementById("title").addEventListener("click", () => location.reload());
 
+// カスタムアラート関数（在庫管理）
+function showCustomAlert(message) {
+  document.getElementById("alertMessage").textContent = message;
+  document.getElementById("customAlert").classList.remove("hidden");
+}
+function closeCustomAlert() {
+  document.getElementById("customAlert").classList.add("hidden");
+}
+
 // 商品登録処理
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const name = document.getElementById("productName").value;
   const unit = document.getElementById("unit").value;
+  const categoryLarge = document.getElementById("categoryLarge").value;
   const categorySmall = document.getElementById("categorySmall").value;
   const lotNo = document.getElementById("lotNo").value;
   const expiry = document.getElementById("expiry").value;
@@ -39,40 +49,24 @@ document.getElementById("registerBtn").addEventListener("click", async () => {
   const loc = document.getElementById("location").value;
   const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
   const timestamp = new Date();
-  const loc = document.getElementById("location").value;
 
-  if (!name || !jan || !qty || !loc || !categorySmall || !unit) {
-  return alert("必須項目が未入力です");
-}
+  if (!name || !jan || !qty || !loc || !categorySmall || !unit || !categoryLarge) {
+    return showCustomAlert("必須項目が未入力です。すべての項目を確認してください。");
+  }
 
-  await db.collection("products").add({
-  name,
-  jan,
-  qty,
-  unit,
-  loc,
-  categoryLarge,
-  categorySmall,
-  lotNo,
-  expiry,
-  maker,
-  adminCode,
-  registeredBy: user,
-  registeredAt: timestamp,
-  updatedAt: timestamp
-});
+  const ref = await db.collection("products").add({
+    name, jan, qty, unit, loc,
+    categoryLarge, categorySmall,
+    lotNo, expiry, maker, adminCode,
+    registeredBy: user,
+    registeredAt: timestamp,
+    updatedAt: timestamp
+  });
 
+  await ref.update({ productId: ref.id });
   loadProducts();
 });
 
-function showCustomAlert(message) {
-  document.getElementById("alertMessage").textContent = message;
-  document.getElementById("customAlert").classList.remove("hidden");
-}
-
-function closeCustomAlert() {
-  document.getElementById("customAlert").classList.add("hidden");
-}
 // 商品一覧表示
 async function loadProducts() {
   const list = document.getElementById("productList");
@@ -81,20 +75,25 @@ async function loadProducts() {
   snapshot.forEach(doc => {
     const data = doc.data();
     const li = document.createElement("li");
-li.innerHTML = `
-  管理番号：${doc.id}<br>
-  ${data.name}（${data.qty}${data.unit}）＠${data.loc}<br>
-  分類：${data.categoryLarge || "未設定"}／${data.categorySmall || "未設定"}<br>
-  <small>最終更新：${formatDate(data.updatedAt?.toDate?.())}</small><br>
-  <button class="editRequestBtn" data-id="${doc.id}">編集申請</button>
-  ＠${data.loc}
-`; 
- ;   list.appendChild(li);
+    li.innerHTML = `
+      管理番号：${doc.id}<br>
+      ${data.name}（${data.qty}${data.unit}）＠${data.loc}<br>
+      分類：${data.categoryLarge || "未設定"}／${data.categorySmall || "未設定"}<br>
+      <small>最終更新：${formatDate(data.updatedAt?.toDate?.())}</small><br>
+      <button class="editRequestBtn" data-id="${doc.id}">編集申請</button>
+    `;
+    list.appendChild(li);
   });
 }
 loadProducts();
 
-// 🔽 ここから貼り付けてOK
+// 日付フォーマット関数
+function formatDate(date) {
+  if (!date) return "不明";
+  return `${date.getFullYear()}年${date.getMonth()+1}月${date.getDate()}日 ${date.getHours()}:${date.getMinutes().toString().padStart(2,'0')}`;
+}
+
+// 編集申請モーダル処理
 let currentProductId = null;
 
 document.addEventListener("click", (e) => {
@@ -139,7 +138,9 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
   const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
   const timestamp = new Date();
 
-  if (!currentProductId || !field || !afterValue) return alert("すべて入力してください");
+  if (!currentProductId || !field || !afterValue) {
+    return showCustomAlert("すべて入力してください");
+  }
 
   const productRef = db.collection("products").doc(currentProductId);
   const productSnap = await productRef.get();
@@ -153,18 +154,13 @@ document.getElementById("submitEditRequest").addEventListener("click", async () 
     requestedBy: user,
     requestedAt: timestamp,
     status: "pending"
-    loc,
   });
 
   closeModal();
-  alert("申請を送信しました");
+  showCustomAlert("申請を送信しました");
 });
+
 // Firebase Auth（匿名ログイン）
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
-
-
-
-
-
