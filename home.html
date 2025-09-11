@@ -8,64 +8,84 @@
   <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-  <script src="home.js" defer></script>
 </head>
 <body>
   <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <h1>ホーム</h1>
-    <div class="user-meta">
-      <span id="userInfo"></span>
-      <span id="currentTime"></span>
+    <div class="header-left">
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+      <h1 onclick="goHome()">在庫管理</h1>
+    </div>
+    <div class="header-right">
+      <div id="currentTime" class="timestamp"></div>
+      <div id="userInfo" class="user-meta"></div>
     </div>
   </header>
 
+  <!-- ✅ ページタイトル -->
+  <div class="page-title">
+    <h2>ホームダッシュボード</h2>
+  </div>
+
   <!-- ✅ サイドメニュー -->
   <nav id="sideMenu" class="hidden">
-    <h2 class="menu-title">在庫管理</h2>
-    <ul id="menuList" class="menu-buttons"></ul>
+    <h2 class="menu-title">メニュー</h2>
+    <ul class="menu-buttons">
+      <li><a href="register.html">商品登録</a></li>
+      <li><a href="list.html">商品一覧</a></li>
+      <li><a href="calendar.html">カレンダー</a></li>
+      <li><a href="#" onclick="logout()">ログアウト</a></li>
+    </ul>
   </nav>
 
-  <!-- ✅ メイン画面 -->
+  <!-- ✅ ダッシュボード -->
   <main>
-    <section id="summary" class="card">
-      <h2>📦 在庫サマリー</h2>
-      <p>登録商品数：--</p>
-      <p>期限切れ商品：--</p>
+    <section class="card">
+      <h2>📦 在庫状況</h2>
+      <ul id="inventorySummary">
+        <li>登録商品数：--</li>
+        <li>期限切れ商品：--</li>
+        <li>保管場所別：--</li>
+      </ul>
     </section>
 
-    <section id="fleamarket" class="card">
-      <h2>🛍️ フリマ出品候補</h2>
-      <p>出品予定商品：--</p>
+    <section class="card">
+      <h2>🛍️ 出品候補</h2>
+      <ul id="fleamarketList">
+        <li>在庫過多の商品：--</li>
+        <li>期限間近の商品：--</li>
+      </ul>
     </section>
 
-    <section id="upcoming" class="card">
+    <section class="card">
       <h2>⏳ 期限間近</h2>
-      <ul id="upcomingList"></ul>
+      <ul id="upcomingList">
+        <li>商品A（あと3日）</li>
+        <li>商品B（あと5日）</li>
+      </ul>
     </section>
 
-    <section id="calendarSection" class="card">
+    <section class="card">
       <h2>📅 カレンダー</h2>
-      <div id="calendarContainer"></div>
+      <div id="calendarContainer">カレンダー表示領域</div>
     </section>
 
-    <section id="aiSection" class="card">
+    <section class="card">
       <h2>🤖 AI予測・提案</h2>
       <p>次回の出品候補：在庫過多の商品を検出中…</p>
       <p>期限切れ予測：△△（あと5日）</p>
     </section>
   </main>
 
-  <!-- ✅ JS：責任者表示と時刻更新 -->
+  <!-- ✅ JS -->
   <script>
     window.onload = function () {
       const name = sessionStorage.getItem("userName");
       const role = sessionStorage.getItem("userRole");
-      const roleMap = { admin: "管理者", manager: "責任者", user: "ユーザー" };
+      const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
       const roleJp = roleMap[role] || role;
 
-      document.getElementById("userInfo").textContent = `${name}（${roleJp}）`;
+      document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
       updateTime();
       setInterval(updateTime, 1000);
     };
@@ -73,8 +93,8 @@
     function updateTime() {
       const now = new Date();
       const days = ["日", "月", "火", "水", "木", "金", "土"];
-      const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-      document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+      const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}) ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+      document.getElementById("currentTime").textContent = formatted;
     }
 
     function toggleMenu() {
@@ -84,7 +104,11 @@
     function goHome() {
       window.location.href = "home.html";
     }
+
+    function logout() {
+      sessionStorage.clear();
+      window.location.href = "index.html";
+    }
   </script>
 </body>
 </html>
-
