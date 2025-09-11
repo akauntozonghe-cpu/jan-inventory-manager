@@ -1,3 +1,4 @@
+/* 背景と全体の雰囲気 */
 body {
   margin: 0;
   font-family: 'Segoe UI', 'Georgia', serif;
@@ -5,6 +6,44 @@ body {
   color: #eee;
 }
 
+/* 固定ヘッダー（共通） */
+.fixed-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #2c3e50;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.fixed-header h1 {
+  margin: 0;
+  font-size: 1.6em;
+  cursor: default;
+}
+.timestamp {
+  font-size: 1em;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+/* ページタイトル */
+.page-title {
+  margin-top: 100px;
+  padding: 10px 20px;
+  background-color: rgba(255,255,255,0.05);
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+}
+.page-title h2 {
+  margin: 0;
+  font-size: 1.3em;
+  color: #ccc;
+}
+
+/* ログインボックス */
 .login-box {
   max-width: 420px;
   margin: 60px auto;
@@ -18,6 +57,7 @@ body {
   animation: fadeIn 1s ease-out;
 }
 
+/* タイトル（特別感） */
 .login-title {
   font-family: 'Georgia', serif;
   font-size: 1.8em;
@@ -28,6 +68,7 @@ body {
   padding-bottom: 10px;
 }
 
+/* 入力欄 */
 .login-box input {
   width: 100%;
   padding: 12px;
@@ -39,6 +80,7 @@ body {
   color: #333;
 }
 
+/* ボタン */
 .login-box button {
   background-color: #0078d4;
   color: white;
@@ -54,13 +96,26 @@ body {
   background-color: #005a9e;
 }
 
+/* ステータス表示 */
 #loginStatus {
   margin-top: 15px;
   color: #ff9999;
   font-weight: bold;
 }
 
+/* アニメーション */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+  .login-box {
+    margin: 40px 20px;
+    padding: 30px;
+  }
+  .login-title {
+    font-size: 1.5em;
+  }
 }

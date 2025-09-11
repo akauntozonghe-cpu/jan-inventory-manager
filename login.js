@@ -1,3 +1,4 @@
+// Firebase初期化
 firebase.initializeApp({
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -5,14 +6,18 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
+// 起動時処理
 window.onload = function () {
   updateTime();
   setInterval(updateTime, 1000);
-  document.getElementById("userIdInput").addEventListener("keydown", function (e) {
+
+  const input = document.getElementById("userIdInput");
+  input.addEventListener("keydown", function (e) {
     if (e.key === "Enter") login();
   });
 };
 
+// 秒付き現在時刻表示
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
@@ -23,6 +28,7 @@ function updateTime() {
   document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
 }
 
+// ログイン処理
 async function login() {
   const userId = document.getElementById("userIdInput").value.trim();
   const status = document.getElementById("loginStatus");
@@ -41,10 +47,19 @@ async function login() {
 
     const doc = snapshot.docs[0];
     const userData = doc.data();
+
+    // セッション保存
     sessionStorage.setItem("userId", userId);
     sessionStorage.setItem("userName", userData.name);
     sessionStorage.setItem("userRole", userData.role);
 
+    // Firestoreにログイン履歴記録
+    const now = new Date();
+    await db.collection("users").doc(doc.id).update({
+      lastLogin: firebase.firestore.Timestamp.fromDate(now)
+    });
+
+    // ホーム画面へ遷移
     window.location.href = "home.html";
   } catch (error) {
     console.error("ログインエラー:", error);
