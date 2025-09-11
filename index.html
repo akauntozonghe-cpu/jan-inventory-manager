@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理システム - ログイン</title>
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Firebase SDKs（非モジュール構成） -->
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth.js"></script>
@@ -18,8 +20,7 @@
     <p id="loginStatus"></p>
   </div>
 
-  <script type="module" src="script.js"></script>
+  <!-- 非モジュール構成で読み込む -->
+  <script src="script.js"></script>
 </body>
-
 </html>
-
