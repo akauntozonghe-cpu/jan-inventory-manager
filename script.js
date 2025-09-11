@@ -17,13 +17,20 @@ try {
   console.warn("FCM初期化スキップ:", e);
 }
 
+// Enterキーでログイン実行
+document.getElementById("userIdInput").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") {
+    login();
+  }
+});
+
 // グローバル関数として定義
 window.login = async function () {
   const userId = document.getElementById("userIdInput").value.trim();
   const status = document.getElementById("loginStatus");
 
   if (!userId) {
-    status.textContent = "責任者番号を登録してください。";
+    status.textContent = "責任者番号を入力してください。";
     return;
   }
 
@@ -35,21 +42,23 @@ window.login = async function () {
       return;
     }
 
-    const userData = snapshot.docs[0].data();
+    const doc = snapshot.docs[0];
+    const userData = doc.data();
     const role = userData.role;
     const name = userData.name;
 
-    // FCMトークン取得（通知設定が有効な場合のみ）
-    if (Notification.permission === "granted" && messaging) {
+    // FCMトークン取得（通知許可があり、messagingが有効な場合）
+    if (messaging && Notification.permission === "granted") {
       try {
         const token = await messaging.getToken({ vapidKey: "YOUR_PUBLIC_VAPID_KEY" });
-        await db.collection("users").doc(snapshot.docs[0].id).update({ fcmToken: token });
+        await db.collection("users").doc(doc.id).update({ fcmToken: token });
       } catch (e) {
         console.warn("FCMトークン取得失敗:", e);
       }
     }
 
     // セッション保存
+    console.log("ログイン成功:", { userId, name, role });
     sessionStorage.setItem("userId", userId);
     sessionStorage.setItem("userName", name);
     sessionStorage.setItem("userRole", role);
