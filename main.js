@@ -45,6 +45,16 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+// ✅ ログイン処理（await を使うので async が必要）
+loginBtn.addEventListener("click", async () => {
+  clearInlineError(loginError);
+  const id = loginId.value.trim();
+  if (!id) {
+    showInlineError(loginError, "責任者番号を入力してください");
+    loginId.focus();
+    return;
+  }
+
   const snapshot = await db.collection("users").where("id", "==", id).get();
   if (snapshot.empty) {
     showInlineError(loginError, "責任者番号が見つかりません");
@@ -216,5 +226,6 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload(); // ✅ 表示状態を初期化
 });
+
 
 
