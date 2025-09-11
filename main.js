@@ -69,14 +69,20 @@ const searchInput = document.getElementById("searchInput");
 let currentUser = null;
 
 // ログイン処理
+import { query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
 async function login(userId) {
-  const userRef = doc(db, "users", userId);
-  const userSnap = await getDoc(userRef);
-  if (!userSnap.exists()) {
+  const q = query(collection(db, "users"), where("id", "==", userId));
+  const snapshot = await getDocs(q);
+
+  if (snapshot.empty) {
     loginError.textContent = "番号が正しくありません";
     return;
   }
-  currentUser = userSnap.data();
+
+  const userDoc = snapshot.docs[0];
+  currentUser = userDoc.data();
+
   loginSection.classList.add("hidden");
   homeSection.classList.remove("hidden");
   userNameDisplay.textContent = currentUser.name;
@@ -176,3 +182,4 @@ document.addEventListener("click", (e) => {
 
 // 時刻更新
 setInterval(() => updateTime(currentTime), 60000);
+
