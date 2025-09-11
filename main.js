@@ -4,7 +4,6 @@ import {
   getFirestore, collection, doc, getDoc, getDocs, addDoc, query
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
-// Firebase設定（トさん提供）
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
