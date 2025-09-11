@@ -63,7 +63,11 @@ function setupMenu(role) {
   ul.innerHTML = "";
   menu.forEach(item => {
     const li = document.createElement("li");
-    li.innerHTML = `<a href="${item.link}">${item.icon} ${item.label}</a>`;
+    if (item.action) {
+      li.innerHTML = `<a href="#" onclick="(${item.action.toString()})()">${item.icon} ${item.label}</a>`;
+    } else {
+      li.innerHTML = `<a href="${item.link}">${item.icon} ${item.label}</a>`;
+    }
     ul.appendChild(li);
   });
 }
