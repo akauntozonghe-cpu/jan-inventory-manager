@@ -1,4 +1,3 @@
-// Firebase初期化
 firebase.initializeApp({
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -6,7 +5,6 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-// 現在時刻表示
 window.onload = function () {
   updateTime();
   setInterval(updateTime, 1000);
@@ -18,15 +16,13 @@ window.onload = function () {
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） `
+  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}) `
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
   document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
 }
-}
 
-// ログイン処理
 async function login() {
   const userId = document.getElementById("userIdInput").value.trim();
   const status = document.getElementById("loginStatus");
