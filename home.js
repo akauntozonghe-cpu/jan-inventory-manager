@@ -10,7 +10,6 @@ const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユー�
 window.onload = async function () {
   const name = sessionStorage.getItem("userName");
   const role = sessionStorage.getItem("userRole");
-  const userId = sessionStorage.getItem("userId");
   const roleJp = roleMap[role] || role;
 
   document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
@@ -21,6 +20,7 @@ window.onload = async function () {
   await loadInventorySummary();
   await loadFleamarketStatus();
   await loadUpcomingItems();
+  renderCalendar();
 };
 
 function updateTime() {
@@ -35,8 +35,7 @@ function goHome() {
 }
 
 function toggleMenu() {
-  const menu = document.getElementById("sideMenu");
-  menu.classList.toggle("visible");
+  document.getElementById("sideMenu").classList.toggle("visible");
 }
 
 function setupMenu(role) {
@@ -94,4 +93,33 @@ async function loadUpcomingItems() {
     let label = "📅";
     if (diff <= 1) label = "🔥";
     else if (diff <= 3) label = "⚠️";
-    return `<li>${label} ${data.name}（期限：${data.期限}）</li
+    return `<li>${label} ${data.name}（期限：${data.期限}）</li>`;
+  }).join("");
+
+  document.getElementById("upcoming").innerHTML = `<h2>⏰ 期限の近い商品</h2><ul>${list || "<li>該当なし</li>"}</ul>`;
+}
+
+function renderCalendar() {
+  const container = document.getElementById("calendarContainer");
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+
+  const firstDay = new Date(year, month, 1).getDay();
+  const lastDate = new Date(year, month + 1, 0).getDate();
+
+  let html = `<table><thead><tr>`;
+  ["日","月","火","水","木","金","土"].forEach(d => html += `<th>${d}</th>`);
+  html += `</tr></thead><tbody><tr>`;
+
+  for (let i = 0; i < firstDay; i++) html += `<td></td>`;
+  for (let d = 1; d <= lastDate; d++) {
+    const isToday = d === today ? ' class="today"' : '';
+    html += `<td${isToday}>${d}</td>`;
+    if ((firstDay + d) % 7 === 0) html += `</tr><tr>`;
+  }
+
+  html += `</tr></tbody></table>`;
+  container.innerHTML = html;
+}
