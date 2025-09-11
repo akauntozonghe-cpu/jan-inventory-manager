@@ -1,0 +1,74 @@
+/* サイドメニュー本体 */
+#sideMenu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 220px;
+  height: 100%;
+  background: #ecf0f1;
+  padding: 20px;
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 999;
+  box-shadow: 2px 0 6px rgba(0,0,0,0.1);
+}
+
+/* 表示状態 */
+#sideMenu.visible {
+  transform: translateX(0);
+}
+
+/* メニュータイトル */
+.menu-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+
+/* メニュー項目 */
+.menu-buttons {
+  padding: 0;
+  margin: 0;
+}
+.menu-buttons li {
+  list-style: none;
+  margin: 10px 0;
+}
+.menu-buttons a {
+  display: block;
+  padding: 10px 12px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* ホバー時の強調 */
+.menu-buttons a:hover {
+  background-color: #dfe6e9;
+  color: #000;
+}
+
+/* アイコンとラベルの間隔 */
+.menu-buttons a::before {
+  content: attr(data-icon);
+  margin-right: 8px;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+  #sideMenu {
+    width: 100%;
+    padding: 15px;
+  }
+  .menu-buttons a {
+    font-size: 1em;
+    padding: 12px;
+  }
+}
