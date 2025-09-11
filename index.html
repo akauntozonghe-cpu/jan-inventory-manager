@@ -1,29 +1,48 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム - ログイン</title>
-  <link rel="stylesheet" href="style.css" />
+// Firebase初期化（非モジュール構成）
+const firebaseConfig = {
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  projectId: "inventory-app-312ca"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  <!-- Firebase SDKs（非モジュール構成） -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-database-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-messaging-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-</head>
-<body>
-  <div class="login-container">
-    <h1>在庫管理システム</h1>
-    <input type="text" id="userIdInput" placeholder="責任者番号を登録" />
-    <button onclick="login()">ログイン</button>
-    <p id="loginStatus"></p>
-  </div>
+// Enterキーでログイン実行
+document.getElementById("userIdInput").addEventListener("keydown", function (e) {
+  if (e.key === "Enter") login();
+});
 
-  <!-- 非モジュール構成で読み込む -->
-  <script src="script.js"></script>
-</body>
-</html>
+// グローバル関数として定義
+window.login = async function () {
+  const userId = document.getElementById("userIdInput").value.trim();
+  const status = document.getElementById("loginStatus");
 
+  if (!userId) {
+    status.textContent = "責任者番号を入力してください。";
+    return;
+  }
 
+  try {
+    const snapshot = await db.collection("users").where("id", "==", userId).get();
+    if (snapshot.empty) {
+      status.textContent = "登録された番号が見つかりません。";
+      return;
+    }
+
+    const doc = snapshot.docs[0];
+    const userData = doc.data();
+    const role = userData.role;
+    const name = userData.name;
+
+    // セッション保存
+    sessionStorage.setItem("userId", userId);
+    sessionStorage.setItem("userName", name);
+    sessionStorage.setItem("userRole", role);
+
+    // 遷移
+    window.location.href = "home.html";
+  } catch (error) {
+    console.error("ログインエラー:", error);
+    status.textContent = "ログイン中にエラーが発生しました。";
+  }
+};
