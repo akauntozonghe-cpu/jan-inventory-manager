@@ -1,14 +1,42 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理</title>
-  <link rel="stylesheet" href="style.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <meta charset="UTF-8">
+  <title>在庫管理システム</title>
+  <link rel="stylesheet" href="style.css">
 </head>
+<body>
+  <h1>在庫管理システム</h1>
+
+  <div id="loginArea">
+    <label>責任者番号（メールアドレス）</label>
+    <input type="email" id="loginEmail" placeholder="example@domain.com">
+    <label>パスワード</label>
+    <input type="password" id="loginPassword" placeholder="パスワード">
+    <button id="loginBtn">ログイン</button>
+    <button id="signupBtn">新規登録</button>
+  </div>
+
+  <div id="mainArea" class="hidden">
+    <p id="userInfo"></p>
+    <!-- 在庫管理画面のコンテンツをここに追加 -->
+  </div>
+
+  <!-- カスタムアラート -->
+  <div id="customAlert" class="hidden">
+    <div class="alertBox">
+      <h3>在庫管理</h3>
+      <p id="alertMessage"></p>
+      <button onclick="closeCustomAlert()">OK</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+  <script src="login.js"></script>
+</body>
+</html>
 <body>
   <header>
   <h1 id="title">在庫管理</h1>
@@ -94,6 +122,7 @@
 </div>
 </body>
 </html>
+
 
 
 
