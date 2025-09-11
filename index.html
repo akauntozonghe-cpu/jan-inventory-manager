@@ -25,10 +25,28 @@
       <input type="text" id="janCode" placeholder="JANコード" />
       <input type="number" id="quantity" placeholder="数量" />
       <select id="location">
-        <option value="倉庫A">倉庫A</option>
-        <option value="店舗B">店舗B</option>
-      </select>
-      <button id="registerBtn">登録</button>
+    <select id="categorySmall">
+      <option value="">小分類を選択</option>
+      <option value="Tシャツ">Tシャツ</option>
+      <option value="缶詰">缶詰</option>
+      <option value="洗剤">洗剤</option>
+    </select>
+    <select id="unit">
+      <option value="">単位を選択</option>
+      <option value="個">個</option>
+      <option value="袋">袋</option>
+      <option value="本">本</option>
+      <option value="枚">枚</option>
+      <option value="包">包</option>
+      <option value="箱">箱</option>
+      <option value="セット">セット</option>
+      <option value="パック">パック</option>
+    </select>
+    <input type="text" id="lotNo" placeholder="Lot.No" />
+    <input type="date" id="expiry" />
+    <input type="text" id="maker" placeholder="メーカー名" />
+    <input type="text" id="adminCode" placeholder="管理区別番号（管理者専用）" style="display:none;" />
+    <button id="registerBtn">登録</button>
     </section>
 
     <section id="list">
@@ -54,5 +72,6 @@
   <script src="main.js"></script>
 </body>
 </html>
+
 
 
