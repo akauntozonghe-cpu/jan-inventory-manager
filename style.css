@@ -9,9 +9,11 @@ header {
   color: white;
   padding: 10px 20px;
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: flex-start;
+  flex-wrap: wrap;
 }
+
 h1 {
   cursor: pointer;
   font-weight: bold;
@@ -21,12 +23,13 @@ h1:hover {
   text-decoration: underline;
 }
 .header-info {
-  margin-top: 8px;
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 4px;
   font-size: 14px;
 }
+
 main {
   padding: 20px;
 }
@@ -71,3 +74,4 @@ li {
 .hidden {
   display: none;
 }
+
