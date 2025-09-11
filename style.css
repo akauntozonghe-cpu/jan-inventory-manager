@@ -285,11 +285,16 @@ main {
   }
 
   #sideMenu {
-    width: 100%;
-    padding: 15px;
-  }
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+}
+
+#sideMenu.visible {
+  transform: translateX(0);
+}
 
   .card {
     margin: 10px 0;
   }
 }
+
