@@ -5,16 +5,23 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
-
-window.onload = async function () {
+window.onload = function () {
   const name = sessionStorage.getItem("userName");
   const role = sessionStorage.getItem("userRole");
+  const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
   const roleJp = roleMap[role] || role;
 
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）`;
+  document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
   updateTime();
   setInterval(updateTime, 1000);
+};
+
+function updateTime() {
+  const now = new Date();
+  const days = ["日", "月", "火", "水", "木", "金", "土"];
+  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+}
 
   setupMenu(role);
   await loadInventorySummary();
@@ -22,13 +29,6 @@ window.onload = async function () {
   await loadUpcomingItems();
   renderCalendar();
 };
-
-function updateTime() {
-  const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `${formatted}`;
-}
 
 function goHome() {
   window.location.href = "home.html";
