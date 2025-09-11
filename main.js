@@ -45,6 +45,45 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 });
 
+  const snapshot = await db.collection("users").where("id", "==", id).get();
+  if (snapshot.empty) {
+    showInlineError(loginError, "責任者番号が見つかりません");
+    loginId.focus();
+    return;
+  }
+
+  const user = snapshot.docs[0].data();
+  sessionStorage.setItem("userId", user.id);
+  sessionStorage.setItem("userName", user.name);
+  sessionStorage.setItem("role", user.role);
+
+  document.body.classList.toggle("admin", user.role === "admin");
+  document.querySelectorAll(".admin-only").forEach(el => {
+    el.style.display = user.role === "admin" ? "block" : "none";
+  });
+
+  loginSection.classList.add("hidden");
+  mainSection.classList.remove("hidden");
+  mainSection.classList.add("fade-in");
+
+  userBadge.textContent = `${user.name}（${user.role}）`;
+  if (user.role === "admin") {
+    userBadge.classList.add("admin-badge");
+    updateAdminBadge();
+  }
+
+  showToast("ログインしました", "success");
+  routeTo("homeSection");
+  renderHomeDashboard();
+
+  await db.collection("logs").add({
+    type: "login",
+    userId: user.id,
+    userName: user.name,
+    role: user.role,
+    timestamp: new Date().toISOString()
+  });
+});
 // エラー表示関数
 function showInlineError(el, message) {
   el.textContent = message;
@@ -177,4 +216,5 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload(); // ✅ 表示状態を初期化
 });
+
 
