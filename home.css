@@ -1,0 +1,100 @@
+/* ホーム画面専用：カード・カレンダー・ダッシュボード */
+
+/* ページタイトル */
+.page-title {
+  margin-top: 100px;
+  padding: 10px 20px;
+  background-color: #ecf0f1;
+  border-bottom: 1px solid #ccc;
+}
+.page-title h2 {
+  margin: 0;
+  font-size: 1.4em;
+  color: #2c3e50;
+}
+
+/* メイン領域 */
+main {
+  padding: 20px;
+}
+
+/* カード型セクション */
+.card {
+  background: white;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-left: 6px solid #3498db;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 8px;
+}
+.card h2 {
+  margin-top: 0;
+  font-size: 1.2em;
+  color: #2c3e50;
+}
+.card p, .card ul {
+  font-size: 1em;
+  color: #333;
+}
+
+/* カレンダー表示 */
+#calendarContainer {
+  overflow-x: auto;
+  margin-top: 10px;
+}
+#calendarContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fff;
+}
+#calendarContainer th, #calendarContainer td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9em;
+}
+#calendarContainer th {
+  background-color: #f0f0f0;
+  color: #2c3e50;
+}
+#calendarContainer td.today {
+  background-color: #3498db;
+  color: white;
+  font-weight: bold;
+  border: 2px solid #2980b9;
+}
+
+/* 期限間近リスト */
+#upcoming ul {
+  padding-left: 20px;
+}
+#upcoming li {
+  margin-bottom: 6px;
+  font-size: 0.95em;
+}
+
+/* AI予測セクション */
+#aiSection p {
+  margin: 6px 0;
+  font-size: 0.95em;
+  color: #555;
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+  .page-title {
+    margin-top: 120px;
+    padding: 10px 15px;
+  }
+  main {
+    padding: 15px;
+  }
+  .card {
+    padding: 15px;
+    margin: 10px 0;
+  }
+  #calendarContainer th, #calendarContainer td {
+    padding: 6px;
+    font-size: 0.8em;
+  }
+}
