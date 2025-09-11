@@ -1,24 +1,49 @@
+/* 全体設定 */
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
   padding: 0;
   background: #f5f5f5;
+  color: #333;
 }
 
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 h1, h2, h3 {
-  margin: 0.5em 0;
+  margin: 1em 0 0.5em;
+  font-weight: 600;
 }
 
-input, button {
+input, select, textarea, button {
+  width: 100%;
+  max-width: 400px;
   padding: 0.6em;
   margin: 0.5em 0;
   font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
 }
 
+button {
+  background: #0078d4;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #005fa3;
+}
+
+.error {
+  color: red;
+  font-size: 0.9em;
+}
+
+/* ヘッダー */
 header {
   display: flex;
   justify-content: space-between;
@@ -26,10 +51,12 @@ header {
   background: #0078d4;
   color: white;
   padding: 1em;
+  flex-wrap: wrap;
 }
 
 .title-block h2 {
   margin: 0;
+  font-size: 1.4em;
 }
 
 #currentTime {
@@ -41,6 +68,7 @@ header {
   display: flex;
   align-items: center;
   gap: 0.5em;
+  font-size: 0.95em;
 }
 
 .badge {
@@ -56,25 +84,86 @@ header {
   color: white;
 }
 
+.badge.user {
+  background: #66ccff;
+  color: white;
+}
+
+/* メニュー */
+#menuToggle {
+  font-size: 1.5em;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
 nav#sideMenu {
   position: absolute;
   top: 60px;
   left: 0;
   background: white;
-  width: 200px;
+  width: 220px;
   box-shadow: 2px 0 5px rgba(0,0,0,0.2);
   padding: 1em;
+  z-index: 100;
 }
 
 nav#sideMenu ul {
   list-style: none;
   padding: 0;
+  margin: 1em 0 0;
 }
 
 nav#sideMenu li {
   margin: 0.5em 0;
 }
 
+nav#sideMenu a {
+  text-decoration: none;
+  color: #0078d4;
+  font-weight: bold;
+}
+
+#introToggle {
+  background: #ffe066;
+  color: #333;
+  font-weight: bold;
+  border-radius: 4px;
+  margin-bottom: 1em;
+}
+
+/* セクション */
+main section {
+  padding: 1em;
+  background: white;
+  margin: 1em;
+  border-radius: 8px;
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+}
+
+/* 在庫状況ブロック */
+.summary-block {
+  margin: 0.5em 0;
+  font-size: 1em;
+  font-weight: bold;
+}
+
+/* 商品一覧 */
+#productList {
+  list-style: none;
+  padding: 0;
+}
+
+#productList li {
+  background: #f0f8ff;
+  margin: 0.5em 0;
+  padding: 0.8em;
+  border-radius: 6px;
+  box-shadow: 0 0 3px rgba(0,0,0,0.1);
+}
+
+/* 通知トースト */
 #toast {
   position: fixed;
   bottom: 20px;
@@ -99,12 +188,19 @@ nav#sideMenu li {
   to { opacity: 0; }
 }
 
+/* レスポンシブ対応 */
 @media screen and (max-width: 600px) {
   header {
     flex-direction: column;
     align-items: flex-start;
   }
+
   nav#sideMenu {
     width: 100%;
+    top: 100px;
+  }
+
+  input, select, textarea, button {
+    max-width: 100%;
   }
 }
