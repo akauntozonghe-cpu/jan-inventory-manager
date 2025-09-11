@@ -19,10 +19,30 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 
-// ✅ 初期表示制御（ログイン画面のみ表示）
+// ✅ ログイン状態判定関数
+function isLoggedIn() {
+  return sessionStorage.getItem("userId") !== null;
+}
+
+// ✅ 初期表示制御（ログイン済みなら mainSection を表示）
 window.addEventListener("DOMContentLoaded", () => {
-  loginSection.classList.remove("hidden");
-  mainSection.classList.add("hidden");
+  if (isLoggedIn()) {
+    loginSection.classList.add("hidden");
+    mainSection.classList.remove("hidden");
+
+    userBadge.textContent = `${sessionStorage.getItem("userName")}（${sessionStorage.getItem("role")}）`;
+
+    if (sessionStorage.getItem("role") === "admin") {
+      userBadge.classList.add("admin-badge");
+      updateAdminBadge();
+    }
+
+    routeTo("homeSection");
+    renderHomeDashboard();
+  } else {
+    loginSection.classList.remove("hidden");
+    mainSection.classList.add("hidden");
+  }
 });
 
 // エラー表示関数
@@ -157,3 +177,4 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload(); // ✅ 表示状態を初期化
 });
+
