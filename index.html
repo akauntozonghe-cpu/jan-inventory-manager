@@ -36,7 +36,22 @@
       <ul id="productList"></ul>
     </section>
   </main>
-
+  
+  <!-- 編集申請モーダル -->
+<div id="editModal" class="modal hidden">
+  <h3>編集申請</h3>
+  <select id="editField">
+    <option value="quantity">数量</option>
+    <option value="location">保管場所</option>
+    <option value="categoryLarge">大分類</option>
+  </select>
+  <div id="editInputArea">
+    <input type="text" id="newValue" placeholder="新しい値" />
+  </div>
+  <button id="submitEditRequest">申請する</button>
+  <button onclick="closeModal()">閉じる</button>
+</div>
   <script src="main.js"></script>
 </body>
 </html>
+
