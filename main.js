@@ -1,7 +1,14 @@
 // Firebase初期化
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
 import {
-  getFirestore, collection, doc, getDoc, getDocs, addDoc, query
+  getFirestore,
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  addDoc,
+  query,
+  where
 } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -66,11 +73,12 @@ const productList = document.getElementById("productList");
 const searchBtn = document.getElementById("searchBtn");
 const searchInput = document.getElementById("searchInput");
 
+const menuToggle = document.getElementById("menuToggle");
+const sideMenu = document.getElementById("sideMenu");
+
 let currentUser = null;
 
-// ログイン処理
-import { query, where, getDocs, collection } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
-
+// ログイン処理（idフィールドで照合）
 async function login(userId) {
   const q = query(collection(db, "users"), where("id", "==", userId));
   const snapshot = await getDocs(q);
@@ -169,8 +177,6 @@ searchBtn.addEventListener("click", async () => {
 });
 
 // メニュー開閉
-const menuToggle = document.getElementById("menuToggle");
-const sideMenu = document.getElementById("sideMenu");
 menuToggle.addEventListener("click", () => {
   sideMenu.classList.toggle("hidden");
 });
@@ -182,4 +188,3 @@ document.addEventListener("click", (e) => {
 
 // 時刻更新
 setInterval(() => updateTime(currentTime), 60000);
-
