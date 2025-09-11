@@ -58,3 +58,16 @@ li {
   padding: 10px;
   border: 1px solid #ccc;
 }
+.modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: white;
+  padding: 20px;
+  border: 2px solid #333;
+  z-index: 1000;
+}
+.hidden {
+  display: none;
+}
