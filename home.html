@@ -3,25 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム - ホーム</title>
+  <title>在庫管理ダッシュボード</title>
   <link rel="stylesheet" href="style.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
+  <script src="home.js" defer></script>
 </head>
 <body>
-  <div class="dashboard">
+  <header>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
     <h1>在庫管理ダッシュボード</h1>
-    <div class="user-info" id="userInfo"></div>
-    <div id="currentTime"></div>
+    <p id="userInfo"></p>
+    <p id="currentTime"></p>
+  </header>
 
-    <div class="menu" id="menuArea">
-      <button onclick="location.href='register.html'">商品登録</button>
-      <button onclick="location.href='list.html'">商品一覧</button>
-      <button onclick="location.href='report.html'">問題報告</button>
-      <button id="adminBtn" style="display:none;" onclick="location.href='admin.html'">管理者メニュー</button>
-      <button onclick="location.href='settings.html'">設定</button>
-    </div>
-  </div>
+  <nav id="sideMenu" class="hidden">
+    <ul>
+      <li><a href="register.html">商品登録</a></li>
+      <li><a href="list.html">商品一覧</a></li>
+      <li><a href="report.html">問題報告</a></li>
+      <li><a href="settings.html">設定</a></li>
+      <li><a href="login.html">ログアウト</a></li>
+    </ul>
+  </nav>
 
-  <script>
+  <main>
+    <section id="summary"></section>
+    <section id="adminList" class="hidden">
+      <h2>他の管理者一覧</h2>
+      <table>
+        <thead><tr><th>氏名</th><th>責任者番号</th><th>通知</th></tr></thead>
+        <tbody id="adminTableBody"></tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
     // ユーザー情報の表示
     const name = sessionStorage.getItem("userName");
     const role = sessionStorage.getItem("userRole");
@@ -42,4 +59,5 @@
     updateTime();
   </script>
 </body>
+
 </html>
