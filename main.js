@@ -1,4 +1,3 @@
-// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -13,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 日時表示（右寄せ）
+// 日時表示（リアルタイム更新）
 function updateTime() {
   const now = new Date();
   const days = ['日','月','火','水','木','金','土'];
@@ -26,7 +25,7 @@ setInterval(updateTime, 60000);
 // タイトルクリックでホーム（リロード）
 document.getElementById("title").addEventListener("click", () => location.reload());
 
-// 商品登録
+// 商品登録処理
 document.getElementById("registerBtn").addEventListener("click", async () => {
   const name = document.getElementById("productName").value;
   const jan = document.getElementById("janCode").value;
@@ -60,5 +59,5 @@ loadProducts();
 
 // Firebase Auth（匿名ログイン）
 firebase.auth().signInAnonymously().then(() => {
-  document.getElementById("userInfo").textContent = "｜ 責任者：匿名ユーザー";
+  document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
