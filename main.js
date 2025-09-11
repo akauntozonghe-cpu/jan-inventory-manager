@@ -18,6 +18,12 @@ const loginBtn = document.getElementById("loginBtn");
 const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
+const titleHeader = document.getElementById("titleHeader");
+
+// 権限ラベル（日本語）
+function getRoleLabel(role) {
+  return role === "admin" ? "管理者" : "一般";
+}
 
 // ログイン状態判定
 function isLoggedIn() {
@@ -30,9 +36,15 @@ window.addEventListener("DOMContentLoaded", async () => {
     loginSection.classList.add("hidden");
     mainSection.classList.remove("hidden");
 
-    userBadge.textContent = `${sessionStorage.getItem("userName")}（${sessionStorage.getItem("role")}）`;
+    const role = sessionStorage.getItem("role");
+    const name = sessionStorage.getItem("userName");
+    userBadge.textContent = `${name}（${getRoleLabel(role)}）`;
 
-    if (sessionStorage.getItem("role") === "admin") {
+    document.querySelectorAll(".admin-only").forEach(el => {
+      el.style.display = role === "admin" ? "block" : "none";
+    });
+
+    if (role === "admin") {
       userBadge.classList.add("admin-badge");
       await updateAdminBadge();
     }
@@ -45,7 +57,7 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ログイン処理（1回だけ定義）
+// ログイン処理
 loginBtn.addEventListener("click", async () => {
   clearInlineError(loginError);
   const id = loginId.value.trim();
@@ -76,7 +88,7 @@ loginBtn.addEventListener("click", async () => {
   mainSection.classList.remove("hidden");
   mainSection.classList.add("fade-in");
 
-  userBadge.textContent = `${user.name}（${user.role}）`;
+  userBadge.textContent = `${user.name}（${getRoleLabel(user.role)}）`;
   if (user.role === "admin") {
     userBadge.classList.add("admin-badge");
     await updateAdminBadge();
@@ -147,22 +159,29 @@ async function renderHomeDashboard() {
   const snapshot = await db.collection("products").get();
   const products = snapshot.docs.map(doc => doc.data());
 
+  const now = new Date();
   const total = products.length;
   const approved = products.filter(p => p.status === "approved").length;
-  const expired = products.filter(p => new Date(p.expire) < new Date()).length;
+  const expired = products.filter(p => new Date(p.expire) < now).length;
   const soon = products.filter(p => {
     const d = new Date(p.expire);
-    const now = new Date();
     const diff = (d - now) / (1000 * 60 * 60 * 24);
     return diff >= 0 && diff <= 7;
   });
+  const flea = products.filter(p => p.market === "flea");
+
+  titleHeader.textContent = `在庫管理（${now.toLocaleDateString()} ${now.toLocaleTimeString()}）`;
 
   document.getElementById("summaryStats").innerHTML = `
     <p>登録：${total}件 / 承認済：${approved}件 / 期限切れ：${expired}件</p>
   `;
   document.getElementById("expiringSoon").innerHTML = `
-    <h4>期限間近の商品</h4>
+    <h4>⏰ 期限間近の商品</h4>
     <ul>${soon.map(p => `<li>${p.productName}（${p.expire}）</li>`).join("")}</ul>
+  `;
+  document.getElementById("fleaMarketInfo").innerHTML = `
+    <h4>🛍️ フリマ出品情報</h4>
+    <ul>${flea.map(p => `<li>${p.productName}（${p.marketDate || "未設定"}）</li>`).join("")}</ul>
   `;
 }
 
