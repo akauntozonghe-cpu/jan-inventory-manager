@@ -74,4 +74,14 @@ li {
 .hidden {
   display: none;
 }
+@media screen and (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-info {
+    align-items: flex-start;
+    margin-top: 8px;
+  }
+}
 
