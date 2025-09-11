@@ -5,62 +5,85 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理システム</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
   <script src="home.js" defer></script>
-  <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
+  <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
-  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-  <h1 onclick="goHome()">ホーム</h1> <!-- ← 画面ごとにタイトル変更 -->
-  <div class="user-meta">
-    <span id="userInfo"></span>
-    <span id="currentTime"></span>
-  </div>
-</header>
+    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+    <h1>ホーム</h1>
+    <div class="user-meta">
+      <span id="userInfo"></span>
+      <span id="currentTime"></span>
+    </div>
+  </header>
+
+  <!-- ✅ サイドメニュー -->
   <nav id="sideMenu" class="hidden">
     <h2 class="menu-title">在庫管理</h2>
     <ul id="menuList" class="menu-buttons"></ul>
   </nav>
-window.onload = function () {
-  const name = sessionStorage.getItem("userName");
-  const role = sessionStorage.getItem("userRole");
-  const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
-  const roleJp = roleMap[role] || role;
 
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
-  updateTime();
-  setInterval(updateTime, 1000);
-};
-
-function updateTime() {
-  const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
-}
+  <!-- ✅ メイン画面 -->
   <main>
-    <section id="summary" class="card"></section>
-    <section id="fleamarket" class="card"></section>
-    <section id="upcoming" class="card"></section>
+    <section id="summary" class="card">
+      <h2>📦 在庫サマリー</h2>
+      <p>登録商品数：--</p>
+      <p>期限切れ商品：--</p>
+    </section>
+
+    <section id="fleamarket" class="card">
+      <h2>🛍️ フリマ出品候補</h2>
+      <p>出品予定商品：--</p>
+    </section>
+
+    <section id="upcoming" class="card">
+      <h2>⏳ 期限間近</h2>
+      <ul id="upcomingList"></ul>
+    </section>
+
     <section id="calendarSection" class="card">
       <h2>📅 カレンダー</h2>
       <div id="calendarContainer"></div>
     </section>
+
     <section id="aiSection" class="card">
-      <h2>AI予測・提案</h2>
+      <h2>🤖 AI予測・提案</h2>
       <p>次回の出品候補：在庫過多の商品を検出中…</p>
       <p>期限切れ予測：△△（あと5日）</p>
     </section>
   </main>
+
+  <!-- ✅ JS：責任者表示と時刻更新 -->
+  <script>
+    window.onload = function () {
+      const name = sessionStorage.getItem("userName");
+      const role = sessionStorage.getItem("userRole");
+      const roleMap = { admin: "管理者", manager: "責任者", user: "ユーザー" };
+      const roleJp = roleMap[role] || role;
+
+      document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
+      updateTime();
+      setInterval(updateTime, 1000);
+    };
+
+    function updateTime() {
+      const now = new Date();
+      const days = ["日", "月", "火", "水", "木", "金", "土"];
+      const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
+      document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+    }
+
+    function toggleMenu() {
+      document.getElementById("sideMenu").classList.toggle("visible");
+    }
+
+    function goHome() {
+      window.location.href = "home.html";
+    }
+  </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
