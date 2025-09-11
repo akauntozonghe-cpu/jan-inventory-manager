@@ -1,3 +1,4 @@
+/* 共通設定 */
 * {
   box-sizing: border-box;
 }
@@ -7,6 +8,8 @@ body {
   background-color: #f4f6f8;
   color: #333;
 }
+
+/* 固定ヘッダー */
 .fixed-header {
   position: fixed;
   top: 0;
@@ -14,15 +17,67 @@ body {
   right: 0;
   background: #2c3e50;
   color: white;
-  padding: 10px 20px;
+  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.fixed-header h1 {
+  margin: 0;
+  font-size: 1.4em;
+  cursor: pointer;
+}
+.menu-toggle {
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 6px;
+}
+.menu-toggle:hover {
+  background-color: rgba(255,255,255,0.2);
+}
+.header-right {
+  text-align: right;
+  font-size: 0.9em;
+}
+.timestamp {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+.user-meta {
+  font-size: 0.9em;
+  color: #ecf0f1;
+}
+
+/* ページタイトル（ヘッダーの下） */
+.page-title {
+  margin-top: 100px;
+  padding: 10px 20px;
+  background-color: #ecf0f1;
+  border-bottom: 1px solid #ccc;
+}
+.page-title h2 {
+  margin: 0;
+  font-size: 1.3em;
+  color: #2c3e50;
+}
+
+/* メイン領域 */
 main {
-  padding: 100px 20px 20px;
+  padding: 20px;
 }
+
+/* サイドメニュー */
 #sideMenu {
   position: fixed;
   top: 0;
@@ -38,10 +93,62 @@ main {
 #sideMenu.visible {
   transform: translateX(0);
 }
+.menu-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
+.menu-buttons li {
+  list-style: none;
+  margin: 10px 0;
+}
+.menu-buttons a {
+  display: block;
+  padding: 10px;
+  background-color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.menu-buttons a:hover {
+  background-color: #dfe6e9;
+}
+
+/* セクションカード */
 .card {
   background: white;
   margin-bottom: 20px;
   padding: 15px;
   border-left: 6px solid #3498db;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* レスポンシブ対応 */
+@media screen and (max-width: 600px) {
+  .fixed-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-right {
+    text-align: left;
+  }
+  .page-title {
+    margin-top: 120px;
+    padding: 10px 15px;
+  }
+  main {
+    padding: 15px;
+  }
+  #sideMenu {
+    width: 100%;
+    padding: 15px;
+  }
+  .card {
+    margin: 10px 0;
+  }
 }
