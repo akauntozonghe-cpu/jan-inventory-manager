@@ -13,7 +13,7 @@ async function init() {
   const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
   const roleJp = roleMap[role] || role;
 
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
+  document.getElementById("userInfo").textContent = `${name}（${roleJp}）`;
   updateTime();
   setInterval(updateTime, 1000);
 
