@@ -5,7 +5,9 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-window.onload = function () {
+window.onload = () => init();
+
+async function init() {
   const name = sessionStorage.getItem("userName");
   const role = sessionStorage.getItem("userRole");
   const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
@@ -14,21 +16,20 @@ window.onload = function () {
   document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
   updateTime();
   setInterval(updateTime, 1000);
-};
-
-function updateTime() {
-  const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
-}
 
   setupMenu(role);
   await loadInventorySummary();
   await loadFleamarketStatus();
   await loadUpcomingItems();
   renderCalendar();
-};
+}
+
+function updateTime() {
+  const now = new Date();
+  const days = ["日", "月", "火", "水", "木", "金", "土"];
+  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+}
 
 function goHome() {
   window.location.href = "home.html";
@@ -38,7 +39,6 @@ function toggleMenu() {
   document.getElementById("sideMenu").classList.toggle("visible");
 }
 
-// メニュー外クリックで閉じる
 document.addEventListener("click", function (e) {
   const menu = document.getElementById("sideMenu");
   const toggle = document.querySelector(".menu-toggle");
@@ -77,7 +77,7 @@ async function loadInventorySummary() {
   const total = snapshot.size;
   const expired = snapshot.docs.filter(doc => {
     const limit = doc.data().期限;
-    return limit && new Date(limit) < new Date();
+    return typeof limit === "string" && limit.trim() !== "" && new Date(limit) < new Date();
   }).length;
   document.getElementById("summary").innerHTML = `<h2>📦 在庫状況</h2><p>登録商品数：${total}　期限切れ：${expired}</p>`;
 }
@@ -93,7 +93,7 @@ async function loadUpcomingItems() {
   const snapshot = await db.collection("products").get();
   const upcoming = snapshot.docs.filter(doc => {
     const limit = doc.data().期限;
-    if (!limit) return false;
+    if (!limit || typeof limit !== "string") return false;
     const date = new Date(limit);
     const now = new Date();
     const diff = (date - now) / (1000 * 60 * 60 * 24);
@@ -140,5 +140,5 @@ function renderCalendar() {
 
 function logout() {
   sessionStorage.clear();
-  window.location.href = "index.html"; // ← ログイン画面が index.html の場合
+  window.location.href = "index.html";
 }
