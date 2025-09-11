@@ -137,3 +137,8 @@ function renderCalendar() {
   html += `</tr></tbody></table>`;
   container.innerHTML = html;
 }
+
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "index.html"; // ← ログイン画面が index.html の場合
+}
