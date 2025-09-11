@@ -11,14 +11,13 @@
 </head>
 <body>
   <header class="fixed-header">
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <h1 onclick="goHome()">ホーム</h1>
-    <div class="user-meta">
-      <span id="userInfo"></span>
-      <span id="currentTime"></span>
-    </div>
-  </header>
-
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+  <h1 onclick="goHome()">ホーム</h1> <!-- ← 画面ごとにタイトル変更 -->
+  <div class="user-meta">
+    <span id="userInfo"></span>
+    <span id="currentTime"></span>
+  </div>
+</header>
   <nav id="sideMenu" class="hidden">
     <h2 class="menu-title">在庫管理</h2>
     <ul id="menuList" class="menu-buttons"></ul>
@@ -40,6 +39,7 @@
   </main>
 </body>
 </html>
+
 
 
 
