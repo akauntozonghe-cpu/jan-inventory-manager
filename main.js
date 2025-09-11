@@ -51,17 +51,82 @@ async function loadProducts() {
   snapshot.forEach(doc => {
     const data = doc.data();
     const li = document.createElement("li");
-    li.innerHTML = `
-  ${data.name}（${data.qty}個）＠${data.loc}
+li.innerHTML = `
+  ${data.name}（${data.qty}個）＠${data.loc}｜分類：${data.categoryLarge}
   <button class="editRequestBtn" data-id="${doc.id}">編集申請</button>
-`;
+`;   
     list.appendChild(li);
   });
 }
 loadProducts();
 
+// 🔽 ここから貼り付けてOK
+let currentProductId = null;
+
+document.addEventListener("click", (e) => {
+  if (e.target.classList.contains("editRequestBtn")) {
+    currentProductId = e.target.dataset.id;
+    document.getElementById("editModal").classList.remove("hidden");
+  }
+});
+
+function closeModal() {
+  document.getElementById("editModal").classList.add("hidden");
+}
+
+const categoryOptions = ["衣類", "食品", "雑貨", "衛生用品"];
+document.getElementById("editField").addEventListener("change", () => {
+  const field = document.getElementById("editField").value;
+  const area = document.getElementById("editInputArea");
+  area.innerHTML = "";
+
+  if (field === "categoryLarge") {
+    const select = document.createElement("select");
+    select.id = "newValue";
+    categoryOptions.forEach(opt => {
+      const option = document.createElement("option");
+      option.value = opt;
+      option.textContent = opt;
+      select.appendChild(option);
+    });
+    area.appendChild(select);
+  } else {
+    const input = document.createElement("input");
+    input.type = "text";
+    input.id = "newValue";
+    input.placeholder = "新しい値";
+    area.appendChild(input);
+  }
+});
+
+document.getElementById("submitEditRequest").addEventListener("click", async () => {
+  const field = document.getElementById("editField").value;
+  const afterValue = document.getElementById("newValue").value;
+  const user = firebase.auth().currentUser?.displayName || "匿名ユーザー";
+  const timestamp = new Date();
+
+  if (!currentProductId || !field || !afterValue) return alert("すべて入力してください");
+
+  const productRef = db.collection("products").doc(currentProductId);
+  const productSnap = await productRef.get();
+  const beforeValue = productSnap.data()[field];
+
+  await db.collection("requests").add({
+    productId: currentProductId,
+    field,
+    beforeValue,
+    afterValue,
+    requestedBy: user,
+    requestedAt: timestamp,
+    status: "pending"
+  });
+
+  closeModal();
+  alert("申請を送信しました");
+});
 // Firebase Auth（匿名ログイン）
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
+
 
