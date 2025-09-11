@@ -1,4 +1,10 @@
-// Firebase 初期化
+// Firebase初期化
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
+import {
+  getFirestore, collection, doc, getDoc, getDocs, addDoc, query
+} from "https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js";
+
+// Firebase設定（トさん提供）
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -8,192 +14,166 @@ const firebaseConfig = {
   appId: "1:245219344089:web:e46105927c302e6a5788c8",
   measurementId: "G-TRH31MJCE3"
 };
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 
-// DOM取得
-const loginSection = document.getElementById("loginSection");
-const mainSection = document.getElementById("mainSection");
-const loginBtn = document.getElementById("loginBtn");
-const loginId = document.getElementById("loginId");
-const loginError = document.getElementById("loginError");
-const userBadge = document.getElementById("userBadge");
-const titleHeader = document.getElementById("titleHeader");
-const sideMenu = document.getElementById("sideMenu");
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// 権限ラベル（日本語）
-function getRoleLabel(role) {
-  return role === "admin" ? "管理者" : "一般";
-}
-
-// ログイン状態判定
-function isLoggedIn() {
-  return sessionStorage.getItem("userId") !== null;
-}
-
-// 初期表示制御
-window.addEventListener("DOMContentLoaded", async () => {
-  if (isLoggedIn()) {
-    loginSection.classList.add("hidden");
-    mainSection.classList.remove("hidden");
-
-    const role = sessionStorage.getItem("role");
-    const name = sessionStorage.getItem("userName");
-    userBadge.textContent = `${name}（${getRoleLabel(role)}）`;
-
-    document.querySelectorAll(".admin-only").forEach(el => {
-      el.style.display = role === "admin" ? "block" : "none";
-    });
-
-    if (role === "admin") {
-      userBadge.classList.add("admin-badge");
-      await updateAdminBadge();
-    }
-
-    routeTo("homeSection");
-    await renderHomeDashboard();
-  } else {
-    loginSection.classList.remove("hidden");
-    mainSection.classList.add("hidden");
-  }
-});
-
-// ログイン処理
-loginBtn.addEventListener("click", async () => {
-  clearInlineError(loginError);
-  const id = loginId.value.trim();
-  if (!id) {
-    showInlineError(loginError, "責任者番号を入力してください");
-    loginId.focus();
-    return;
-  }
-
-  const snapshot = await db.collection("users").where("id", "==", id).get();
-  if (snapshot.empty) {
-    showInlineError(loginError, "責任者番号が見つかりません");
-    loginId.focus();
-    return;
-  }
-
-  const user = snapshot.docs[0].data();
-  sessionStorage.setItem("userId", user.id);
-  sessionStorage.setItem("userName", user.name);
-  sessionStorage.setItem("role", user.role);
-
-  document.body.classList.toggle("admin", user.role === "admin");
-  document.querySelectorAll(".admin-only").forEach(el => {
-    el.style.display = user.role === "admin" ? "block" : "none";
-  });
-
-  loginSection.classList.add("hidden");
-  mainSection.classList.remove("hidden");
-  mainSection.classList.add("fade-in");
-
-  userBadge.textContent = `${user.name}（${getRoleLabel(user.role)}）`;
-  if (user.role === "admin") {
-    userBadge.classList.add("admin-badge");
-    await updateAdminBadge();
-  }
-
-  showToast("ログインしました", "success");
-  routeTo("homeSection");
-  await renderHomeDashboard();
-
-  await db.collection("logs").add({
-    type: "login",
-    userId: user.id,
-    userName: user.name,
-    role: user.role,
-    timestamp: new Date().toISOString()
-  });
-});
-
-// エラー表示関数
-function showInlineError(el, message) {
-  el.textContent = message;
-  el.classList.add("show");
-}
-function clearInlineError(el) {
-  el.textContent = "";
-  el.classList.remove("show");
-}
-
-// トースト通知関数
-function showToast(message, type = "success") {
+// 共通関数
+function showToast(message) {
   const toast = document.getElementById("toast");
   toast.textContent = message;
-  toast.className = `toast-${type}`;
   toast.classList.remove("hidden");
   setTimeout(() => toast.classList.add("hidden"), 3000);
 }
 
-// Enterキー送信対応
-loginId.addEventListener("keydown", (e) => {
-  if (e.key === "Enter") {
-    e.preventDefault();
-    loginBtn.click();
-  }
-});
-
-// 管理者バッジ更新
-async function updateAdminBadge() {
-  const snap = await db.collection("products").where("status", "==", "pending").get();
-  const count = snap.size;
-  const badge = document.querySelector('[data-route="adminSection"]');
-  badge.textContent = count > 0 ? `🛡️ 管理者画面（${count}件）` : "🛡️ 管理者画面";
-
-  if (count > 0) {
-    showToast(`承認待ちの商品が ${count} 件あります`, "warning");
-  }
-}
-
-// 画面切替処理
-function routeTo(sectionId) {
-  document.querySelectorAll("section.content").forEach(sec => sec.classList.add("hidden"));
-  document.getElementById(sectionId).classList.remove("hidden");
-}
-
-// ホーム画面表示
-async function renderHomeDashboard() {
-  const snapshot = await db.collection("products").get();
-  const products = snapshot.docs.map(doc => doc.data());
-
+function updateTime(el) {
   const now = new Date();
-  const total = products.length;
-  const approved = products.filter(p => p.status === "approved").length;
-  const expired = products.filter(p => new Date(p.expire) < now).length;
-  const soon = products.filter(p => {
-    const d = new Date(p.expire);
-    const diff = (d - now) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 7;
-  });
-  const flea = products.filter(p => p.market === "flea");
-
-  titleHeader.textContent = `在庫管理（${now.toLocaleDateString()} ${now.toLocaleTimeString()}）`;
-
-  document.getElementById("summaryStats").innerHTML = `
-    <p>登録：${total}件 / 承認済：${approved}件 / 期限切れ：${expired}件</p>
-  `;
-  document.getElementById("expiringSoon").innerHTML = `
-    <h4>⏰ 期限間近の商品</h4>
-    <ul>${soon.map(p => `<li>${p.productName}（${p.expire}）</li>`).join("")}</ul>
-  `;
-  document.getElementById("fleaMarketInfo").innerHTML = `
-    <h4>🛍️ フリマ出品情報</h4>
-    <ul>${flea.map(p => `<li>${p.productName}（${p.marketDate || "未設定"}）</li>`).join("")}</ul>
-  `;
+  el.textContent = now.toLocaleString("ja-JP");
 }
 
-// ログアウト処理
-document.getElementById("logoutBtn").addEventListener("click", async () => {
-  const uid = sessionStorage.getItem("userId");
-  await db.collection("logs").add({
-    type: "logout",
-    userId: uid,
-    timestamp: new Date().toISOString()
+async function generateManagementNumber(key) {
+  const q = query(collection(db, "products"));
+  const snapshot = await getDocs(q);
+  let count = 0;
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (data.managementKey === key) count++;
   });
-  sessionStorage.clear();
-  location.reload();
+  return `${key}-${count + 1}`;
+}
+
+// DOM要素取得
+const loginSection = document.getElementById("loginSection");
+const homeSection = document.getElementById("homeSection");
+const loginBtn = document.getElementById("loginBtn");
+const userIdInput = document.getElementById("userIdInput");
+const loginError = document.getElementById("loginError");
+const userNameDisplay = document.getElementById("userNameDisplay");
+const userRoleBadge = document.getElementById("userRoleBadge");
+const currentTime = document.getElementById("currentTime");
+
+const navRegister = document.getElementById("navRegister");
+const navList = document.getElementById("navList");
+const navReport = document.getElementById("navReport");
+const navAdmin = document.getElementById("navAdmin");
+
+const registerSection = document.getElementById("registerSection");
+const listSection = document.getElementById("listSection");
+const reportSection = document.getElementById("reportSection");
+const adminSection = document.getElementById("adminSection");
+
+const registerBtn = document.getElementById("registerBtn");
+const productList = document.getElementById("productList");
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchInput");
+
+let currentUser = null;
+
+// ログイン処理
+async function login(userId) {
+  const userRef = doc(db, "users", userId);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) {
+    loginError.textContent = "番号が正しくありません";
+    return;
+  }
+  currentUser = userSnap.data();
+  loginSection.classList.add("hidden");
+  homeSection.classList.remove("hidden");
+  userNameDisplay.textContent = currentUser.name;
+  userRoleBadge.textContent = currentUser.role === "admin" ? "管理者" : "責任者";
+  userRoleBadge.classList.add(currentUser.role);
+  if (currentUser.role === "admin") navAdmin.classList.remove("hidden");
+  updateTime(currentTime);
+  showToast("ログインしました");
+}
+
+loginBtn.addEventListener("click", () => login(userIdInput.value.trim()));
+userIdInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") login(userIdInput.value.trim());
 });
 
+// 画面切替
+function showSection(section) {
+  [registerSection, listSection, reportSection, adminSection].forEach(s => s.classList.add("hidden"));
+  section.classList.remove("hidden");
+}
 
+navRegister.addEventListener("click", () => showSection(registerSection));
+navList.addEventListener("click", () => showSection(listSection));
+navReport.addEventListener("click", () => showSection(reportSection));
+navAdmin.addEventListener("click", () => showSection(adminSection));
+
+// 商品登録処理
+registerBtn.addEventListener("click", async () => {
+  const name = document.getElementById("productName").value.trim();
+  const jan = document.getElementById("janCode").value.trim();
+  const lot = document.getElementById("lotNo").value.trim();
+  const qty = parseInt(document.getElementById("quantity").value.trim());
+  const unit = document.getElementById("unitSelect").value;
+  const location = document.getElementById("locationSelect").value;
+  const category = document.getElementById("categorySelect").value;
+  const subcategory = document.getElementById("subcategoryInput").value.trim();
+
+  if (!name || !jan || !lot || isNaN(qty)) {
+    showToast("必須項目が未入力です");
+    return;
+  }
+
+  const managementKey = `${jan}-${lot}`;
+  const managementNumber = await generateManagementNumber(managementKey);
+
+  const productData = {
+    productName: name,
+    janCode: jan,
+    lotNo: lot,
+    quantity: qty,
+    unit,
+    location,
+    category,
+    subcategory,
+    managementKey,
+    managementNumber,
+    createdBy: currentUser.name,
+    createdAt: new Date().toISOString(),
+    status: "pending"
+  };
+
+  await addDoc(collection(db, "products"), productData);
+  showToast("商品登録申請を送信しました");
+});
+
+// 商品検索処理
+searchBtn.addEventListener("click", async () => {
+  const keyword = searchInput.value.trim();
+  productList.innerHTML = "";
+  const q = query(collection(db, "products"));
+  const snapshot = await getDocs(q);
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (
+      data.productName.includes(keyword) ||
+      data.janCode.includes(keyword)
+    ) {
+      const li = document.createElement("li");
+      li.textContent = `${data.productName}（${data.managementNumber}） - ${data.location}`;
+      productList.appendChild(li);
+    }
+  });
+  showToast("検索完了");
+});
+
+// メニュー開閉
+const menuToggle = document.getElementById("menuToggle");
+const sideMenu = document.getElementById("sideMenu");
+menuToggle.addEventListener("click", () => {
+  sideMenu.classList.toggle("hidden");
+});
+document.addEventListener("click", (e) => {
+  if (!sideMenu.contains(e.target) && e.target !== menuToggle) {
+    sideMenu.classList.add("hidden");
+  }
+});
+
+// 時刻更新
+setInterval(() => updateTime(currentTime), 60000);
