@@ -1,3 +1,6 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+import { getMessaging } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-messaging.js";
 // Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
@@ -54,4 +57,5 @@ window.login = async function () {
     console.error("ログインエラー:", error);
     status.textContent = "ログイン中にエラーが発生しました。";
   }
+
 };
