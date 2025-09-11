@@ -19,13 +19,13 @@ const loginId = document.getElementById("loginId");
 const loginError = document.getElementById("loginError");
 const userBadge = document.getElementById("userBadge");
 
-// ✅ ログイン状態判定関数
+// ログイン状態判定
 function isLoggedIn() {
   return sessionStorage.getItem("userId") !== null;
 }
 
-// ✅ 初期表示制御（ログイン済みなら mainSection を表示）
-window.addEventListener("DOMContentLoaded", () => {
+// 初期表示制御
+window.addEventListener("DOMContentLoaded", async () => {
   if (isLoggedIn()) {
     loginSection.classList.add("hidden");
     mainSection.classList.remove("hidden");
@@ -34,18 +34,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (sessionStorage.getItem("role") === "admin") {
       userBadge.classList.add("admin-badge");
-      updateAdminBadge();
+      await updateAdminBadge();
     }
 
     routeTo("homeSection");
-    renderHomeDashboard();
+    await renderHomeDashboard();
   } else {
     loginSection.classList.remove("hidden");
     mainSection.classList.add("hidden");
   }
 });
 
-// ✅ ログイン処理（await を使うので async が必要）
+// ログイン処理（1回だけ定義）
 loginBtn.addEventListener("click", async () => {
   clearInlineError(loginError);
   const id = loginId.value.trim();
@@ -79,12 +79,12 @@ loginBtn.addEventListener("click", async () => {
   userBadge.textContent = `${user.name}（${user.role}）`;
   if (user.role === "admin") {
     userBadge.classList.add("admin-badge");
-    updateAdminBadge();
+    await updateAdminBadge();
   }
 
   showToast("ログインしました", "success");
   routeTo("homeSection");
-  renderHomeDashboard();
+  await renderHomeDashboard();
 
   await db.collection("logs").add({
     type: "login",
@@ -94,6 +94,7 @@ loginBtn.addEventListener("click", async () => {
     timestamp: new Date().toISOString()
   });
 });
+
 // エラー表示関数
 function showInlineError(el, message) {
   el.textContent = message;
@@ -115,62 +116,12 @@ function showToast(message, type = "success") {
   }
 }
 
-// Enterキー送信対応（ログイン欄）
+// Enterキー送信対応
 loginId.addEventListener("keydown", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
     loginBtn.click();
   }
-});
-
-// ログイン処理
-loginBtn.addEventListener("click", async () => {
-  clearInlineError(loginError);
-  const id = loginId.value.trim();
-  if (!id) {
-    showInlineError(loginError, "責任者番号を入力してください");
-    loginId.focus();
-    return;
-  }
-
-  const snapshot = await db.collection("users").where("id", "==", id).get();
-  if (snapshot.empty) {
-    showInlineError(loginError, "責任者番号が見つかりません");
-    loginId.focus();
-    return;
-  }
-
-  const user = snapshot.docs[0].data();
-  sessionStorage.setItem("userId", user.id);
-  sessionStorage.setItem("userName", user.name);
-  sessionStorage.setItem("role", user.role);
-
-  document.body.classList.toggle("admin", user.role === "admin");
-  document.querySelectorAll(".admin-only").forEach(el => {
-    el.style.display = user.role === "admin" ? "block" : "none";
-  });
-
-  loginSection.classList.add("hidden");
-  mainSection.classList.remove("hidden");
-  mainSection.classList.add("fade-in"); // ✅ フェードイン演出
-
-  userBadge.textContent = `${user.name}（${user.role}）`;
-  if (user.role === "admin") {
-    userBadge.classList.add("admin-badge"); // ✅ 管理者バッジ強調
-    updateAdminBadge();
-  }
-
-  showToast("ログインしました", "success");
-  routeTo("homeSection");
-  renderHomeDashboard();
-
-  await db.collection("logs").add({
-    type: "login",
-    userId: user.id,
-    userName: user.name,
-    role: user.role,
-    timestamp: new Date().toISOString()
-  });
 });
 
 // 管理者バッジ更新
@@ -224,8 +175,5 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
     timestamp: new Date().toISOString()
   });
   sessionStorage.clear();
-  location.reload(); // ✅ 表示状態を初期化
+  location.reload();
 });
-
-
-
