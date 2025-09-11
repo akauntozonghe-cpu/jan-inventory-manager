@@ -7,13 +7,8 @@ firebase.initializeApp({
 const db = firebase.firestore();
 
 // ロール変換表
-const roleMap = {
-  admin: "管理者",
-  manager: "責任者",
-  user: "一般ユーザー"
-};
+const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
 
-// ページ読み込み時
 window.onload = async function () {
   const name = sessionStorage.getItem("userName");
   const role = sessionStorage.getItem("userRole");
@@ -21,19 +16,16 @@ window.onload = async function () {
   const roleJp = roleMap[role] || role;
 
   document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
-
   updateTime();
   setInterval(updateTime, 1000);
 
+  setupMenu(role);
   await loadInventorySummary();
-
-  if (role === "admin") {
-    document.getElementById("adminList").classList.remove("hidden");
-    await loadAdminList();
-  }
+  await loadFleamarketStatus();
+  await loadUpcomingItems();
 };
 
-// 現在日時の表示（〇月〇日（〇）形式＋時刻）
+// 現在日時（秒単位・曜日付き）
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
@@ -41,12 +33,36 @@ function updateTime() {
   document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
 }
 
-// メニュー開閉
+// タイトルクリックでホームに戻る（スマホ含む）
+function goHome() {
+  window.location.href = "home.html";
+}
+
+// ハンバーガーメニュー開閉
 function toggleMenu() {
   document.getElementById("sideMenu").classList.toggle("hidden");
 }
 
-// 在庫サマリー表示
+// メニュー構成（ロール別）
+function setupMenu(role) {
+  const menu = [
+    { label: "商品登録", link: "register.html" },
+    { label: "商品一覧", link: "list.html" },
+    ...(role === "manager" || role === "admin" ? [{ label: "問題報告", link: "report.html" }] : []),
+    { label: "設定", link: "settings.html" },
+    { label: "フリマ", link: "fleamarket.html" },
+    ...(role === "admin" ? [{ label: "管理者", link: "admin.html" }] : []),
+    { label: "ログアウト", link: "login.html" }
+  ];
+  const ul = document.getElementById("menuList");
+  menu.forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${item.link}">${item.label}</a>`;
+    ul.appendChild(li);
+  });
+}
+
+// 在庫状況の表示
 async function loadInventorySummary() {
   const snapshot = await db.collection("products").get();
   const total = snapshot.size;
@@ -54,15 +70,31 @@ async function loadInventorySummary() {
     const limit = doc.data().期限;
     return limit && new Date(limit) < new Date();
   }).length;
-  document.getElementById("summary").textContent = `登録商品数：${total}　期限切れ：${expired}`;
+  document.getElementById("summary").innerHTML = `<h2>在庫状況</h2><p>登録商品数：${total}　期限切れ：${expired}</p>`;
 }
 
-// 管理者一覧表示
-async function loadAdminList() {
-  const snapshot = await db.collection("users").where("role", "==", "admin").get();
-  const tbody = document.getElementById("adminTableBody");
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    tbody.innerHTML += `<tr><td>${data.name}</td><td>${data.id}</td><td>${data.fcmToken ? "✅" : "❌"}</td></tr>`;
+// フリマ状況の表示
+async function loadFleamarketStatus() {
+  const snapshot = await db.collection("fleamarket").get();
+  const total = snapshot.size;
+  const pending = snapshot.docs.filter(doc => doc.data().状態 === "未処理").length;
+  document.getElementById("fleamarket").innerHTML = `<h2>フリマ状況</h2><p>出品数：${total}　未処理：${pending}</p>`;
+}
+
+// 期限の近い商品表示（7日以内）
+async function loadUpcomingItems() {
+  const snapshot = await db.collection("products").get();
+  const upcoming = snapshot.docs.filter(doc => {
+    const limit = doc.data().期限;
+    if (!limit) return false;
+    const date = new Date(limit);
+    const now = new Date();
+    const diff = (date - now) / (1000 * 60 * 60 * 24);
+    return diff > 0 && diff <= 7;
   });
+  const list = upcoming.map(doc => {
+    const data = doc.data();
+    return `<li>${data.name}（期限：${data.期限}）</li>`;
+  }).join("");
+  document.getElementById("upcoming").innerHTML = `<h2>期限の近い商品</h2><ul>${list || "<li>該当なし</li>"}</ul>`;
 }
