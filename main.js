@@ -22,7 +22,7 @@ const titleHeader = document.getElementById("titleHeader");
 
 // 権限ラベル（日本語）
 function getRoleLabel(role) {
-  return role === "admin" ? "管理者" : "一般";
+  return role === "admin" ? "管理者" : "責任者";
 }
 
 // ログイン状態判定
@@ -196,3 +196,4 @@ document.getElementById("logoutBtn").addEventListener("click", async () => {
   sessionStorage.clear();
   location.reload();
 });
+
