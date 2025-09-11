@@ -15,21 +15,35 @@
   <link rel="icon" href="data:,">
 </head>
 <body>
-  <!-- ログイン画面 -->
+ <!-- ログイン画面 -->
 <section id="loginSection">
-  <h2 class="loginTitle">在庫管理システム </h2>
-  <input type="text" id="loginId" placeholder="責任者番号" autocomplete="off" inputmode="text" />
+  <h2>在庫管理システム</h2>
+  <input id="loginId" placeholder="責任者番号">
   <button id="loginBtn">ログイン</button>
   <p id="loginError"></p>
 </section>
 
-  <!-- メイン画面 -->
-  <section id="mainSection" class="hidden">
-    <header>
-      <h2 id="titleHeader">在庫管理</h2>
-      <span id="userBadge"></span>
-      <button id="menuToggle">≡</button>
-    </header>
+<!-- メイン画面 -->
+<section id="mainSection" class="hidden">
+  <header>
+    <h2 id="titleHeader">在庫管理</h2>
+    <span id="userBadge"></span>
+    <button id="menuToggle">≡</button>
+  </header>
+
+  <!-- ホーム画面 -->
+  <section id="homeSection" class="content">
+    <div id="summaryStats"></div>
+    <div id="expiringSoon"></div>
+    <div id="fleaMarketInfo"></div>
+  </section>
+
+  <!-- 管理者画面（ハンバーガーから遷移） -->
+  <section id="adminSection" class="content admin-only hidden" data-route="adminSection">
+    <h3>管理者画面</h3>
+    <!-- 管理者専用機能 -->
+  </section>
+</section>
 
     <!-- サイドメニュー -->
     <nav id="sideMenu" class="hidden">
@@ -193,6 +207,7 @@
   
 </body>
 </html>
+
 
 
 
