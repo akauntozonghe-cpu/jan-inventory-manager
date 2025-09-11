@@ -10,19 +10,27 @@ header {
   padding: 10px 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 h1 {
   cursor: pointer;
   font-weight: bold;
+  margin: 0;
 }
 h1:hover {
   text-decoration: underline;
 }
 .header-right {
   display: flex;
-  gap: 12px;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+}
+#datetime, #userInfo {
+  font-size: 14px;
+  white-space: nowrap;
 }
 main {
   padding: 20px;
@@ -54,4 +62,16 @@ li {
   margin: 5px 0;
   padding: 10px;
   border: 1px solid #ccc;
+}
+
+/* ✅ スマホ対応：ヘッダー縦並び */
+@media screen and (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .header-right {
+    align-items: flex-start;
+    margin-top: 8px;
+  }
 }
