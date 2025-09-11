@@ -40,6 +40,7 @@ function toggleMenu() {
 
 function setupMenu(role) {
   const menu = [
+    { label: "ホーム", link: "home.html", icon: "🏠" },
     { label: "商品登録", link: "register.html", icon: "📦" },
     { label: "商品一覧", link: "list.html", icon: "📋" },
     ...(role === "manager" || role === "admin" ? [{ label: "問題報告", link: "report.html", icon: "⚠️" }] : []),
@@ -48,6 +49,15 @@ function setupMenu(role) {
     ...(role === "admin" ? [{ label: "管理者", link: "admin.html", icon: "🧑‍💼" }] : []),
     { label: "ログアウト", link: "login.html", icon: "🔓" }
   ];
+
+  const ul = document.getElementById("menuList");
+  ul.innerHTML = "";
+  menu.forEach(item => {
+    const li = document.createElement("li");
+    li.innerHTML = `<a href="${item.link}">${item.icon} ${item.label}</a>`;
+    ul.appendChild(li);
+  });
+}
 
   const ul = document.getElementById("menuList");
   ul.innerHTML = "";
