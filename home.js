@@ -56,7 +56,7 @@ function setupMenu(role) {
     { label: "設定", link: "settings.html", icon: "⚙️" },
     { label: "フリマ", link: "fleamarket.html", icon: "🛍️" },
     ...(role === "admin" ? [{ label: "管理者", link: "admin.html", icon: "🧑‍💼" }] : []),
-    { label: "ログアウト", link: "login.html", icon: "🔓" }
+    { label: "ログアウト", link: "index.html", icon: "🔓" }
   ];
 
   const ul = document.getElementById("menuList");
