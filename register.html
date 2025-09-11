@@ -1,121 +1,29 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>商品登録</title>
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div class="dashboard">
-    <h1>商品登録</h1>
-    <div class="user-info" id="userInfo"></div>
-
-    <div>
-      <label>JANコード</label>
-      <input type="text" id="janInput" placeholder="JANコードを入力" />
-      <button onclick="autoFill()">AI補完</button>
-    </div>
-
-    <div>
-      <label>商品名</label>
-      <input type="text" id="nameInput" placeholder="商品名を入力" />
-    </div>
-
-    <div>
-      <label>数量</label>
-      <input type="number" id="qtyInput" placeholder="数量を入力" />
-    </div>
-
-    <div>
-      <label>数量単位</label>
-      <select id="unitSelect">
-        <option value="個">個</option>
-        <option value="箱">箱</option>
-        <option value="袋">袋</option>
-      </select>
-    </div>
-
-    <div>
-      <label>保管場所</label>
-      <input type="text" id="locationInput" placeholder="例：A棚" />
-    </div>
-
-    <div>
-      <label>大分類</label>
-      <input type="text" id="categoryLarge" placeholder="例：食品" />
-    </div>
-
-    <div>
-      <label>小分類</label>
-      <input type="text" id="categorySmall" placeholder="例：お菓子" />
-    </div>
-
-    <button onclick="registerProduct()">登録する</button>
-    <p id="statusMsg"></p>
+<header class="fixed-header">
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+  <h1>商品登録</h1>
+  <div class="user-meta">
+    <span id="userInfo"></span>
+    <span id="currentTime"></span>
   </div>
+</header>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
-    import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+<main>
+  <div class="card">
+    <label>商品名</label>
+    <input type="text" id="name" placeholder="商品名を入力">
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.appspot.com",
-      messagingSenderId: "245219344089",
-      appId: "1:245219344089:web:e46105927c302e6a5788c8"
-    };
+    <label>JANコード</label>
+    <input type="text" id="jan" placeholder="バーコードを読み取るか入力">
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+    <label>保管場所</label>
+    <input type="text" id="location" placeholder="例：棚A-3">
 
-    const userId = sessionStorage.getItem("userId");
-    const userName = sessionStorage.getItem("userName");
-    const userRole = sessionStorage.getItem("userRole");
-    document.getElementById("userInfo").textContent = `${userName}（${userRole}）として操作中`;
+    <label>数量</label>
+    <input type="number" id="quantity" value="1" min="1">
 
-    window.autoFill = function () {
-      const jan = document.getElementById("janInput").value.trim();
-      if (jan === "4901234567890") {
-        document.getElementById("nameInput").value = "ポテトチップス";
-        document.getElementById("categoryLarge").value = "食品";
-        document.getElementById("categorySmall").value = "スナック";
-      }
-    };
+    <label>期限</label>
+    <input type="date" id="limit"> <!-- ← これが欠けていた -->
 
-    window.registerProduct = async function () {
-      const jan = document.getElementById("janInput").value.trim();
-      const name = document.getElementById("nameInput").value.trim();
-      const qty = document.getElementById("qtyInput").value;
-      const unit = document.getElementById("unitSelect").value;
-      const location = document.getElementById("locationInput").value.trim();
-      const catL = document.getElementById("categoryLarge").value.trim();
-      const catS = document.getElementById("categorySmall").value.trim();
-
-      if (!jan || !name || !qty || !location) {
-        document.getElementById("statusMsg").textContent = "必須項目が未入力です。";
-        return;
-      }
-
-      const newRef = push(ref(db, "products"));
-      await set(newRef, {
-        JANコード: jan,
-        商品名: name,
-        数量: qty,
-        単位: unit,
-        保管場所: location,
-        大分類: catL,
-        小分類: catS,
-        登録者: userName,
-        権限: userRole,
-        登録日時: new Date().toISOString()
-      });
-
-      document.getElementById("statusMsg").textContent = "登録が完了しました。";
-    };
-  </script>
-</body>
-</html>
+    <button onclick="registerProduct()">登録</button>
+  </div>
+</main>
