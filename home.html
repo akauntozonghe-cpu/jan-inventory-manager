@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理ーホーム</title>
+  <title>在庫管理システム</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
@@ -11,13 +11,13 @@
 </head>
 <body>
   <header class="fixed-header">
-    <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <h1 onclick="goHome()">在庫管理ダッシュボード</h1>
-    <div class="user-meta">
-      <span id="userInfo"></span>
-      <span id="currentTime"></span>
-    </div>
-  </header>
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+  <h1 onclick="goHome()">ホーム</h1> <!-- ←ここを変更 -->
+  <div class="user-meta">
+    <span id="userInfo"></span>
+    <span id="currentTime"></span>
+  </div>
+</header>
 
   <nav id="sideMenu" class="hidden">
     <ul id="menuList" class="menu-buttons"></ul>
@@ -39,5 +39,6 @@
   </main>
 </body>
 </html>
+
 
 
