@@ -27,7 +27,7 @@ function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
   const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+  document.getElementById("currentTime").textContent = `${formatted}`;
 }
 
 function goHome() {
