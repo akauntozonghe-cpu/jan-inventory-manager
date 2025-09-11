@@ -24,14 +24,7 @@
       <input type="text" id="productName" placeholder="商品名" />
       <input type="text" id="janCode" placeholder="JANコード" />
       <input type="number" id="quantity" placeholder="数量" />
-      <select id="location">
-    <select id="categorySmall">
-      <option value="">小分類を選択</option>
-      <option value="Tシャツ">Tシャツ</option>
-      <option value="缶詰">缶詰</option>
-      <option value="洗剤">洗剤</option>
-    </select>
-    <select id="unit">
+      <select id="unit">
       <option value="">単位を選択</option>
       <option value="個">個</option>
       <option value="袋">袋</option>
@@ -42,6 +35,26 @@
       <option value="セット">セット</option>
       <option value="パック">パック</option>
     </select>
+    <select id="location">
+      <option value="">保管場所を選択</option>
+      <option value="倉庫A">倉庫A</option>
+      <option value="店舗B">店舗B</option>
+      <option value="棚C">棚C</option>
+    </select>
+    <!-- 大分類 -->
+    <select id="categoryLarge">
+      <option value="">大分類を選択</option>
+      <option value="衣類">衣類</option>
+      <option value="食品">食品</option>
+      <option value="雑貨">雑貨</option>
+     </select>
+      <!-- 小分類 -->
+    <select id="categorySmall">
+        <option value="">小分類を選択</option>
+        <option value="Tシャツ">Tシャツ</option>
+        <option value="缶詰">缶詰</option>
+        <option value="洗剤">洗剤</option>
+      </select>
     <input type="text" id="lotNo" placeholder="Lot.No" />
     <input type="date" id="expiry" />
     <input type="text" id="maker" placeholder="メーカー名" />
@@ -72,6 +85,7 @@
   <script src="main.js"></script>
 </body>
 </html>
+
 
 
 
