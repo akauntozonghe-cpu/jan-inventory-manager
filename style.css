@@ -297,4 +297,12 @@ main {
     margin: 10px 0;
   }
 }
+.menu-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #2c3e50;
+  border-bottom: 1px solid #ccc;
+  padding-bottom: 5px;
+}
 
