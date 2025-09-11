@@ -77,15 +77,17 @@ loginBtn.addEventListener("click", async () => {
 
   loginSection.classList.add("hidden");
   mainSection.classList.remove("hidden");
+  mainSection.classList.add("fade-in"); // ✅ フェードイン演出
+
   userBadge.textContent = `${user.name}（${user.role}）`;
+  if (user.role === "admin") {
+    userBadge.classList.add("admin-badge"); // ✅ 管理者バッジ強調
+    updateAdminBadge();
+  }
 
   showToast("ログインしました", "success");
   routeTo("homeSection");
   renderHomeDashboard();
-
-  if (user.role === "admin") {
-    updateAdminBadge();
-  }
 
   await db.collection("logs").add({
     type: "login",
