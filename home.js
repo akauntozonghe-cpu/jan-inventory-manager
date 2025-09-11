@@ -8,16 +8,12 @@ const db = firebase.firestore();
 window.onload = () => init();
 
 async function init() {
-  const name = sessionStorage.getItem("userName");
-  const role = sessionStorage.getItem("userRole");
-  const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
-  const roleJp = roleMap[role] || role;
-
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）`;
   updateTime();
   setInterval(updateTime, 1000);
 
+  const role = sessionStorage.getItem("userRole");
   setupMenu(role);
+
   await loadInventorySummary();
   await loadFleamarketStatus();
   await loadUpcomingItems();
@@ -27,28 +23,20 @@ async function init() {
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） `
+  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}) `
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
-}
-
-function goHome() {
-  window.location.href = "home.html";
+  document.getElementById("currentTime").textContent = formatted;
 }
 
 function toggleMenu() {
   document.getElementById("sideMenu").classList.toggle("visible");
 }
 
-document.addEventListener("click", function (e) {
-  const menu = document.getElementById("sideMenu");
-  const toggle = document.querySelector(".menu-toggle");
-  if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-    menu.classList.remove("visible");
-  }
-});
+function goHome() {
+  window.location.href = "home.html";
+}
 
 function setupMenu(role) {
   const menu = [
