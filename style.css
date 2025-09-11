@@ -1,4 +1,7 @@
 /* 共通設定 */
+* {
+  box-sizing: border-box;
+}
 body {
   font-family: 'Segoe UI', sans-serif;
   margin: 0;
@@ -6,161 +9,11 @@ body {
   background-color: #f4f6f8;
   color: #333;
 }
-
 h1, h2, h3 {
   margin: 0.5em 0;
   color: #2c3e50;
 }
 
-button {
-  background-color: #0078d4;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  margin-top: 10px;
-  font-size: 1em;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #005a9e;
-}
-
-input[type="text"],
-input[type="number"],
-select {
-  padding: 10px;
-  font-size: 1em;
-  width: 100%;
-  margin-top: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  box-sizing: border-box;
-}
-
-/* ログイン画面 */
-.login-container {
-  max-width: 400px;
-  margin: 80px auto;
-  padding: 30px;
-  background-color: white;
-  border-radius: 10px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  text-align: center;
-}
-
-/* ダッシュボード */
-.dashboard {
-  padding: 20px;
-}
-
-.user-info {
-  font-size: 1em;
-  margin-bottom: 10px;
-  color: #555;
-}
-
-/* ハンバーガーメニュー */
-.menu-toggle {
-  font-size: 24px;
-  cursor: pointer;
-  padding: 10px;
-}
-
-#sideMenu {
-  position: fixed;
-  top: 0;
-  left: 0;
-  background-color: #ecf0f1;
-  width: 220px;
-  height: 100%;
-  padding: 20px;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-  z-index: 1000;
-}
-
-#sideMenu.visible {
-  transform: translateX(0);
-}
-
-.menu-buttons li {
-  list-style: none;
-  margin: 10px 0;
-}
-
-.menu-buttons a {
-  display: block;
-  padding: 10px;
-  background-color: #ffffff;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #2c3e50;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.menu-buttons a:hover {
-  background-color: #dfe6e9;
-}
-
-/* セクションカード */
-.card {
-  background-color: #fff;
-  border-left: 6px solid #3498db;
-  padding: 15px;
-  margin: 20px;
-  border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-/* 通知ラベル */
-.label {
-  display: inline-block;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.9em;
-  color: white;
-}
-
-.label-承認待ち {
-  background-color: #f39c12;
-}
-
-.label-期限切れ {
-  background-color: #e74c3c;
-}
-
-.label-完了 {
-  background-color: #2ecc71;
-}
-
-/* レスポンシブ対応 */
-@media screen and (max-width: 600px) {
-  .login-container,
-  .dashboard {
-    padding: 15px;
-  }
-
-  button {
-    width: 100%;
-  }
-
-  .menu {
-    flex-direction: column;
-  }
-
-  #sideMenu {
-    width: 100%;
-    padding: 15px;
-  }
-
-  .card {
-    margin: 10px;
-  }
-}
 /* 固定ヘッダー */
 .fixed-header {
   position: fixed;
@@ -175,19 +28,11 @@ select {
   justify-content: space-between;
   z-index: 1000;
 }
-
 .fixed-header h1 {
   margin: 0;
-  cursor: pointer;
   font-size: 1.2em;
-}
-
-.menu-toggle {
-  font-size: 24px;
   cursor: pointer;
-  margin-right: 10px;
 }
-
 .user-meta {
   display: flex;
   flex-direction: column;
@@ -201,6 +46,11 @@ main {
 }
 
 /* ハンバーガーメニュー */
+.menu-toggle {
+  font-size: 24px;
+  cursor: pointer;
+  margin-right: 10px;
+}
 #sideMenu {
   position: fixed;
   top: 0;
@@ -214,11 +64,9 @@ main {
   transition: transform 0.3s ease;
   z-index: 999;
 }
-
 #sideMenu.visible {
   transform: translateX(0);
 }
-
 .menu-title {
   font-size: 1.1em;
   font-weight: bold;
@@ -227,12 +75,10 @@ main {
   border-bottom: 1px solid #ccc;
   padding-bottom: 5px;
 }
-
 .menu-buttons li {
   list-style: none;
   margin: 10px 0;
 }
-
 .menu-buttons a {
   display: block;
   padding: 10px;
@@ -243,36 +89,11 @@ main {
   font-weight: bold;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
-
 .menu-buttons a:hover {
   background-color: #dfe6e9;
 }
 
-#sideMenu.visible {
-  transform: translateX(0);
-}
-
-.menu-buttons li {
-  list-style: none;
-  margin: 10px 0;
-}
-
-.menu-buttons a {
-  display: block;
-  padding: 10px;
-  background-color: #ffffff;
-  border-radius: 6px;
-  text-decoration: none;
-  color: #2c3e50;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.menu-buttons a:hover {
-  background-color: #dfe6e9;
-}
-
-/* カード型セクション */
+/* セクションカード */
 .card {
   background-color: #fff;
   border-left: 6px solid #3498db;
@@ -288,14 +109,12 @@ main {
   border-collapse: collapse;
   margin-top: 10px;
 }
-
 #calendarContainer th, #calendarContainer td {
   border: 1px solid #ccc;
   text-align: center;
   padding: 8px;
   font-size: 0.9em;
 }
-
 #calendarContainer td.today {
   background-color: #0078d4;
   color: white;
@@ -308,35 +127,17 @@ main {
     flex-direction: column;
     align-items: flex-start;
   }
-
   .user-meta {
     align-items: flex-start;
   }
-
   main {
     padding: 120px 15px 15px;
   }
-
   #sideMenu {
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
-
-#sideMenu.visible {
-  transform: translateX(0);
-}
-
+    width: 100%;
+    padding: 15px;
+  }
   .card {
     margin: 10px 0;
   }
 }
-.menu-title {
-  font-size: 1.1em;
-  font-weight: bold;
-  margin-bottom: 15px;
-  color: #2c3e50;
-  border-bottom: 1px solid #ccc;
-  padding-bottom: 5px;
-}
-
-
