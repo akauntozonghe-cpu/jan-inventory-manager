@@ -3,6 +3,59 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在庫管理システム</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <section id="loginSection">
+    <h1>在庫管理システム</h1>
+    <input type="text" id="userIdInput" placeholder="責任者番号を入力" />
+    <button id="loginBtn">ログイン</button>
+    <p id="loginError" class="error"></p>
+  </section>
+
+  <section id="homeSection" class="hidden">
+    <header>
+      <div class="title-block">
+        <h2>在庫管理</h2>
+        <span id="currentTime"></span>
+      </div>
+      <div class="user-info">
+        <span id="userNameDisplay"></span>
+        <span id="userRoleBadge" class="badge"></span>
+      </div>
+      <button id="menuToggle">☰</button>
+    </header>
+
+    <nav id="sideMenu" class="hidden">
+      <button id="introToggle">💡 機能紹介</button>
+      <ul>
+        <li><a href="#">商品登録</a></li>
+        <li><a href="#">商品一覧</a></li>
+        <li><a href="#">フリマ出品</a></li>
+        <li><a href="#">問題報告</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="inventorySummary">
+        <h3>在庫状況</h3>
+        <div class="summary-block">登録数: <span id="totalItems">0</span></div>
+        <div class="summary-block">承認済: <span id="approvedItems">0</span></div>
+        <div class="summary-block">期限切れ: <span id="expiredItems">0</span></div>
+      </section>
+    </main>
+  </section>
+
+  <div id="toast" class="hidden"></div>
+
+  <script src="main.js"></script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理</title>
   <link rel="stylesheet" href="style.css" />
  <!-- Firebase SDK v8（非モジュール形式） -->
@@ -207,6 +260,7 @@
   
 </body>
 </html>
+
 
 
 
