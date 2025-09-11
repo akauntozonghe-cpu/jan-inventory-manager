@@ -51,7 +51,10 @@ async function loadProducts() {
   snapshot.forEach(doc => {
     const data = doc.data();
     const li = document.createElement("li");
-    li.textContent = `${data.name}（${data.qty}個）＠${data.loc}`;
+    li.innerHTML = `
+  ${data.name}（${data.qty}個）＠${data.loc}
+  <button class="editRequestBtn" data-id="${doc.id}">編集申請</button>
+`;
     list.appendChild(li);
   });
 }
@@ -61,3 +64,4 @@ loadProducts();
 firebase.auth().signInAnonymously().then(() => {
   document.getElementById("userInfo").textContent = "責任者：匿名ユーザー";
 });
+
