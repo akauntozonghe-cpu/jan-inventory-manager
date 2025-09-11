@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理ダッシュボード</title>
+  <title>在庫管理</title>
   <link rel="stylesheet" href="style.css" />
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
@@ -12,7 +12,7 @@
 <body>
   <header>
     <div class="menu-toggle" onclick="toggleMenu()">☰</div>
-    <h1 onclick="goHome()">在庫管理ダッシュボード</h1>
+    <h1 onclick="goHome()">在庫管理</h1>
     <p id="userInfo"></p>
     <p id="currentTime"></p>
   </header>
@@ -25,6 +25,10 @@
     <section id="summary" class="card"></section>
     <section id="fleamarket" class="card"></section>
     <section id="upcoming" class="card"></section>
+    <section id="calendarSection" class="card">
+      <h2>📅 カレンダー</h2>
+      <div id="calendarContainer"></div>
+    </section>
     <section id="aiSection" class="card">
       <h2>AI予測・提案</h2>
       <p>次回の出品候補：在庫過多の商品を検出中…</p>
