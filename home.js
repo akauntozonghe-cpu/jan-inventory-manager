@@ -86,9 +86,30 @@ function controlUIByRole() {
 }
 
 // ✅ 画面遷移関数群
-function goToRegister() { window.location.href = "register.html"; }
-function goToList() { window.location.href = "list.html"; }
-function goToFleamarket() { window.location.href = "fleamarket.html"; }
-function goToReport() { window.location.href = "report.html"; }
-function goToAdmin() { window.location.href = "admin.html"; }
-function goToSettings() { window.location.href = "settings.html"; }
+function goToHome() {
+  window.location.href = "home.html";
+}
+
+function goToRegister() {
+  window.location.href = "register.html";
+}
+
+function goToList() {
+  window.location.href = "list.html";
+}
+
+function goToFleamarket() {
+  window.location.href = "fleamarket.html";
+}
+
+function goToReport() {
+  window.location.href = "report.html";
+}
+
+function goToAdmin() {
+  window.location.href = "admin.html";
+}
+
+function goToSettings() {
+  window.location.href = "settings.html";
+}
