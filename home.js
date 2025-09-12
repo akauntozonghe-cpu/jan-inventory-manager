@@ -178,6 +178,7 @@ function loadAISuggestions() {
 // ✅ 権限によるUI制御
 function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
+  if (!role) return; // 未ログインやセッション切れ対策
 
   if (role === "責任者" || role === "管理者") {
     document.getElementById("calendarButton")?.style.display = "inline-block";
