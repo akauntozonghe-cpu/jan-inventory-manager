@@ -12,6 +12,7 @@ window.onload = () => {
   setInterval(updateTime, 1000);
   loadUserInfo();
   controlUIByRole();
+  setupMenuCloseOnOutsideClick();
 };
 
 // ✅ 秒付き現在時刻
@@ -25,7 +26,7 @@ function updateTime() {
   document.getElementById("currentTime").textContent = formatted;
 }
 
-// ✅ 責任者氏名＋権限表示
+// ✅ 責任者氏名＋権限（縦配置）
 function loadUserInfo() {
   const userName = sessionStorage.getItem("userName");
   const userRole = sessionStorage.getItem("userRole");
@@ -48,7 +49,21 @@ function goToHome() {
 function toggleMenu() {
   const menu = document.getElementById("hamburgerMenu");
   if (!menu) return;
-  menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
+  menu.style.display = "block";
+}
+
+// ✅ メニュー外クリックで閉じる
+function setupMenuCloseOnOutsideClick() {
+  document.addEventListener("click", (event) => {
+    const menu = document.getElementById("hamburgerMenu");
+    const toggle = document.getElementById("menuToggle");
+    if (!menu || !toggle) return;
+
+    const isClickInside = menu.contains(event.target) || toggle.contains(event.target);
+    if (!isClickInside) {
+      menu.style.display = "none";
+    }
+  });
 }
 
 // ✅ 権限によるUI制御
