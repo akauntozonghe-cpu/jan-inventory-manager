@@ -11,17 +11,17 @@
 </head>
 <body>
 
-  <!-- ✅ 固定ヘッダー（誇りある操作空間） -->
+  <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
     <div class="header-left">
-      <button id="menuToggle" onclick="toggleMenu()" aria-label="メニューを開く">☰</button>
+      <button id="menuToggle" onclick="toggleMenu()">☰</button>
       <h1 onclick="goToHome()" class="header-title" title="ホームに戻る">在庫管理</h1>
     </div>
-    <div class="header-center">
-      <div id="currentTime" class="timestamp"></div>
-    </div>
     <div class="header-right">
-      <div id="userInfo" class="user-role" title="ログイン中の責任者"></div>
+      <div id="currentTime" class="timestamp"></div>
+      <div id="userName" class="user-name"></div>
+      <div id="userRole" class="user-role"></div>
+      <button id="logoutButton" onclick="logout()" class="logout-button">ログアウト</button>
     </div>
   </header>
 

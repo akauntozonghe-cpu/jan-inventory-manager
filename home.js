@@ -22,16 +22,21 @@ function updateTime() {
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  const timeEl = document.getElementById("currentTime");
-  if (timeEl) timeEl.textContent = formatted;
+  document.getElementById("currentTime").textContent = formatted;
 }
 
 // ✅ 責任者氏名＋権限表示
 function loadUserInfo() {
   const userName = sessionStorage.getItem("userName");
   const userRole = sessionStorage.getItem("userRole");
-  const infoEl = document.getElementById("userInfo");
-  if (infoEl) infoEl.textContent = `${userName || "未設定"}（${userRole || "未設定"}）`;
+  document.getElementById("userName").textContent = userName || "未設定";
+  document.getElementById("userRole").textContent = userRole || "未設定";
+}
+
+// ✅ ログアウト処理
+function logout() {
+  sessionStorage.clear();
+  window.location.href = "login.html";
 }
 
 // ✅ ホームに戻る

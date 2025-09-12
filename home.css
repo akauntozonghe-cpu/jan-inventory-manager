@@ -228,3 +228,17 @@ main {
 .user-role {
   font-weight: bold;
 }
+.logout-button {
+  margin-top: 8px;
+  background-color: #e74c3c;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  font-size: 0.9em;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.logout-button:hover {
+  background-color: #c0392b;
+}
