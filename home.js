@@ -199,9 +199,15 @@ function toggleMenu() {
 }
 
 // ✅ 画面遷移
-function goToRegister() { window.location.href = "register.html"; }
-function goToList() { window.location.href = "list.html"; }
-function goToFleamarket() { window.location.href = "fleamarket.html"; }
+function goToRegister() {
+  window.location.href = "register.html";
+}
+function goToList() {
+  window.location.href = "list.html";
+}
+function goToFleamarket() {
+  window.location.href = "fleamarket.html";
+}
 function goToCalendar() {
   window.location.href = "calendar.html";
 }
