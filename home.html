@@ -2,24 +2,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <title>在庫管理ホーム</title>
+  <title>ホーム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="home.css">
-
-  <!-- ✅ Firebase v8 CDN（非モジュール式） -->
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-
-  <!-- ✅ JS読み込み（構文エラー防止のため defer 使用） -->
   <script src="home.js" defer></script>
 </head>
 <body>
 
-  <!-- ✅ 固定ヘッダー -->
+  <!-- ✅ 固定ヘッダー（責任者名＋権限表示） -->
   <header class="fixed-header">
     <div class="header-left">
       <button id="menuToggle" onclick="toggleMenu()">☰</button>
-      <h1>在庫管理</h1>
+      <h1 onclick="goToHome()" style="cursor: pointer;">ホーム</h1>
     </div>
     <div class="header-right">
       <div id="currentTime" class="timestamp"></div>
@@ -27,26 +23,23 @@
     </div>
   </header>
 
-  <!-- ✅ ハンバーガーメニュー（初期非表示） -->
+  <!-- ✅ ハンバーガーメニュー（役割別表示制御） -->
   <div id="hamburgerMenu" class="menu-box">
     <ul>
       <li><button onclick="goToRegister()">商品登録</button></li>
       <li><button onclick="goToList()">商品一覧</button></li>
-      <li><button id="calendarButton" onclick="goToCalendar()">カレンダー</button></li>
       <li><button id="fleamarketButton" onclick="goToFleamarket()">フリマ情報</button></li>
-      <li><button id="aiButton" onclick="goToImprovementAI()">改善AI</button></li>
+      <li><button onclick="goToReport()">報告</button></li>
       <li><button id="adminButton" onclick="goToAdmin()">管理者画面</button></li>
-      <li><button onclick="goToSettings()">設定</button></li>
+      <li><button onclick="goToSettings()">設定（ユーザー個人設定）</button></li>
     </ul>
   </div>
 
-  <!-- ✅ メイン -->
+  <!-- ✅ ホーム画面（責任ある情報表示） -->
   <main>
-    <div class="home-title">ようこそ</div>
-    <div class="welcome-box">
-      <p id="userName">ユーザー名</p>
-      <p id="userRole">役割</p>
-      <p>最終ログイン：<span id="lastLogin">--</span></p>
+    <div class="dashboard">
+      <h3>期限が近いもの</h3>
+      <ul id="deadlineSummary"></ul>
     </div>
 
     <div class="dashboard">
@@ -55,17 +48,12 @@
     </div>
 
     <div id="fleamarketSection" class="dashboard">
-      <h3>フリマ出品状況</h3>
+      <h3>フリマ情報</h3>
       <ul id="fleamarketSummary"></ul>
     </div>
 
-    <div id="deadlineSection" class="dashboard">
-      <h3>期限が近い商品</h3>
-      <ul id="deadlineSummary"></ul>
-    </div>
-
     <div id="calendarSection" class="dashboard">
-      <h3>カレンダーAI</h3>
+      <h3>カレンダー</h3>
       <div id="calendarView"></div>
     </div>
 
