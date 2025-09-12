@@ -7,7 +7,7 @@ firebase.initializeApp({
 const db = firebase.firestore();
 
 // 起動時処理
-window.onload = function () {
+window.onload = () => {
   updateTime();
   setInterval(updateTime, 1000);
   loadUserInfo();
@@ -19,7 +19,7 @@ window.onload = function () {
   controlUIByRole();
 };
 
-// ✅ 秒付き現在時刻表示
+// ✅ 秒付き現在時刻（ラベルなし）
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
@@ -27,7 +27,7 @@ function updateTime() {
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `${formatted}`;
+  document.getElementById("currentTime").textContent = formatted;
 }
 
 // ✅ ユーザー情報の表示
@@ -179,38 +179,28 @@ function loadAISuggestions() {
 function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
 
-  // 商品一覧は全員表示
-  document.getElementById("listButton")?.style.display = "inline-block";
-
-  // 責任者以上にカレンダー・フリマ・改善AIを表示
   if (role === "責任者" || role === "管理者") {
     document.getElementById("calendarButton")?.style.display = "inline-block";
     document.getElementById("fleamarketButton")?.style.display = "inline-block";
     document.getElementById("aiButton")?.style.display = "inline-block";
   }
 
-  // 管理者のみ管理者画面を表示
   if (role === "管理者") {
     document.getElementById("adminButton")?.style.display = "inline-block";
   }
 }
 
-// メニュー展開
+// ✅ メニュー展開（左配置対応）
 function toggleMenu() {
   const menu = document.getElementById("hamburgerMenu");
-  menu.style.display = menu.style.display === "none" ? "" : "none";
+  if (!menu) return;
+  menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
 }
 
-// 画面遷移
-function goToRegister() {
-  window.location.href = "register.html";
-}
-function goToList() {
-  window.location.href = "list.html";
-}
-function goToFleamarket() {
-  window.location.href = "fleamarket.html";
-}
+// ✅ 画面遷移
+function goToRegister() { window.location.href = "register.html"; }
+function goToList() { window.location.href = "list.html"; }
+function goToFleamarket() { window.location.href = "fleamarket.html"; }
 function goToCalendar() {
   window.location.href = "calendar.html";
 }

@@ -19,15 +19,15 @@
 <body>
   <!-- ✅ 固定ヘッダー（在庫管理） -->
   <header class="fixed-header">
-    <div class="header-left">
-      <h1>在庫管理</h1> <!-- ✅ 固定ヘッダーは「在庫管理」で統一 -->
-    </div>
-    <div class="header-right">
-      <div id="currentTime" class="timestamp"></div>
-      <div id="userInfo" class="user-role"></div>
-      <button id="menuToggle" onclick="toggleMenu()">☰</button>
-    </div>
-  </header>
+  <div class="header-left">
+    <button id="menuToggle" onclick="toggleMenu()">☰</button> <!-- ← タイトルの左側に移動 -->
+    <h1>在庫管理</h1>
+  </div>
+  <div class="header-right">
+    <div id="currentTime" class="timestamp"></div>
+    <div id="userInfo" class="user-role"></div>
+  </div>
+</header>
 
   <!-- ✅ ハンバーガーメニュー -->
   <nav id="hamburgerMenu" class="menu-box" style="display:none;">
