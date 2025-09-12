@@ -3,76 +3,54 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム</title>
+  <title>ホーム - 在庫管理システム</title>
 
-  <!-- CSS分割構成 -->
-  <link rel="stylesheet" href="css/base.css" />
-  <link rel="stylesheet" href="css/header.css" />
-  <link rel="stylesheet" href="css/menu.css" />
-  <link rel="stylesheet" href="css/home.css" />
+  <!-- CSS -->
+  <link rel="stylesheet" href="header.css" />
+  <link rel="stylesheet" href="home.css" />
 
   <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
 
-  <!-- JS本体 -->
-  <script src="js/home.js" defer></script>
+  <!-- JS -->
+  <script src="home.js" defer></script>
 </head>
 <body>
   <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
     <div class="header-left">
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-      <h1 onclick="goHome()">在庫管理</h1>
+      <h1>在庫管理</h1>
     </div>
     <div class="header-right">
       <div id="currentTime" class="timestamp"></div>
+      <div id="userInfo" class="user-role"></div>
     </div>
   </header>
 
-  <!-- ✅ ページタイトル -->
-  <div class="page-title">
-    <h2>ホームダッシュボード</h2>
-  </div>
-
-  <!-- ✅ サイドメニュー -->
-  <nav id="sideMenu">
-    <h2 class="menu-title">メニュー</h2>
-    <ul id="menuList" class="menu-buttons"></ul>
-  </nav>
-
-  <!-- ✅ メイン領域 -->
+  <!-- ✅ メイン画面 -->
   <main>
-    <!-- 在庫状況 -->
-    <section id="summary" class="card">
-      <h2>📦 在庫状況</h2>
-      <p>登録商品数：--</p>
-      <p>期限切れ商品：--</p>
+    <!-- 限定空間の歓迎 -->
+    <section class="welcome-box">
+      <h2 class="home-title">📦 ホーム</h2>
+      <p>ようこそ、<span id="userName">---</span> さん</p>
+      <p>役割：<span id="userRole">---</span></p>
+      <p>最終ログイン：<span id="lastLogin">---</span></p>
     </section>
 
-    <!-- フリマ出品候補 -->
-    <section id="fleamarket" class="card">
-      <h2>🛍️ 出品候補</h2>
-      <p>出品予定商品：--</p>
+    <!-- 実務の中心：在庫状況 -->
+    <section class="dashboard">
+      <h3>📊 在庫状況</h3>
+      <ul id="inventorySummary">
+        <li>読み込み中...</li>
+      </ul>
     </section>
 
-    <!-- 期限間近 -->
-    <section id="upcoming" class="card">
-      <h2>⏳ 期限間近</h2>
-      <ul id="upcomingList"><li>読み込み中…</li></ul>
-    </section>
-
-    <!-- カレンダー -->
-    <section id="calendarSection" class="card">
-      <h2>📅 カレンダー</h2>
-      <div id="calendarContainer"></div>
-    </section>
-
-    <!-- AI予測 -->
-    <section id="aiSection" class="card">
-      <h2>🤖 AI予測・提案</h2>
-      <p>次回の出品候補：在庫過多の商品を検出中…</p>
-      <p>期限切れ予測：△△（あと5日）</p>
+    <!-- 意味ある導線 -->
+    <section class="actions">
+      <button onclick="goToList()">商品一覧</button>
+      <button onclick="goToAdmin()">承認画面</button>
+      <button onclick="goToCalendar()">期限カレンダー</button>
     </section>
   </main>
 </body>
