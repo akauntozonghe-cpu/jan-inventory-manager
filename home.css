@@ -39,16 +39,14 @@
 .user-info-row {
   display: flex;
   gap: 8px;
-  align-items: center;
+  font-size: 0.95em;
 }
 
 .user-name {
   font-weight: bold;
-  font-size: 0.95em;
 }
 
 .user-role {
-  font-size: 0.85em;
   color: #ccc;
 }
 

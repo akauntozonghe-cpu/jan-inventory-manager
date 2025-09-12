@@ -28,13 +28,13 @@ function updateTime() {
 
 // ✅ 氏名＋権限（横並び）
 function loadUserInfo() {
-  const userName = sessionStorage.getItem("userName");
-  const userRole = sessionStorage.getItem("userRole");
-  document.getElementById("userName").textContent = userName || "未設定";
-  document.getElementById("userRole").textContent = `（${userRole || "未設定"}）`;
+  const userName = sessionStorage.getItem("userName") || "村本悠気";
+  const userRole = sessionStorage.getItem("userRole") || "管理者";
+  document.getElementById("userName").textContent = userName;
+  document.getElementById("userRole").textContent = `（${userRole}）`;
 }
 
-// ✅ ログアウト
+// ✅ ログアウト処理
 function logout() {
   sessionStorage.clear();
   window.location.href = "login.html";
