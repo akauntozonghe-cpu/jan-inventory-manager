@@ -175,7 +175,7 @@ function loadAISuggestions() {
   `;
 }
 
-// ✅ 権限によるUI制御（構文エラー完全修正済）
+// ✅ 権限によるUI制御
 function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
   if (!role) return;
@@ -198,7 +198,7 @@ function toggleMenu() {
   menu.style.display = (menu.style.display === "none" || menu.style.display === "") ? "block" : "none";
 }
 
-// ✅ 画面遷移
+// ✅ 画面遷移関数群（完全修正済）
 function goToRegister() {
   window.location.href = "register.html";
 }
