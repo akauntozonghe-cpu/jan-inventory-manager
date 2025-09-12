@@ -5,13 +5,17 @@
   <title>在庫管理ホーム</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="home.css">
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
+
+  <!-- ✅ Firebase v8 CDN（非モジュール式） -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+  <!-- ✅ JS読み込み（構文エラー防止のため defer 使用） -->
   <script src="home.js" defer></script>
 </head>
 <body>
 
-  <!-- 固定ヘッダー -->
+  <!-- ✅ 固定ヘッダー -->
   <header class="fixed-header">
     <div class="header-left">
       <button id="menuToggle" onclick="toggleMenu()">☰</button>
@@ -23,7 +27,7 @@
     </div>
   </header>
 
-  <!-- ハンバーガーメニュー -->
+  <!-- ✅ ハンバーガーメニュー（初期非表示） -->
   <div id="hamburgerMenu" class="menu-box">
     <ul>
       <li><button onclick="goToRegister()">商品登録</button></li>
@@ -36,42 +40,35 @@
     </ul>
   </div>
 
-  <!-- メイン -->
+  <!-- ✅ メイン -->
   <main>
     <div class="home-title">ようこそ</div>
-
-    <!-- ウェルカムボックス -->
     <div class="welcome-box">
       <p id="userName">ユーザー名</p>
       <p id="userRole">役割</p>
       <p>最終ログイン：<span id="lastLogin">--</span></p>
     </div>
 
-    <!-- 在庫ダッシュボード -->
     <div class="dashboard">
       <h3>在庫状況</h3>
       <ul id="inventorySummary"></ul>
     </div>
 
-    <!-- フリマ情報 -->
     <div id="fleamarketSection" class="dashboard">
       <h3>フリマ出品状況</h3>
       <ul id="fleamarketSummary"></ul>
     </div>
 
-    <!-- 期限情報 -->
     <div id="deadlineSection" class="dashboard">
       <h3>期限が近い商品</h3>
       <ul id="deadlineSummary"></ul>
     </div>
 
-    <!-- カレンダーAI -->
     <div id="calendarSection" class="dashboard">
       <h3>カレンダーAI</h3>
       <div id="calendarView"></div>
     </div>
 
-    <!-- 改善AI -->
     <div id="aiSuggestions" class="dashboard">
       <h3>改善AIの提案</h3>
       <ul id="suggestionList"></ul>

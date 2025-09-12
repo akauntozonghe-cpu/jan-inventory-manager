@@ -1,4 +1,4 @@
-// Firebase初期化
+// ✅ Firebase初期化（v8形式）
 firebase.initializeApp({
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -6,7 +6,7 @@ firebase.initializeApp({
 });
 const db = firebase.firestore();
 
-// 起動時処理
+// ✅ 起動時処理
 window.onload = () => {
   updateTime();
   setInterval(updateTime, 1000);
