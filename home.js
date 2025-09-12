@@ -26,15 +26,15 @@ function updateTime() {
   document.getElementById("currentTime").textContent = formatted;
 }
 
-// ✅ 責任者氏名＋権限（縦配置）
+// ✅ 氏名＋権限（横並び）
 function loadUserInfo() {
   const userName = sessionStorage.getItem("userName");
   const userRole = sessionStorage.getItem("userRole");
   document.getElementById("userName").textContent = userName || "未設定";
-  document.getElementById("userRole").textContent = userRole || "未設定";
+  document.getElementById("userRole").textContent = `（${userRole || "未設定"}）`;
 }
 
-// ✅ ログアウト処理
+// ✅ ログアウト
 function logout() {
   sessionStorage.clear();
   window.location.href = "login.html";
@@ -58,7 +58,6 @@ function setupMenuCloseOnOutsideClick() {
     const menu = document.getElementById("hamburgerMenu");
     const toggle = document.getElementById("menuToggle");
     if (!menu || !toggle) return;
-
     const isClickInside = menu.contains(event.target) || toggle.contains(event.target);
     if (!isClickInside) {
       menu.style.display = "none";
@@ -70,12 +69,10 @@ function setupMenuCloseOnOutsideClick() {
 function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
   if (!role) return;
-
   const show = (id) => {
     const el = document.getElementById(id);
     if (el) el.style.display = "inline-block";
   };
-
   if (["責任者", "管理者"].includes(role)) {
     show("calendarSection");
     show("fleamarketButton");
@@ -86,30 +83,9 @@ function controlUIByRole() {
 }
 
 // ✅ 画面遷移関数群
-function goToHome() {
-  window.location.href = "home.html";
-}
-
-function goToRegister() {
-  window.location.href = "register.html";
-}
-
-function goToList() {
-  window.location.href = "list.html";
-}
-
-function goToFleamarket() {
-  window.location.href = "fleamarket.html";
-}
-
-function goToReport() {
-  window.location.href = "report.html";
-}
-
-function goToAdmin() {
-  window.location.href = "admin.html";
-}
-
-function goToSettings() {
-  window.location.href = "settings.html";
-}
+function goToRegister() { window.location.href = "register.html"; }
+function goToList() { window.location.href = "list.html"; }
+function goToFleamarket() { window.location.href = "fleamarket.html"; }
+function goToReport() { window.location.href = "report.html"; }
+function goToAdmin() { window.location.href = "admin.html"; }
+function goToSettings() { window.location.href = "settings.html"; }

@@ -1,332 +1,83 @@
-/* 全体背景と雰囲気 */
-body {
-  margin: 0;
-  font-family: 'Segoe UI', 'Georgia', serif;
-  background: linear-gradient(to bottom right, #1c1f26, #2c3e50);
-  color: #eee;
-}
-
-/* 固定ヘッダー */
 .fixed-header {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  background-color: #2c3e50;
-  color: white;
-  padding: 12px 20px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  background-color: #2c3e50;
+  color: white;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  box-sizing: border-box;
   z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* 左側：ハンバーガー＋タイトル */
 .header-left {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-.fixed-header h1 {
-  margin: 0;
-  font-size: 1.6em;
-  font-family: 'Georgia', serif;
+  gap: 10px;
 }
 
-/* ハンバーガーボタン */
-#menuToggle {
-  font-size: 1.6em;
-  background: none;
-  border: none;
-  color: white;
+.header-title {
+  font-size: 1.5em;
   cursor: pointer;
-  padding: 4px;
-  transition: color 0.2s ease;
-}
-#menuToggle:hover {
-  color: #00bfff;
 }
 
-/* 右側：時刻＋ユーザー情報 */
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  text-align: right;
+}
+
 .timestamp {
-  font-size: 1em;
-  font-weight: bold;
-  color: #ffffff;
-}
-.user-role {
+  font-family: monospace;
   font-size: 0.9em;
-  color: #ccc;
-  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
-/* ハンバーガーメニュー本体（初期非表示） */
-.menu-box {
-  position: fixed;
-  top: 60px;
-  left: 20px;
-  background-color: rgba(0,0,0,0.85);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 8px;
-  padding: 12px;
-  z-index: 999;
-  box-shadow: 0 0 10px rgba(0,0,0,0.5);
-  display: none;
-  animation: fadeIn 0.3s ease-out;
+.user-info-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
 }
+
+.user-name {
+  font-weight: bold;
+  font-size: 0.95em;
+}
+
+.user-role {
+  font-size: 0.85em;
+  color: #ccc;
+}
+
+.menu-box {
+  position: absolute;
+  top: 60px;
+  left: 10px;
+  background-color: #34495e;
+  color: white;
+  padding: 10px;
+  border-radius: 4px;
+  display: none;
+  z-index: 999;
+}
+
 .menu-box ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
+
 .menu-box li {
-  margin: 8px 0;
+  margin-bottom: 8px;
 }
+
 .menu-box button {
-  background-color: transparent;
-  color: #fff;
+  background: none;
   border: none;
+  color: white;
   font-size: 1em;
   cursor: pointer;
-  text-align: left;
-  width: 100%;
-}
-.menu-box button:hover {
-  color: #00bfff;
-}
-
-/* 権限別ボタン（初期非表示） */
-#calendarButton,
-#fleamarketButton,
-#aiButton,
-#adminButton {
-  display: none;
-}
-
-/* メインセクション */
-main {
-  margin-top: 100px;
-  padding: 20px;
-}
-
-/* タイトル */
-.home-title {
-  font-family: 'Georgia', serif;
-  font-size: 1.6em;
-  color: #f0f0f0;
-  margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255,255,255,0.2);
-  padding-bottom: 6px;
-  text-align: center;
-}
-
-/* ウェルカムボックス */
-.welcome-box {
-  background-color: rgba(255,255,255,0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255,255,255,0.2);
-  border-radius: 12px;
-  padding: 30px;
-  margin: 40px auto;
-  max-width: 500px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
-  text-align: center;
-  animation: fadeIn 1s ease-out;
-}
-.welcome-box p {
-  margin: 8px 0;
-  font-size: 1em;
-  color: #ddd;
-}
-
-/* ダッシュボードセクション */
-.dashboard {
-  background-color: rgba(255,255,255,0.03);
-  padding: 20px;
-  border-radius: 10px;
-  max-width: 600px;
-  margin: 20px auto;
-  color: #eee;
-  box-shadow: 0 0 10px rgba(0,0,0,0.2);
-}
-.dashboard h3 {
-  font-size: 1.2em;
-  margin-bottom: 10px;
-  font-family: 'Georgia', serif;
-}
-.dashboard ul {
-  list-style: none;
-  padding: 0;
-}
-.dashboard li {
-  padding: 6px 0;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-/* カレンダーAI・改善AIビュー */
-#calendarView, #suggestionList {
-  font-size: 0.95em;
-  color: #ccc;
-  padding: 10px;
-  background-color: rgba(255,255,255,0.02);
-  border-radius: 6px;
-}
-
-/* アニメーション */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* レスポンシブ対応 */
-@media screen and (max-width: 600px) {
-  .welcome-box, .dashboard {
-    margin: 20px;
-    padding: 20px;
-  }
-  .home-title {
-    font-size: 1.4em;
-  }
-  .menu-box {
-    left: 10px;
-    top: 60px;
-    width: 80%;
-  }
-}
-.fixed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #2c3e50;
-  color: white;
-  padding: 10px 20px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-.header-left, .header-right {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-title {
-  font-size: 1.5em;
-  cursor: pointer;
-}
-
-.header-center {
-  flex-grow: 1;
-  text-align: center;
-}
-
-.timestamp {
-  font-family: monospace;
-  font-size: 0.9em;
-}
-
-.user-role {
-  font-weight: bold;
-}
-.logout-button {
-  margin-top: 8px;
-  background-color: #e74c3c;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  font-size: 0.9em;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-.logout-button:hover {
-  background-color: #c0392b;
-}
-.fixed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background-color: #2c3e50;
-  color: white;
-  padding: 10px 20px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-title {
-  font-size: 1.5em;
-  cursor: pointer;
-}
-
-.header-right {
-  text-align: right;
-}
-
-.timestamp {
-  font-family: monospace;
-  font-size: 0.9em;
-  margin-bottom: 4px;
-}
-
-.user-name {
-  font-weight: bold;
-}
-
-.user-role {
-  font-size: 0.9em;
-  color: #ccc;
-}
-.fixed-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background-color: #2c3e50;
-  color: white;
-  padding: 10px 20px;
-  position: fixed;
-  top: 0;
-  width: 100%;
-  z-index: 1000;
-}
-
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-title {
-  font-size: 1.5em;
-  cursor: pointer;
-}
-
-.header-right {
-  text-align: right;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-}
-
-.timestamp {
-  font-family: monospace;
-  font-size: 0.9em;
-  margin-bottom: 4px;
-}
-
-.user-name {
-  font-weight: bold;
-  margin-bottom: 2px;
-}
-
-.user-role {
-  font-size: 0.9em;
-  color: #ccc;
 }
