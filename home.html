@@ -11,20 +11,22 @@
 </head>
 <body>
 
-  <!-- ✅ 固定ヘッダー（責任者名＋権限表示） -->
+  <!-- ✅ 固定ヘッダー（誇りある操作空間） -->
   <header class="fixed-header">
     <div class="header-left">
-      <button id="menuToggle" onclick="toggleMenu()">☰</button>
-      <h1 onclick="goToHome()" style="cursor: pointer;">ホーム</h1>
+      <button id="menuToggle" onclick="toggleMenu()" aria-label="メニューを開く">☰</button>
+      <h1 onclick="goToHome()" class="header-title" title="ホームに戻る">在庫管理</h1>
+    </div>
+    <div class="header-center">
+      <div id="currentTime" class="timestamp"></div>
     </div>
     <div class="header-right">
-      <div id="currentTime" class="timestamp"></div>
-      <div id="userInfo" class="user-role"></div>
+      <div id="userInfo" class="user-role" title="ログイン中の責任者"></div>
     </div>
   </header>
 
-  <!-- ✅ ハンバーガーメニュー（役割別表示制御） -->
-  <div id="hamburgerMenu" class="menu-box">
+  <!-- ✅ ハンバーガーメニュー -->
+  <nav id="hamburgerMenu" class="menu-box">
     <ul>
       <li><button onclick="goToRegister()">商品登録</button></li>
       <li><button onclick="goToList()">商品一覧</button></li>
@@ -33,34 +35,34 @@
       <li><button id="adminButton" onclick="goToAdmin()">管理者画面</button></li>
       <li><button onclick="goToSettings()">設定（ユーザー個人設定）</button></li>
     </ul>
-  </div>
+  </nav>
 
-  <!-- ✅ ホーム画面（責任ある情報表示） -->
+  <!-- ✅ ホーム画面本体 -->
   <main>
-    <div class="dashboard">
+    <section class="dashboard">
       <h3>期限が近いもの</h3>
       <ul id="deadlineSummary"></ul>
-    </div>
+    </section>
 
-    <div class="dashboard">
+    <section class="dashboard">
       <h3>在庫状況</h3>
       <ul id="inventorySummary"></ul>
-    </div>
+    </section>
 
-    <div id="fleamarketSection" class="dashboard">
+    <section id="fleamarketSection" class="dashboard">
       <h3>フリマ情報</h3>
       <ul id="fleamarketSummary"></ul>
-    </div>
+    </section>
 
-    <div id="calendarSection" class="dashboard">
+    <section id="calendarSection" class="dashboard">
       <h3>カレンダー</h3>
       <div id="calendarView"></div>
-    </div>
+    </section>
 
-    <div id="aiSuggestions" class="dashboard">
+    <section id="aiSuggestions" class="dashboard">
       <h3>改善AIの提案</h3>
       <ul id="suggestionList"></ul>
-    </div>
+    </section>
   </main>
 
 </body>
