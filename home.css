@@ -242,3 +242,45 @@ main {
 .logout-button:hover {
   background-color: #c0392b;
 }
+.fixed-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background-color: #2c3e50;
+  color: white;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-title {
+  font-size: 1.5em;
+  cursor: pointer;
+}
+
+.header-right {
+  text-align: right;
+}
+
+.timestamp {
+  font-family: monospace;
+  font-size: 0.9em;
+  margin-bottom: 4px;
+}
+
+.user-name {
+  font-weight: bold;
+}
+
+.user-role {
+  font-size: 0.9em;
+  color: #ccc;
+}
