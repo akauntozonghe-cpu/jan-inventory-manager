@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ホーム - 在庫管理システム</title>
+  <title>ホーム</title> <!-- ✅ ブラウザタブのタイトル -->
 
   <!-- CSS -->
   <link rel="stylesheet" href="header.css" />
@@ -17,40 +17,69 @@
   <script src="home.js" defer></script>
 </head>
 <body>
-  <!-- ✅ 固定ヘッダー -->
+  <!-- ✅ 固定ヘッダー（在庫管理） -->
   <header class="fixed-header">
     <div class="header-left">
-      <h1>在庫管理</h1>
+      <h1>在庫管理</h1> <!-- ✅ 固定ヘッダーは「在庫管理」で統一 -->
     </div>
     <div class="header-right">
       <div id="currentTime" class="timestamp"></div>
       <div id="userInfo" class="user-role"></div>
+      <button id="menuToggle" onclick="toggleMenu()">☰</button>
     </div>
   </header>
 
+  <!-- ✅ ハンバーガーメニュー -->
+  <nav id="hamburgerMenu" class="menu-box" style="display:none;">
+    <ul>
+      <li><button onclick="goToRegister()">商品登録</button></li>
+      <li><button onclick="goToList()">商品一覧</button></li>
+      <li id="fleamarketButton"><button onclick="goToFleamarket()">フリマ情報</button></li>
+      <li id="calendarButton"><button onclick="goToCalendar()">カレンダーAI</button></li>
+      <li><button onclick="goToSettings()">設定</button></li>
+      <li id="adminButton"><button onclick="goToAdmin()">管理者</button></li>
+      <li id="aiButton"><button onclick="goToImprovementAI()">改善AI</button></li>
+    </ul>
+  </nav>
+
   <!-- ✅ メイン画面 -->
   <main>
-    <!-- 限定空間の歓迎 -->
+    <!-- ✅ ホーム画面タイトル -->
     <section class="welcome-box">
-      <h2 class="home-title">📦 ホーム</h2>
+      <h2 class="home-title">🏠 ホーム</h2> <!-- ✅ 画面タイトルは「ホーム」 -->
       <p>ようこそ、<span id="userName">---</span> さん</p>
       <p>役割：<span id="userRole">---</span></p>
       <p>最終ログイン：<span id="lastLogin">---</span></p>
     </section>
 
-    <!-- 実務の中心：在庫状況 -->
+    <!-- 在庫情報 -->
     <section class="dashboard">
-      <h3>📊 在庫状況</h3>
-      <ul id="inventorySummary">
-        <li>読み込み中...</li>
-      </ul>
+      <h3>📊 在庫情報</h3>
+      <ul id="inventorySummary"><li>読み込み中...</li></ul>
     </section>
 
-    <!-- 意味ある導線 -->
-    <section class="actions">
-      <button onclick="goToList()">商品一覧</button>
-      <button onclick="goToAdmin()">承認画面</button>
-      <button onclick="goToCalendar()">期限カレンダー</button>
+    <!-- フリマ情報 -->
+    <section id="fleamarketSection" class="dashboard">
+      <h3>🛍️ フリマ情報</h3>
+      <ul id="fleamarketSummary"><li>読み込み中...</li></ul>
+    </section>
+
+    <!-- 期限の近いもの -->
+    <section id="deadlineSection" class="dashboard">
+      <h3>⏰ 期限の近いもの</h3>
+      <ul id="deadlineSummary"><li>読み込み中...</li></ul>
+    </section>
+
+    <!-- カレンダーAI -->
+    <section id="calendarSection" class="dashboard">
+      <h3>📅 カレンダーAI</h3>
+      <div id="calendarView">読み込み中...</div>
+    </section>
+
+    <!-- 改善AI -->
+    <section id="aiSuggestions" class="dashboard">
+      <h3>🧠 改善AIからの提案</h3>
+      <ul id="suggestionList"><li>読み込み中...</li></ul>
     </section>
   </main>
 </body>

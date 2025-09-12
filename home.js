@@ -12,6 +12,10 @@ window.onload = function () {
   setInterval(updateTime, 1000);
   loadUserInfo();
   loadInventorySummary();
+  loadFleamarketSummary();
+  loadDeadlineSummary();
+  loadCalendarView();
+  loadAISuggestions();
   controlUIByRole();
 };
 
@@ -23,7 +27,7 @@ function updateTime() {
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `${formatted}`;
+  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
 }
 
 // ✅ ユーザー情報の表示
@@ -54,7 +58,7 @@ async function loadUserInfo() {
   }
 }
 
-// ✅ 在庫状況の読み込み
+// ✅ 在庫情報の読み込み
 async function loadInventorySummary() {
   try {
     const snapshot = await db.collection("products").get();
@@ -78,8 +82,97 @@ async function loadInventorySummary() {
     `;
   } catch (error) {
     console.error("在庫読み込みエラー:", error);
-    document.getElementById("inventorySummary").innerHTML = `<li>読み込み失敗</li>`;
   }
+}
+
+// ✅ フリマ情報の読み込み
+async function loadFleamarketSummary() {
+  const role = sessionStorage.getItem("userRole");
+  if (role !== "責任者" && role !== "管理者") {
+    document.getElementById("fleamarketSection").style.display = "none";
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("products").where("listed", "==", true).get();
+    const listedCount = snapshot.size;
+    let soonExpired = 0;
+    let soldCount = 0;
+    let priceTotal = 0;
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const deadline = data.listingDeadline?.toDate();
+      if (deadline && (deadline - new Date()) < 3 * 24 * 60 * 60 * 1000) soonExpired++;
+      if (data.sold === true) soldCount++;
+      if (data.price) priceTotal += data.price;
+    });
+
+    const avgPrice = listedCount ? Math.round(priceTotal / listedCount) : 0;
+
+    document.getElementById("fleamarketSummary").innerHTML = `
+      <li>出品中：${listedCount} 件</li>
+      <li>期限間近：${soonExpired} 件</li>
+      <li>今月売れた商品：${soldCount} 件</li>
+      <li>平均価格：¥${avgPrice}</li>
+    `;
+  } catch (error) {
+    console.error("フリマ情報取得エラー:", error);
+  }
+}
+
+// ✅ 期限の近いもの
+async function loadDeadlineSummary() {
+  const role = sessionStorage.getItem("userRole");
+  if (role !== "責任者" && role !== "管理者") {
+    document.getElementById("deadlineSection").style.display = "none";
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("products").get();
+    const now = new Date();
+    const soon = [];
+
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const deadline = data.deadline?.toDate();
+      if (deadline && (deadline - now) < 3 * 24 * 60 * 60 * 1000) {
+        soon.push(data.name);
+      }
+    });
+
+    const list = soon.map(name => `<li>${name} の期限が近い</li>`).join("");
+    document.getElementById("deadlineSummary").innerHTML = list || "<li>期限間近の商品はありません</li>";
+  } catch (error) {
+    console.error("期限情報取得エラー:", error);
+  }
+}
+
+// ✅ カレンダーAI（仮表示）
+function loadCalendarView() {
+  const role = sessionStorage.getItem("userRole");
+  if (role !== "責任者" && role !== "管理者") {
+    document.getElementById("calendarSection").style.display = "none";
+    return;
+  }
+
+  document.getElementById("calendarView").textContent = "今週の優先対応：商品Bの承認、商品Cの出品期限が迫っています。";
+}
+
+// ✅ 改善AI（仮表示）
+function loadAISuggestions() {
+  const role = sessionStorage.getItem("userRole");
+  if (role !== "責任者" && role !== "管理者") {
+    document.getElementById("aiSuggestions").style.display = "none";
+    return;
+  }
+
+  document.getElementById("suggestionList").innerHTML = `
+    <li>商品Aは3週間売れていません。価格見直しを検討してください。</li>
+    <li>今週は「文房具」カテゴリが売れやすい傾向です。</li>
+    <li>商品Bの期限が近く、承認が未完了です。優先対応を推奨します。</li>
+  `;
 }
 
 // ✅ 権限によるUI制御
@@ -87,26 +180,46 @@ function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
 
   // 商品一覧は全員表示
-  document.getElementById("listButton").style.display = "inline-block";
+  document.getElementById("listButton")?.style.display = "inline-block";
 
-  // 責任者以上に期限カレンダーを表示
+  // 責任者以上にカレンダー・フリマ・改善AIを表示
   if (role === "責任者" || role === "管理者") {
-    document.getElementById("calendarButton").style.display = "inline-block";
+    document.getElementById("calendarButton")?.style.display = "inline-block";
+    document.getElementById("fleamarketButton")?.style.display = "inline-block";
+    document.getElementById("aiButton")?.style.display = "inline-block";
   }
 
-  // 管理者のみ承認画面を表示
+  // 管理者のみ管理者画面を表示
   if (role === "管理者") {
-    document.getElementById("adminButton").style.display = "inline-block";
+    document.getElementById("adminButton")?.style.display = "inline-block";
   }
 }
 
-// ✅ 画面遷移
+// メニュー展開
+function toggleMenu() {
+  const menu = document.getElementById("hamburgerMenu");
+  menu.style.display = menu.style.display === "none" ? "" : "none";
+}
+
+// 画面遷移
+function goToRegister() {
+  window.location.href = "register.html";
+}
 function goToList() {
   window.location.href = "list.html";
+}
+function goToFleamarket() {
+  window.location.href = "fleamarket.html";
+}
+function goToCalendar() {
+  window.location.href = "calendar.html";
+}
+function goToSettings() {
+  window.location.href = "settings.html";
 }
 function goToAdmin() {
   window.location.href = "admin.html";
 }
-function goToCalendar() {
-  window.location.href = "calendar.html";
+function goToImprovementAI() {
+  window.location.href = "ai.html";
 }
