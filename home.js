@@ -12,9 +12,10 @@ window.onload = function () {
   setInterval(updateTime, 1000);
   loadUserInfo();
   loadInventorySummary();
+  controlUIByRole();
 };
 
-// 秒付き現在時刻表示
+// ✅ 秒付き現在時刻表示
 function updateTime() {
   const now = new Date();
   const days = ["日", "月", "火", "水", "木", "金", "土"];
@@ -22,10 +23,10 @@ function updateTime() {
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+  document.getElementById("currentTime").textContent = `${formatted}`;
 }
 
-// ユーザー情報の表示
+// ✅ ユーザー情報の表示
 async function loadUserInfo() {
   const userId = sessionStorage.getItem("userId");
   const userName = sessionStorage.getItem("userName");
@@ -53,30 +54,59 @@ async function loadUserInfo() {
   }
 }
 
-// 在庫状況の読み込み（例：商品数と警告数）
+// ✅ 在庫状況の読み込み
 async function loadInventorySummary() {
   try {
     const snapshot = await db.collection("products").get();
     const total = snapshot.size;
     let warningCount = 0;
+    let expiredCount = 0;
+    let approvalPending = 0;
 
     snapshot.forEach(doc => {
       const data = doc.data();
       if (data.warning === true) warningCount++;
+      if (data.expired === true) expiredCount++;
+      if (data.approval === "pending") approvalPending++;
     });
 
-    document.getElementById("inventorySummary").innerHTML =
-      `<p>登録商品数：${total} 件</p><p>警告あり：${warningCount} 件</p>`;
+    document.getElementById("inventorySummary").innerHTML = `
+      <li>登録商品数：${total} 件</li>
+      <li>警告あり：${warningCount} 件</li>
+      <li>期限切れ：${expiredCount} 件</li>
+      <li>承認待ち：${approvalPending} 件</li>
+    `;
   } catch (error) {
     console.error("在庫読み込みエラー:", error);
-    document.getElementById("inventorySummary").textContent = "読み込み失敗";
+    document.getElementById("inventorySummary").innerHTML = `<li>読み込み失敗</li>`;
   }
 }
 
-// 画面遷移
+// ✅ 権限によるUI制御
+function controlUIByRole() {
+  const role = sessionStorage.getItem("userRole");
+
+  // 商品一覧は全員表示
+  document.getElementById("listButton").style.display = "inline-block";
+
+  // 責任者以上に期限カレンダーを表示
+  if (role === "責任者" || role === "管理者") {
+    document.getElementById("calendarButton").style.display = "inline-block";
+  }
+
+  // 管理者のみ承認画面を表示
+  if (role === "管理者") {
+    document.getElementById("adminButton").style.display = "inline-block";
+  }
+}
+
+// ✅ 画面遷移
 function goToList() {
   window.location.href = "list.html";
 }
 function goToAdmin() {
   window.location.href = "admin.html";
+}
+function goToCalendar() {
+  window.location.href = "calendar.html";
 }
