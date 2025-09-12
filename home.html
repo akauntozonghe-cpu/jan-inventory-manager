@@ -1,86 +1,82 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ホーム</title> <!-- ✅ ブラウザタブのタイトル -->
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="header.css" />
-  <link rel="stylesheet" href="home.css" />
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-
-  <!-- JS -->
+  <meta charset="UTF-8">
+  <title>在庫管理ホーム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="home.css">
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js"></script>
   <script src="home.js" defer></script>
 </head>
 <body>
-  <!-- ✅ 固定ヘッダー（在庫管理） -->
-  <header class="fixed-header">
-  <div class="header-left">
-    <button id="menuToggle" onclick="toggleMenu()">☰</button> <!-- ← タイトルの左側に移動 -->
-    <h1>在庫管理</h1>
-  </div>
-  <div class="header-right">
-    <div id="currentTime" class="timestamp"></div>
-    <div id="userInfo" class="user-role"></div>
-  </div>
-</header>
 
-  <!-- ✅ ハンバーガーメニュー -->
-  <nav id="hamburgerMenu" class="menu-box" style="display:none;">
+  <!-- 固定ヘッダー -->
+  <header class="fixed-header">
+    <div class="header-left">
+      <button id="menuToggle" onclick="toggleMenu()">☰</button>
+      <h1>在庫管理</h1>
+    </div>
+    <div class="header-right">
+      <div id="currentTime" class="timestamp"></div>
+      <div id="userInfo" class="user-role"></div>
+    </div>
+  </header>
+
+  <!-- ハンバーガーメニュー -->
+  <div id="hamburgerMenu" class="menu-box">
     <ul>
       <li><button onclick="goToRegister()">商品登録</button></li>
       <li><button onclick="goToList()">商品一覧</button></li>
-      <li id="fleamarketButton"><button onclick="goToFleamarket()">フリマ情報</button></li>
-      <li id="calendarButton"><button onclick="goToCalendar()">カレンダーAI</button></li>
+      <li><button id="calendarButton" onclick="goToCalendar()">カレンダー</button></li>
+      <li><button id="fleamarketButton" onclick="goToFleamarket()">フリマ情報</button></li>
+      <li><button id="aiButton" onclick="goToImprovementAI()">改善AI</button></li>
+      <li><button id="adminButton" onclick="goToAdmin()">管理者画面</button></li>
       <li><button onclick="goToSettings()">設定</button></li>
-      <li id="adminButton"><button onclick="goToAdmin()">管理者</button></li>
-      <li id="aiButton"><button onclick="goToImprovementAI()">改善AI</button></li>
     </ul>
-  </nav>
+  </div>
 
-  <!-- ✅ メイン画面 -->
+  <!-- メイン -->
   <main>
-    <!-- ✅ ホーム画面タイトル -->
-    <section class="welcome-box">
-      <h2 class="home-title">🏠 ホーム</h2> <!-- ✅ 画面タイトルは「ホーム」 -->
-      <p>ようこそ、<span id="userName">---</span> さん</p>
-      <p>役割：<span id="userRole">---</span></p>
-      <p>最終ログイン：<span id="lastLogin">---</span></p>
-    </section>
+    <div class="home-title">ようこそ</div>
 
-    <!-- 在庫情報 -->
-    <section class="dashboard">
-      <h3>📊 在庫情報</h3>
-      <ul id="inventorySummary"><li>読み込み中...</li></ul>
-    </section>
+    <!-- ウェルカムボックス -->
+    <div class="welcome-box">
+      <p id="userName">ユーザー名</p>
+      <p id="userRole">役割</p>
+      <p>最終ログイン：<span id="lastLogin">--</span></p>
+    </div>
+
+    <!-- 在庫ダッシュボード -->
+    <div class="dashboard">
+      <h3>在庫状況</h3>
+      <ul id="inventorySummary"></ul>
+    </div>
 
     <!-- フリマ情報 -->
-    <section id="fleamarketSection" class="dashboard">
-      <h3>🛍️ フリマ情報</h3>
-      <ul id="fleamarketSummary"><li>読み込み中...</li></ul>
-    </section>
+    <div id="fleamarketSection" class="dashboard">
+      <h3>フリマ出品状況</h3>
+      <ul id="fleamarketSummary"></ul>
+    </div>
 
-    <!-- 期限の近いもの -->
-    <section id="deadlineSection" class="dashboard">
-      <h3>⏰ 期限の近いもの</h3>
-      <ul id="deadlineSummary"><li>読み込み中...</li></ul>
-    </section>
+    <!-- 期限情報 -->
+    <div id="deadlineSection" class="dashboard">
+      <h3>期限が近い商品</h3>
+      <ul id="deadlineSummary"></ul>
+    </div>
 
     <!-- カレンダーAI -->
-    <section id="calendarSection" class="dashboard">
-      <h3>📅 カレンダーAI</h3>
-      <div id="calendarView">読み込み中...</div>
-    </section>
+    <div id="calendarSection" class="dashboard">
+      <h3>カレンダーAI</h3>
+      <div id="calendarView"></div>
+    </div>
 
     <!-- 改善AI -->
-    <section id="aiSuggestions" class="dashboard">
-      <h3>🧠 改善AIからの提案</h3>
-      <ul id="suggestionList"><li>読み込み中...</li></ul>
-    </section>
+    <div id="aiSuggestions" class="dashboard">
+      <h3>改善AIの提案</h3>
+      <ul id="suggestionList"></ul>
+    </div>
   </main>
+
 </body>
 </html>
