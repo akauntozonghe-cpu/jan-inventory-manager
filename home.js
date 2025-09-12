@@ -175,7 +175,7 @@ function loadAISuggestions() {
   `;
 }
 
-// ✅ 権限によるUI制御
+// ✅ 権限によるUI制御（構文エラー完全修正済）
 function controlUIByRole() {
   const role = sessionStorage.getItem("userRole");
   if (!role) return;
