@@ -22,6 +22,7 @@ body {
 .fixed-header h1 {
   margin: 0;
   font-size: 1.6em;
+  font-family: 'Georgia', serif;
   cursor: default;
 }
 .timestamp {
@@ -41,6 +42,7 @@ body {
   margin: 0;
   font-size: 1.3em;
   color: #ccc;
+  font-family: 'Georgia', serif;
 }
 
 /* ログインボックス */

@@ -25,7 +25,7 @@ function updateTime() {
     + `${now.getHours().toString().padStart(2, "0")}:`
     + `${now.getMinutes().toString().padStart(2, "0")}:`
     + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+  document.getElementById("currentTime").textContent = `${formatted}`;
 }
 
 // ログイン処理
