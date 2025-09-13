@@ -1,6 +1,6 @@
 // Firebase SDK モジュールの読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase 設定
 const firebaseConfig = {
@@ -40,6 +40,11 @@ userCodeInput.addEventListener("input", async () => {
       userInfo.classList.remove("hidden");
       loginBtn.classList.add("active");
       loginBtn.disabled = false;
+
+      // ログインボタンに責任者情報を一時保持（思想的に必要）
+      loginBtn.dataset.userCode = code;
+      loginBtn.dataset.userName = user.name;
+      loginBtn.dataset.userRole = user.role;
     } else {
       resetUI();
     }
@@ -57,13 +62,39 @@ document.addEventListener("keydown", (event) => {
 });
 
 // ログインボタンのクリックイベント
-loginBtn.addEventListener("click", () => {
-  const code = userCodeInput.value.trim();
-  if (code) {
-    // 必要なら責任者情報をセッションに保存（後で拡張可能）
-    // sessionStorage.setItem("userCode", code);
-    window.location.href = "home.html";
+loginBtn.addEventListener("click", async () => {
+  const code = loginBtn.dataset.userCode;
+  const name = loginBtn.dataset.userName;
+  const role = loginBtn.dataset.userRole;
+
+  if (!code || !name || !role) return;
+
+  // ログイン履歴の記録（思想的痕跡）
+  const now = new Date();
+  const timestamp = now.toISOString();
+  const version = "v1.0.0"; // 固定 or DBから取得可能
+  const device = `${navigator.platform} / ${navigator.userAgent}`;
+
+  const logRef = ref(db, "loginLogs");
+  const logData = {
+    code: code,
+    name: name,
+    role: role,
+    timestamp: timestamp,
+    version: version,
+    device: device
+  };
+
+  try {
+    await push(logRef, logData);
+    console.log("ログイン履歴を記録しました");
+  } catch (error) {
+    console.error("ログイン履歴の記録に失敗:", error);
   }
+
+  // 必要なら責任者情報をセッションに保存（後で拡張可能）
+  // sessionStorage.setItem("userCode", code);
+  window.location.href = "home.html";
 });
 
 // UIリセット関数
@@ -72,4 +103,9 @@ function resetUI() {
   userInfo.classList.add("hidden");
   loginBtn.classList.remove("active");
   loginBtn.disabled = true;
+
+  // 保持情報もクリア
+  loginBtn.dataset.userCode = "";
+  loginBtn.dataset.userName = "";
+  loginBtn.dataset.userRole = "";
 }
