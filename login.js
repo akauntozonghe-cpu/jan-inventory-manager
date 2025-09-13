@@ -8,22 +8,26 @@ const firebaseConfig = {
   authDomain: "inventory-app-312ca.firebaseapp.com",
   databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.firebasestorage.app",
+  storageBucket: "inventory-app-312ca.appspot.com",
   messagingSenderId: "245219344089",
   appId: "1:245219344089:web:e46105927c302e6a5788c8",
   measurementId: "G-TRH31MJCE3"
 };
 
-// Firebase 初期化
+// 初期化
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// DOM 要素の取得
+// DOM取得
 const userCodeInput = document.getElementById("userCode");
 const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
+const editVersionBtn = document.getElementById("editVersionBtn");
 
-// 入力イベント：責任者番号の照合
+// 管理者コード一覧（思想的に編集権限を限定）
+const adminCodes = ["AD-001", "AD-002"];
+
+// 入力イベント：照合
 userCodeInput.addEventListener("input", async () => {
   const code = userCodeInput.value.trim();
   if (!code) {
@@ -41,10 +45,17 @@ userCodeInput.addEventListener("input", async () => {
       loginBtn.classList.add("active");
       loginBtn.disabled = false;
 
-      // ログインボタンに責任者情報を一時保持（思想的に必要）
+      // 保持
       loginBtn.dataset.userCode = code;
       loginBtn.dataset.userName = user.name;
       loginBtn.dataset.userRole = user.role;
+
+      // 管理者なら編集ボタン表示
+      if (adminCodes.includes(code)) {
+        editVersionBtn.classList.remove("hidden");
+      } else {
+        editVersionBtn.classList.add("hidden");
+      }
     } else {
       resetUI();
     }
@@ -54,14 +65,14 @@ userCodeInput.addEventListener("input", async () => {
   }
 });
 
-// Enterキーでログイン可能に
+// Enterキー対応
 document.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !loginBtn.disabled) {
     loginBtn.click();
   }
 });
 
-// ログインボタンのクリックイベント
+// ログイン処理＋履歴記録
 loginBtn.addEventListener("click", async () => {
   const code = loginBtn.dataset.userCode;
   const name = loginBtn.dataset.userName;
@@ -69,20 +80,19 @@ loginBtn.addEventListener("click", async () => {
 
   if (!code || !name || !role) return;
 
-  // ログイン履歴の記録（思想的痕跡）
   const now = new Date();
   const timestamp = now.toISOString();
-  const version = "v1.0.0"; // 固定 or DBから取得可能
+  const version = "v1.0.0";
   const device = `${navigator.platform} / ${navigator.userAgent}`;
 
   const logRef = ref(db, "loginLogs");
   const logData = {
-    code: code,
-    name: name,
-    role: role,
-    timestamp: timestamp,
-    version: version,
-    device: device
+    code,
+    name,
+    role,
+    timestamp,
+    version,
+    device
   };
 
   try {
@@ -92,20 +102,23 @@ loginBtn.addEventListener("click", async () => {
     console.error("ログイン履歴の記録に失敗:", error);
   }
 
-  // 必要なら責任者情報をセッションに保存（後で拡張可能）
-  // sessionStorage.setItem("userCode", code);
   window.location.href = "home.html";
 });
 
-// UIリセット関数
+// 編集ボタン（管理者のみ）
+editVersionBtn.addEventListener("click", () => {
+  alert("バージョン編集画面へ遷移します（管理者専用）");
+  // window.location.href = "version-edit.html";
+});
+
+// UIリセット
 function resetUI() {
   userInfo.textContent = "";
   userInfo.classList.add("hidden");
   loginBtn.classList.remove("active");
   loginBtn.disabled = true;
-
-  // 保持情報もクリア
   loginBtn.dataset.userCode = "";
   loginBtn.dataset.userName = "";
   loginBtn.dataset.userRole = "";
+  editVersionBtn.classList.add("hidden");
 }

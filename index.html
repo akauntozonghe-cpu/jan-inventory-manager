@@ -3,39 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム</title>
-  <link rel="stylesheet" href="home.css" />
+  <title>在庫管理システム - ログイン</title>
+  <link rel="stylesheet" href="login.css" />
 </head>
 <body>
-  <header class="system-header">
-    <div class="header-title">🧭 在庫管理システム</div>
-    <div id="header-time">--</div>
-    <div class="header-version">バージョン：v1.0.0</div>
-  </header>
-
-  <script src="home.js"></script>
-</body>
-</html>
   <div class="login-container">
-  <div class="user-icon">👤</div>
-  <h1>ようこそ。</h1>
-  <p id="role-label">責任者番号を入力してください。</p>
-  <input type="text" id="userCode" placeholder="責任者番号" />
-  <button id="loginBtn" disabled>ログイン</button>
-  <p id="userInfo" class="hidden"></p>
-  <p class="footer">この空間は、あなたの責任と誇りを表現する場です。</p>
+    <div class="user-icon">👤</div>
+    <h1>在庫管理システム</h1>
+    <p class="welcome-message">この空間は、あなたの責任と誇りを表現する場です。</p>
 
-  <!-- 🔽 バージョン表示を追加 -->
-  <p class="version-label">
-  バージョン：v1.0.0
-  <span id="editVersionBtn" class="hidden">🛠 編集</span>
-</p>
-</div>
+    <label for="userCode">責任者番号を入力してください。</label>
+    <input type="text" id="userCode" placeholder="責任者番号" />
+    <button id="loginBtn" disabled>ログイン</button>
+
+    <p id="userInfo" class="hidden"></p>
+
+    <p class="version-label">
+      バージョン：v1.0.0
+      <span id="editVersionBtn" class="hidden">※ 編集</span>
+    </p>
+  </div>
+
   <script type="module" src="login.js"></script>
-  document.addEventListener("keydown", (event) => {
-  if (event.key === "Enter" && !loginBtn.disabled) {
-    loginBtn.click();
-  }
-});
 </body>
 </html>
