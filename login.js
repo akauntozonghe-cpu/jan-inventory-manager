@@ -1,6 +1,8 @@
+// Firebase SDK モジュールの読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+// Firebase 設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -12,16 +14,22 @@ const firebaseConfig = {
   measurementId: "G-TRH31MJCE3"
 };
 
+// Firebase 初期化
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// DOM 要素の取得
 const userCodeInput = document.getElementById("userCode");
 const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 
+// 入力イベント：責任者番号の照合
 userCodeInput.addEventListener("input", async () => {
   const code = userCodeInput.value.trim();
-  if (!code) return;
+  if (!code) {
+    resetUI();
+    return;
+  }
 
   const userRef = ref(db, `users/${code}`);
   try {
@@ -33,19 +41,35 @@ userCodeInput.addEventListener("input", async () => {
       loginBtn.classList.add("active");
       loginBtn.disabled = false;
     } else {
-      userInfo.textContent = "";
-      userInfo.classList.add("hidden");
-      loginBtn.classList.remove("active");
-      loginBtn.disabled = true;
+      resetUI();
     }
   } catch (error) {
     console.error("照合エラー:", error);
+    resetUI();
   }
 });
 
+// Enterキーでログイン可能に
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !loginBtn.disabled) {
+    loginBtn.click();
+  }
+});
+
+// ログインボタンのクリックイベント
 loginBtn.addEventListener("click", () => {
   const code = userCodeInput.value.trim();
   if (code) {
+    // 必要なら責任者情報をセッションに保存（後で拡張可能）
+    // sessionStorage.setItem("userCode", code);
     window.location.href = "home.html";
   }
 });
+
+// UIリセット関数
+function resetUI() {
+  userInfo.textContent = "";
+  userInfo.classList.add("hidden");
+  loginBtn.classList.remove("active");
+  loginBtn.disabled = true;
+}
