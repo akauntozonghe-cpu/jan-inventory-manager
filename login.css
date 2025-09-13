@@ -1,17 +1,15 @@
-/* 全体の背景とフォント */
 body {
   margin: 0;
   font-family: "Noto Sans JP", "Segoe UI", sans-serif;
-  background: linear-gradient(to bottom right, #fdfdfd, #e8e8e8);
+  background: radial-gradient(circle at center, #fdfdfd, #e0e0e0);
   animation: fadeIn 1.2s ease-out;
 }
 
-/* ログインコンテナ */
 .login-container {
-  max-width: 440px;
+  max-width: 460px;
   margin: 6rem auto;
   padding: 2.5rem;
-  background-color: #ffffff;
+  background-color: #fff;
   border-radius: 14px;
   box-shadow: 0 0 30px rgba(0,0,0,0.08);
   display: flex;
@@ -24,13 +22,11 @@ body {
   box-shadow: 0 0 40px rgba(0,0,0,0.12);
 }
 
-/* アイコン */
 .user-icon {
   font-size: 2.6rem;
   margin-bottom: 1rem;
 }
 
-/* タイトルと説明 */
 h1 {
   font-size: 1.7rem;
   font-weight: 600;
@@ -48,7 +44,6 @@ h1 {
   line-height: 1.6;
 }
 
-/* 入力ラベルと欄 */
 label {
   font-size: 0.85rem;
   color: #444;
@@ -72,7 +67,6 @@ input[type="text"]:focus {
   outline: none;
 }
 
-/* ボタン */
 button {
   width: 100%;
   padding: 0.75rem;
@@ -95,7 +89,6 @@ button.active {
   box-shadow: 0 0 10px rgba(0,120,212,0.4);
 }
 
-/* ユーザー情報表示 */
 #userInfo {
   margin-top: 0.5rem;
   font-size: 0.9rem;
@@ -103,7 +96,6 @@ button.active {
   text-align: center;
 }
 
-/* バージョン表示 */
 .version-label {
   font-size: 0.8rem;
   color: #aaa;
@@ -115,21 +107,18 @@ button.active {
   gap: 0.5rem;
 }
 
-/* 編集ボタン（管理者のみ） */
 #editVersionBtn {
   font-size: 0.75rem;
-  color: #d4af37; /* ゴールドで特権感 */
+  color: #d4af37;
   font-weight: bold;
   font-family: "Cinzel", serif;
   cursor: pointer;
 }
 
-/* 非表示クラス */
 .hidden {
   display: none;
 }
 
-/* アニメーション */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }

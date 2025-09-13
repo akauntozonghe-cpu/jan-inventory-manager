@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -15,17 +14,14 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// DOM取得
 const userCodeInput = document.getElementById("userCode");
 const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 const welcomeMessage = document.querySelector(".welcome-message");
 
-// 管理者ID一覧
 const adminIds = ["AD-001", "1011"];
 
-// 思想的メッセージ候補
 const messages = [
   "この空間は、あなたの責任と誇りを表現する場です。",
   "あなたの判断が、この空間の未来を形作ります。",
@@ -39,14 +35,12 @@ const messages = [
   "この空間は、あなたの責任が可視化される場所です。"
 ];
 
-// メッセージをランダム表示
 function setRandomMessage() {
   const index = Math.floor(Math.random() * messages.length);
   welcomeMessage.textContent = messages[index];
 }
 window.addEventListener("DOMContentLoaded", setRandomMessage);
 
-// 入力イベント：照合
 userCodeInput.addEventListener("input", async () => {
   const inputId = userCodeInput.value.trim();
   if (!inputId) {
@@ -61,7 +55,7 @@ userCodeInput.addEventListener("input", async () => {
   snapshot.forEach(doc => {
     const data = doc.data();
     if (data.id === inputId) {
-      matchedUser = { ...data, docId: doc.id };
+            matchedUser = { ...data, docId: doc.id };
     }
   });
 
