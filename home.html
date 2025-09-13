@@ -40,32 +40,39 @@
   </nav>
 
   <!-- ✅ ホーム画面本体 -->
-  <main>
-    <section class="dashboard">
-      <h3>期限が近いもの</h3>
-      <ul id="deadlineSummary"></ul>
-    </section>
+ <main>
+  <!-- ✅ 期限が近いもの -->
+  <section class="dashboard">
+    <h3>期限が近いもの</h3>
+    <ul id="deadlineSummary">
+      <!-- 例：冷凍たこ焼き（9/16） → 値下げ推奨 -->
+    </ul>
+  </section>
 
-    <section class="dashboard">
-      <h3>在庫状況</h3>
-      <ul id="inventorySummary"></ul>
-    </section>
+  <!-- ✅ 在庫状況 -->
+  <section class="dashboard">
+    <h3>在庫状況</h3>
+    <ul id="inventorySummary">
+      <!-- 例：折りたたみ傘 → 残り2個 → 発注推奨 -->
+    </ul>
+  </section>
 
-    <section id="fleamarketSection" class="dashboard">
-      <h3>フリマ情報</h3>
-      <ul id="fleamarketSummary"></ul>
-    </section>
+  <!-- ✅ フリマ状況 -->
+  <section class="dashboard">
+    <h3>フリマ状況</h3>
+    <ul id="fleamarketSummary">
+      <!-- 例：手作りポーチ → 出品中（価格800円） -->
+    </ul>
+  </section>
 
-   <section id="calendarSection" class="dashboard">
-  <h3>カレンダー</h3>
-  <div id="calendarView" class="calendar-grid"></div>
-</section>
-
-    <section id="aiSuggestions" class="dashboard">
-      <h3>改善AIの提案</h3>
-      <ul id="suggestionList"></ul>
-    </section>
-  </main>
+  <!-- ✅ AI提案（暫定表示） -->
+  <section class="dashboard">
+    <h3>AIによる改善提案</h3>
+    <ul id="aiSuggestionPreview">
+      <!-- 例：売れ残り傾向 → 写真変更＋値下げ推奨 -->
+    </ul>
+  </section>
+</main>
 
 </body>
 </html>

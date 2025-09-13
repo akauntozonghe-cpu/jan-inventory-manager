@@ -13,8 +13,9 @@ window.onload = () => {
   loadUserInfo();
   controlUIByRole();
   setupMenuCloseOnOutsideClick();
-  loadAISuggestions();
-  loadCalendar();
+  loadHomeSummaries();      // ← 追加：ホーム情報表示
+  loadAISuggestions();      // AI提案表示
+  loadCalendar();           // カレンダー表示
 };
 
 // ✅ 秒付き現在時刻
@@ -92,6 +93,53 @@ function goToReport() { window.location.href = "report.html"; }
 function goToAdmin() { window.location.href = "admin.html"; }
 function goToSettings() { window.location.href = "settings.html"; }
 
+// ✅ ホーム画面：期限・在庫・フリマ・AI提案（暫定）
+function loadHomeSummaries() {
+  const deadlineList = document.getElementById("deadlineSummary");
+  const inventoryList = document.getElementById("inventorySummary");
+  const fleamarketList = document.getElementById("fleamarketSummary");
+  const aiList = document.getElementById("aiSuggestionPreview");
+
+  deadlineList.innerHTML = "";
+  inventoryList.innerHTML = "";
+  fleamarketList.innerHTML = "";
+  aiList.innerHTML = "";
+
+  const today = new Date();
+  const soon = new Date();
+  soon.setDate(today.getDate() + 7);
+
+  db.collection("products").get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const p = doc.data();
+      const expiry = p.expiryDate ? new Date(p.expiryDate) : null;
+
+      if (expiry && expiry <= soon) {
+        deadlineList.innerHTML += `<li>${p.name}（${p.expiryDate}） → 値下げ検討</li>`;
+      }
+
+      if (p.stock !== undefined && p.stock <= 3) {
+        inventoryList.innerHTML += `<li>${p.name} → 残り${p.stock}個 → 発注推奨</li>`;
+      }
+
+      if (p.marketStatus === "listed") {
+        fleamarketList.innerHTML += `<li>${p.name} → 出品中（${p.price || "価格未設定"}円）</li>`;
+      }
+    });
+  });
+
+  db.collection("aiSuggestions")
+    .where("status", "==", "未処理")
+    .limit(3)
+    .get()
+    .then(snapshot => {
+      snapshot.forEach(doc => {
+        const s = doc.data();
+        aiList.innerHTML += `<li>${s.product} → ${s.recommendedAction}（${s.type}）</li>`;
+      });
+    });
+}
+
 // ✅ AI提案表示（管理者のみ承認可能）
 function loadAISuggestions() {
   const role = sessionStorage.getItem("userRole");
@@ -162,21 +210,25 @@ function loadCalendar() {
     return;
   }
 
+  calendarGrid.innerHTML = "";
+
   const today = new Date();
   const year = today.getFullYear();
-  const month = today.getMonth(); // 0-indexed
+  const month = today.getMonth();
 
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
   const startDay = firstDay.getDay();
-  const totalDays = lastDay.getDate();
+    const totalDays = lastDay.getDate();
 
+  // 空白セル（前月分）
   for (let i = 0; i < startDay; i++) {
     const empty = document.createElement("div");
     empty.className = "calendar-day";
     calendarGrid.appendChild(empty);
   }
 
+  // 日付セル生成
   for (let d = 1; d <= totalDays; d++) {
     const cell = document.createElement("div");
     cell.className = "calendar-day";
@@ -185,6 +237,7 @@ function loadCalendar() {
     calendarGrid.appendChild(cell);
   }
 
+  // 承認済みAI提案を日付に反映
   db.collection("aiSuggestions")
     .where("status", "==", "承認")
     .get()
@@ -200,18 +253,4 @@ function loadCalendar() {
         }
       });
     });
-}
-
-function getTagClass(type) {
-  if (type === "期限予測") return "expiry";
-  if (type === "在庫予測") return "reorder";
-  if (type === "売れ残り分析") return "improvement";
-  return "default";
-}
-
-function getTagIcon(type) {
-  if (type === "期限予測") return "⚠️";
-  if (type === "在庫予測") return "📦";
-  if (type === "売れ残り分析") return "💡";
-  return "📅";
 }
