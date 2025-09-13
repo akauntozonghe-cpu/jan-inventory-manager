@@ -24,7 +24,7 @@ const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 
 // 管理者ID一覧（思想的に特権を限定）
-const adminIds = ["AD-001", "1011"];
+const adminIds = ["2488", "1011"];
 
 // 入力イベント：責任者ID照合
 userCodeInput.addEventListener("input", async () => {
