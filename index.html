@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム - ログイン</title>
+  <title>在庫管理システム</title>
   <link rel="stylesheet" href="login.css" />
 </head>
 <body>
@@ -12,16 +12,15 @@
     <h1>在庫管理システム</h1>
     <p class="welcome-message">この空間は、あなたの責任と誇りを表現する場です。</p>
 
-    <label for="userCode">責任者番号を入力してください。</label>
-    <input type="text" id="userCode" placeholder="責任者番号" />
+    <label for="userCode">責任者番号</label>
+    <input type="text" id="userCode" placeholder="例：RM-001" />
+
     <button id="loginBtn" disabled>ログイン</button>
-
     <p id="userInfo" class="hidden"></p>
-
-    <p class="version-label">
+    <div class="version-label">
       バージョン：v1.0.0
-      <span id="editVersionBtn" class="hidden">※ 編集</span>
-    </p>
+      <span id="editVersionBtn" class="hidden">編集</span>
+    </div>
   </div>
 
   <script type="module" src="login.js"></script>

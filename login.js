@@ -1,8 +1,7 @@
-// Firebase SDK モジュールの読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// Firebase 設定
+// Firebase設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -13,7 +12,6 @@ const firebaseConfig = {
   measurementId: "G-TRH31MJCE3"
 };
 
-// 初期化
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
@@ -22,11 +20,33 @@ const userCodeInput = document.getElementById("userCode");
 const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
+const welcomeMessage = document.querySelector(".welcome-message");
 
-// 管理者ID一覧（思想的に特権を限定）
-const adminIds = ["2488", "1011"];
+// 管理者ID一覧
+const adminIds = ["AD-001", "1011"];
 
-// 入力イベント：責任者ID照合
+// 思想的メッセージ候補
+const messages = [
+  "この空間は、あなたの責任と誇りを表現する場です。",
+  "あなたの判断が、この空間の未来を形作ります。",
+  "この場は、あなたの痕跡が意味を持つ場所です。",
+  "責任者としてのあなたの意志が、すべての動きを導きます。",
+  "この空間は、あなたの選択が記録される舞台です。",
+  "あなたの役割は、ただの操作ではなく、思想の実行です。",
+  "この場に宿る者として、あなたの誇りが空気を変えます。",
+  "この空間は、あなたの存在が意味を持つよう設計されています。",
+  "あなたの入場は、空間の記憶に刻まれます。",
+  "この空間は、あなたの責任が可視化される場所です。"
+];
+
+// メッセージをランダム表示
+function setRandomMessage() {
+  const index = Math.floor(Math.random() * messages.length);
+  welcomeMessage.textContent = messages[index];
+}
+window.addEventListener("DOMContentLoaded", setRandomMessage);
+
+// 入力イベント：照合
 userCodeInput.addEventListener("input", async () => {
   const inputId = userCodeInput.value.trim();
   if (!inputId) {
@@ -38,7 +58,6 @@ userCodeInput.addEventListener("input", async () => {
   const snapshot = await getDocs(usersRef);
 
   let matchedUser = null;
-
   snapshot.forEach(doc => {
     const data = doc.data();
     if (data.id === inputId) {
@@ -88,14 +107,7 @@ loginBtn.addEventListener("click", async () => {
   const device = `${navigator.platform} / ${navigator.userAgent}`;
 
   const logRef = collection(db, "loginLogs");
-  const logData = {
-    id,
-    name,
-    role,
-    timestamp,
-    version,
-    device
-  };
+  const logData = { id, name, role, timestamp, version, device };
 
   try {
     await addDoc(logRef, logData);
