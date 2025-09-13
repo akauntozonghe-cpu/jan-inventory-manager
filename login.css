@@ -1,19 +1,19 @@
 /* 全体の背景とフォント */
 body {
   margin: 0;
-  font-family: "Segoe UI", "Noto Sans JP", sans-serif;
-  background: radial-gradient(circle at center, #fdfdfd, #dcdcdc);
-  animation: fadeIn 1s ease-out;
+  font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom right, #fdfdfd, #e8e8e8);
+  animation: fadeIn 1.2s ease-out;
 }
 
 /* ログインコンテナ */
 .login-container {
-  max-width: 420px;
-  margin: 5rem auto;
-  padding: 2.2rem;
+  max-width: 440px;
+  margin: 6rem auto;
+  padding: 2.5rem;
   background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.08);
+  border-radius: 14px;
+  box-shadow: 0 0 30px rgba(0,0,0,0.08);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,33 +21,34 @@ body {
 }
 
 .login-container:hover {
-  box-shadow: 0 0 30px rgba(0,0,0,0.12);
+  box-shadow: 0 0 40px rgba(0,0,0,0.12);
 }
 
 /* アイコン */
 .user-icon {
-  font-size: 2.4rem;
+  font-size: 2.6rem;
   margin-bottom: 1rem;
 }
 
 /* タイトルと説明 */
 h1 {
-  font-size: 1.6rem;
+  font-size: 1.7rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
   color: #2c2c2c;
   font-family: "Noto Serif JP", serif;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.6rem;
 }
 
 .welcome-message {
   font-size: 0.95rem;
-  color: #666;
-  margin-bottom: 1.5rem;
+  color: #555;
+  margin-bottom: 1.8rem;
   text-align: center;
+  line-height: 1.6;
 }
 
-/* 入力欄 */
+/* 入力ラベルと欄 */
 label {
   font-size: 0.85rem;
   color: #444;
@@ -57,8 +58,8 @@ label {
 
 input[type="text"] {
   width: 100%;
-  padding: 0.7rem;
-  margin: 0.5rem 0 1rem 0;
+  padding: 0.75rem;
+  margin-bottom: 1.2rem;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 6px;
@@ -67,14 +68,14 @@ input[type="text"] {
 
 input[type="text"]:focus {
   border-color: #0078d4;
-  box-shadow: 0 0 5px rgba(0,120,212,0.3);
+  box-shadow: 0 0 6px rgba(0,120,212,0.3);
   outline: none;
 }
 
 /* ボタン */
 button {
   width: 100%;
-  padding: 0.7rem;
+  padding: 0.75rem;
   font-size: 1rem;
   background-color: #0078d4;
   color: white;
@@ -91,7 +92,7 @@ button:disabled {
 
 button.active {
   background: linear-gradient(to right, #005a9e, #0078d4);
-  box-shadow: 0 0 8px rgba(0,120,212,0.4);
+  box-shadow: 0 0 10px rgba(0,120,212,0.4);
 }
 
 /* ユーザー情報表示 */
@@ -107,7 +108,7 @@ button.active {
   font-size: 0.8rem;
   color: #aaa;
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 2rem;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -130,6 +131,6 @@ button.active {
 
 /* アニメーション */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
 }
