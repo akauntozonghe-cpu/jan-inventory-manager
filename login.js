@@ -1,12 +1,11 @@
 // Firebase SDK モジュールの読み込み
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getDatabase, ref, get, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 // Firebase 設定
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "inventory-app-312ca",
   storageBucket: "inventory-app-312ca.appspot.com",
   messagingSenderId: "245219344089",
@@ -16,7 +15,7 @@ const firebaseConfig = {
 
 // 初期化
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const db = getFirestore(app);
 
 // DOM取得
 const userCodeInput = document.getElementById("userCode");
@@ -24,46 +23,46 @@ const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 
-// 管理者ID一覧（編集権限を限定）
-const adminIds = ["AD-001", "AD-002"];
+// 管理者ID一覧（思想的に特権を限定）
+const adminIds = ["AD-001", "1011"];
 
 // 入力イベント：責任者ID照合
 userCodeInput.addEventListener("input", async () => {
-  const id = userCodeInput.value.trim();
-  if (!id) {
+  const inputId = userCodeInput.value.trim();
+  if (!inputId) {
     resetUI();
     return;
   }
 
-  const userRef = ref(db, `users/${id}`);
-  try {
-    const snapshot = await get(userRef);
-    if (snapshot.exists()) {
-      const user = snapshot.val();
-      const name = user.name || "未定義";
-      const role = user.role || "未定義";
+  const usersRef = collection(db, "users");
+  const snapshot = await getDocs(usersRef);
 
-      userInfo.textContent = `${name} さん（${role}）としてログインします。`;
-      userInfo.classList.remove("hidden");
-      loginBtn.classList.add("active");
-      loginBtn.disabled = false;
+  let matchedUser = null;
 
-      // 保持
-      loginBtn.dataset.userId = id;
-      loginBtn.dataset.userName = name;
-      loginBtn.dataset.userRole = role;
-
-      // 管理者なら編集ボタン表示
-      if (adminIds.includes(id)) {
-        editVersionBtn.classList.remove("hidden");
-      } else {
-        editVersionBtn.classList.add("hidden");
-      }
-    } else {
-      resetUI();
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    if (data.id === inputId) {
+      matchedUser = { ...data, docId: doc.id };
     }
-  } catch (error) {
-    console.error("照合エラー:", error);
+  });
+
+  if (matchedUser) {
+    const { name, role, id } = matchedUser;
+    userInfo.textContent = `ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
+    userInfo.classList.remove("hidden");
+    loginBtn.classList.add("active");
+    loginBtn.disabled = false;
+
+    loginBtn.dataset.userId = id;
+    loginBtn.dataset.userName = name;
+    loginBtn.dataset.userRole = role;
+
+    if (adminIds.includes(id)) {
+      editVersionBtn.classList.remove("hidden");
+    } else {
+      editVersionBtn.classList.add("hidden");
+    }
+  } else {
     resetUI();
   }
 });
@@ -88,7 +87,7 @@ loginBtn.addEventListener("click", async () => {
   const version = "v1.0.0";
   const device = `${navigator.platform} / ${navigator.userAgent}`;
 
-  const logRef = ref(db, "loginLogs");
+  const logRef = collection(db, "loginLogs");
   const logData = {
     id,
     name,
@@ -99,7 +98,7 @@ loginBtn.addEventListener("click", async () => {
   };
 
   try {
-    await push(logRef, logData);
+    await addDoc(logRef, logData);
     console.log("ログイン履歴を記録しました");
   } catch (error) {
     console.error("ログイン履歴の記録に失敗:", error);
