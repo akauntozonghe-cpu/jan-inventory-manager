@@ -24,34 +24,37 @@ const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 
-// 管理者コード一覧（思想的に編集権限を限定）
-const adminCodes = ["AD-001", "AD-002"];
+// 管理者ID一覧（編集権限を限定）
+const adminIds = ["AD-001", "AD-002"];
 
-// 入力イベント：照合
+// 入力イベント：責任者ID照合
 userCodeInput.addEventListener("input", async () => {
-  const code = userCodeInput.value.trim();
-  if (!code) {
+  const id = userCodeInput.value.trim();
+  if (!id) {
     resetUI();
     return;
   }
 
-  const userRef = ref(db, `users/${code}`);
+  const userRef = ref(db, `users/${id}`);
   try {
     const snapshot = await get(userRef);
     if (snapshot.exists()) {
       const user = snapshot.val();
-      userInfo.textContent = `${user.name} さん（${user.role}）としてログインします。`;
+      const name = user.name || "未定義";
+      const role = user.role || "未定義";
+
+      userInfo.textContent = `${name} さん（${role}）としてログインします。`;
       userInfo.classList.remove("hidden");
       loginBtn.classList.add("active");
       loginBtn.disabled = false;
 
       // 保持
-      loginBtn.dataset.userCode = code;
-      loginBtn.dataset.userName = user.name;
-      loginBtn.dataset.userRole = user.role;
+      loginBtn.dataset.userId = id;
+      loginBtn.dataset.userName = name;
+      loginBtn.dataset.userRole = role;
 
       // 管理者なら編集ボタン表示
-      if (adminCodes.includes(code)) {
+      if (adminIds.includes(id)) {
         editVersionBtn.classList.remove("hidden");
       } else {
         editVersionBtn.classList.add("hidden");
@@ -74,11 +77,11 @@ document.addEventListener("keydown", (event) => {
 
 // ログイン処理＋履歴記録
 loginBtn.addEventListener("click", async () => {
-  const code = loginBtn.dataset.userCode;
+  const id = loginBtn.dataset.userId;
   const name = loginBtn.dataset.userName;
   const role = loginBtn.dataset.userRole;
 
-  if (!code || !name || !role) return;
+  if (!id || !name || !role) return;
 
   const now = new Date();
   const timestamp = now.toISOString();
@@ -87,7 +90,7 @@ loginBtn.addEventListener("click", async () => {
 
   const logRef = ref(db, "loginLogs");
   const logData = {
-    code,
+    id,
     name,
     role,
     timestamp,
@@ -117,7 +120,7 @@ function resetUI() {
   userInfo.classList.add("hidden");
   loginBtn.classList.remove("active");
   loginBtn.disabled = true;
-  loginBtn.dataset.userCode = "";
+  loginBtn.dataset.userId = "";
   loginBtn.dataset.userName = "";
   loginBtn.dataset.userRole = "";
   editVersionBtn.classList.add("hidden");
