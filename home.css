@@ -1,3 +1,4 @@
+/* ✅ 固定ヘッダー */
 .fixed-header {
   display: flex;
   justify-content: space-between;
@@ -7,11 +8,13 @@
   padding: 10px 20px;
   position: fixed;
   top: 0;
+  left: 0;
   width: 100%;
   box-sizing: border-box;
   z-index: 1000;
 }
 
+/* ✅ ヘッダー左側 */
 .header-left {
   display: flex;
   align-items: center;
@@ -23,6 +26,7 @@
   cursor: pointer;
 }
 
+/* ✅ ヘッダー右側（日時＋氏名＋権限） */
 .header-right {
   display: flex;
   flex-direction: column;
@@ -50,6 +54,7 @@
   color: #ccc;
 }
 
+/* ✅ メニュー */
 .menu-box {
   position: absolute;
   top: 60px;
@@ -80,24 +85,51 @@
   cursor: pointer;
 }
 
-.fixed-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  background-color: #2c3e50;
-  color: white;
-  padding: 10px 20px;
-  z-index: 1000;
-  box-sizing: border-box;
+/* ✅ ホーム画面本体の余白（ヘッダー対策） */
+main {
+  padding-top: 80px;
 }
 
-/* ✅ ヘッダーの高さ分だけ main を下げる */
-main {
-  padding-top: 80px; /* ← ヘッダーの高さに合わせて調整 */
-}
 @media screen and (max-width: 600px) {
   main {
-    padding-top: 100px; /* スマホでは縦に伸びるので余裕を持たせる */
+    padding-top: 100px;
   }
+}
+
+/* ✅ カレンダー月間ビュー */
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.calendar-day {
+  border: 1px solid #ccc;
+  padding: 6px;
+  min-height: 80px;
+  font-size: 0.85em;
+  background-color: #f9f9f9;
+}
+
+/* ✅ AI提案タグ（種類別色分け） */
+.calendar-tag {
+  display: block;
+  margin-top: 4px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: white;
+}
+
+.calendar-tag.expiry {
+  background-color: #e74c3c; /* 赤：期限注意 */
+}
+
+.calendar-tag.reorder {
+  background-color: #3498db; /* 青：発注推奨 */
+}
+
+.calendar-tag.improvement {
+  background-color: #27ae60; /* 緑：改善提案 */
 }
