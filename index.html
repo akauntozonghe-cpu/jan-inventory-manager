@@ -16,6 +16,11 @@
     <p id="userInfo" class="hidden"></p>
     <p class="footer">この空間は、あなたの責任と誇りを記録する場です。</p>
   </div>
-  <script src="login.js"></script>
+  <script type="module" src="login.js"></script>
+  document.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !loginBtn.disabled) {
+    loginBtn.click();
+  }
+});
 </body>
 </html>
