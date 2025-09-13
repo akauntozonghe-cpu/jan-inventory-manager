@@ -1,68 +1,51 @@
-// Firebase初期化
-firebase.initializeApp({
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
-  projectId: "inventory-app-312ca"
-});
-const db = firebase.firestore();
-
-// 起動時処理
-window.onload = function () {
-  updateTime();
-  setInterval(updateTime, 1000);
-
-  const input = document.getElementById("userIdInput");
-  input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter") login();
-  });
+  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.firebasestorage.app",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
 };
 
-// 秒付き現在時刻表示
-function updateTime() {
-  const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}) `
-    + `${now.getHours().toString().padStart(2, "0")}:`
-    + `${now.getMinutes().toString().padStart(2, "0")}:`
-    + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `${formatted}`;
-}
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// ログイン処理
-async function login() {
-  const userId = document.getElementById("userIdInput").value.trim();
-  const status = document.getElementById("loginStatus");
+const userCodeInput = document.getElementById("userCode");
+const loginBtn = document.getElementById("loginBtn");
+const userInfo = document.getElementById("userInfo");
 
-  if (!userId) {
-    status.textContent = "責任者番号を入力してください。";
-    return;
-  }
+userCodeInput.addEventListener("input", async () => {
+  const code = userCodeInput.value.trim();
+  if (!code) return;
 
+  const userRef = ref(db, `users/${code}`);
   try {
-    const snapshot = await db.collection("users").where("id", "==", userId).get();
-    if (snapshot.empty) {
-      status.textContent = "登録された番号が見つかりません。";
-      return;
+    const snapshot = await get(userRef);
+    if (snapshot.exists()) {
+      const user = snapshot.val();
+      userInfo.textContent = `${user.name} さん（${user.role}）としてログインします。`;
+      userInfo.classList.remove("hidden");
+      loginBtn.classList.add("active");
+      loginBtn.disabled = false;
+    } else {
+      userInfo.textContent = "";
+      userInfo.classList.add("hidden");
+      loginBtn.classList.remove("active");
+      loginBtn.disabled = true;
     }
-
-    const doc = snapshot.docs[0];
-    const userData = doc.data();
-
-    // セッション保存
-    sessionStorage.setItem("userId", userId);
-    sessionStorage.setItem("userName", userData.name);
-    sessionStorage.setItem("userRole", userData.role);
-
-    // Firestoreにログイン履歴記録
-    const now = new Date();
-    await db.collection("users").doc(doc.id).update({
-      lastLogin: firebase.firestore.Timestamp.fromDate(now)
-    });
-
-    // ホーム画面へ遷移
-    window.location.href = "home.html";
   } catch (error) {
-    console.error("ログインエラー:", error);
-    status.textContent = "ログイン中にエラーが発生しました。";
+    console.error("照合エラー:", error);
   }
-}
+});
+
+loginBtn.addEventListener("click", () => {
+  const code = userCodeInput.value.trim();
+  if (code) {
+    window.location.href = "home.html";
+  }
+});

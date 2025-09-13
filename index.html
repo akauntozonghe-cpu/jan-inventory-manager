@@ -3,44 +3,19 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム</title>
-
-  <!-- CSS分割構成 -->
-  <link rel="stylesheet" href="header.css" />
+  <title>在庫管理 - ログイン</title>
   <link rel="stylesheet" href="login.css" />
-  <script src="login.js" defer></script>
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-firestore-compat.js"></script>
-
-  <!-- JS本体 -->
-  <script src="js/login.js" defer></script>
 </head>
 <body>
-  <!-- ✅ 固定ヘッダー -->
-  <header class="fixed-header">
-    <div class="header-left">
-      <h1>在庫管理</h1>
-    </div>
-    <div class="header-right">
-      <div id="currentTime" class="timestamp"></div>
-    </div>
-  </header>
-
-  <!-- ✅ ページタイトル -->
-  <div class="page-title">
-    <h2>ログイン</h2>
+  <div class="login-container">
+    <div class="user-icon">👤</div>
+    <h1>ようこそ。</h1>
+    <p id="role-label">責任者番号を入力してください。</p>
+    <input type="text" id="userCode" placeholder="責任者番号" />
+    <button id="loginBtn" disabled>ログイン</button>
+    <p id="userInfo" class="hidden"></p>
+    <p class="footer">この空間は、あなたの責任と誇りを記録する場です。</p>
   </div>
-
-  <!-- ✅ ログインフォーム -->
-  <main>
-    <div class="login-box card">
-      <h2 class="login-title">在庫管理システム<br>
-      <input type="text" id="userIdInput" placeholder="責任者番号を登録" />
-      <button onclick="login()">ログイン</button>
-      <p id="loginStatus"></p>
-    </div>
-  </main>
+  <script src="login.js"></script>
 </body>
 </html>
