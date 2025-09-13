@@ -20,7 +20,7 @@ const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 const welcomeMessage = document.querySelector(".welcome-message");
 
-const adminIds = ["AD-001", "1011"];
+const adminIds = ["2488", "1011"];
 
 const messages = [
   "この空間は、あなたの責任と誇りを表現する場です。",
