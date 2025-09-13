@@ -133,3 +133,15 @@ main {
 .calendar-tag.improvement {
   background-color: #27ae60; /* 緑：改善提案 */
 }
+.calendar-tag {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.8em;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.calendar-tag.expiry { background-color: #e74c3c; }
+.calendar-tag.reorder { background-color: #3498db; }
+.calendar-tag.improvement { background-color: #27ae60; }

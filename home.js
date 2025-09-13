@@ -143,29 +143,47 @@ function loadHomeSummaries() {
 // ✅ AI提案表示（管理者のみ承認可能）
 function loadAISuggestions() {
   const role = sessionStorage.getItem("userRole");
+  const container = document.getElementById("suggestionList");
+  if (!container) {
+    console.warn("suggestionList が見つかりません。HTMLに <ul id='suggestionList'> を追加してください。");
+    return;
+  }
+
+  container.innerHTML = "";
+
   db.collection("aiSuggestions").get().then(snapshot => {
-    const container = document.getElementById("suggestionList");
-    container.innerHTML = "";
     snapshot.forEach(doc => {
       const s = doc.data();
       const li = document.createElement("li");
+
+      // ✅ 提案の種類と日付を明示
+      const typeIcon = getTagIcon(s.type);
+      const typeClass = getTagClass(s.type);
+      const dateStr = s.scheduledDate || "未設定";
+
       li.innerHTML = `
-        <strong>${s.product}</strong><br>
+        <span class="calendar-tag ${typeClass}">${typeIcon} ${s.type}</span><br>
+        <strong>${s.product}</strong>（${dateStr}）<br>
         ${s.message}<br>
         提案：${s.recommendedAction}<br>
       `;
+
+      // ✅ 管理者のみ操作可能
       if (role === "管理者" && s.status === "未処理") {
         li.innerHTML += `
           <button onclick="approveSuggestion('${doc.id}')">承認</button>
           <button onclick="rejectSuggestion('${doc.id}')">却下</button>
         `;
       }
-      if (role === "管理者" && s.status !== "未処理") {
+
+      // ✅ 承認済み・却下済みの表示
+      if (s.status !== "未処理") {
         li.innerHTML += `
-          状態：${s.status}（${s.approvedBy}）<br>
-          時刻：${new Date(s.approvedAt).toLocaleString()}
+          状態：${s.status}（${s.approvedBy || "不明"}）<br>
+          時刻：${s.approvedAt ? new Date(s.approvedAt).toLocaleString() : "未記録"}
         `;
       }
+
       container.appendChild(li);
     });
   });
