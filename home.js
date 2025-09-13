@@ -157,7 +157,10 @@ function rejectSuggestion(id) {
 // ✅ カレンダー表示（月間ビュー＋AI提案反映）
 function loadCalendar() {
   const calendarGrid = document.getElementById("calendarView");
-  calendarGrid.innerHTML = "";
+  if (!calendarGrid) {
+    console.warn("calendarView が見つかりません。HTMLに <div id='calendarView'> を追加してください。");
+    return;
+  }
 
   const today = new Date();
   const year = today.getFullYear();
