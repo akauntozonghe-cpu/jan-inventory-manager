@@ -24,36 +24,24 @@ const db = getFirestore(app);
 // 管理者ID一覧
 const adminIds = ["2488", "1011"];
 
-// 思想メッセージ
-const messages = [
-  "この空間は、あなたの責任と誇りを表現する場です。",
-  "あなたの判断が、この空間の未来を形作ります。",
-  "この場は、あなたの痕跡が意味を持つ場所です。",
-  "責任者としてのあなたの意志が、すべての動きを導きます。",
-  "この空間は、あなたの選択が記録される舞台です。",
-  "あなたの役割は、ただの操作ではなく、思想の実行です。",
-  "この場に宿る者として、あなたの誇りが空気を変えます。",
-  "この空間は、あなたの存在が意味を持つよう設計されています。",
-  "あなたの入場は、空間の記憶に刻まれます。",
-  "この空間は、あなたの責任が可視化される場所です。"
-];
-
-// 初期化（DOMが完全に読み込まれてから実行）
+// 初期化
 window.addEventListener("DOMContentLoaded", () => {
   const userCodeInput = document.getElementById("userIdInput");
   const loginBtn = document.getElementById("loginBtn");
   const editVersionBtn = document.getElementById("editVersionBtn");
-  const userInfo = document.getElementById("userInfo");
   const welcomeMessage = document.querySelector(".welcome-message");
 
-  if (!userCodeInput || !loginBtn || !editVersionBtn || !userInfo || !welcomeMessage) {
+  if (!userCodeInput || !loginBtn || !editVersionBtn || !welcomeMessage) {
     console.error("空間の入口要素が見つかりません。HTML構造を確認してください。");
     return;
   }
 
-  // ランダムメッセージ表示
-  const index = Math.floor(Math.random() * messages.length);
-  welcomeMessage.textContent = messages[index];
+  // Enterキー対応（儀式化）
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !loginBtn.disabled) {
+      loginBtn.click();
+    }
+  });
 
   // 入力監視
   userCodeInput.addEventListener("input", async () => {
@@ -75,9 +63,6 @@ window.addEventListener("DOMContentLoaded", () => {
     const data = snapshot.docs[0].data();
     const { id, name, role, uid } = data;
 
-    userInfo.textContent = `ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
-    userInfo.classList.remove("hidden");
-
     loginBtn.disabled = false;
     loginBtn.classList.add("active");
     loginBtn.dataset.userId = id;
@@ -87,7 +72,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     localStorage.setItem("uid", uid);
 
-    welcomeMessage.textContent = `🛡️ ようこそ、${name} さん。この空間はあなたの痕跡を記憶します。`;
+    welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
 
     if (adminIds.includes(id)) {
       editVersionBtn.classList.remove("hidden");
@@ -103,7 +88,10 @@ window.addEventListener("DOMContentLoaded", () => {
     const role = loginBtn.dataset.userRole;
     const uid = loginBtn.dataset.userUid;
 
-    if (!id || !name || !role || !uid) return;
+    if (!id || !name || !role || !uid) {
+      console.error("ログイン情報が不完全です。");
+      return;
+    }
 
     const now = new Date();
     const timestamp = now.toISOString();
@@ -131,8 +119,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // UIリセット
   function resetUI() {
-    userInfo.textContent = "";
-    userInfo.classList.add("hidden");
     loginBtn.classList.remove("active");
     loginBtn.disabled = true;
     loginBtn.dataset.userId = "";
