@@ -38,9 +38,9 @@ const messages = [
   "この空間は、あなたの責任が可視化される場所です。"
 ];
 
-// 初期化
+// 初期化（DOMが完全に読み込まれてから実行）
 window.addEventListener("DOMContentLoaded", () => {
-  const userCodeInput = document.getElementById("userCode");
+  const userCodeInput = document.getElementById("userIdInput");
   const loginBtn = document.getElementById("loginBtn");
   const editVersionBtn = document.getElementById("editVersionBtn");
   const userInfo = document.getElementById("userInfo");
