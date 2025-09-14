@@ -1,78 +1,23 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理｜思想的司令室</title>
-  <link rel="stylesheet" href="home.css" />
+  <meta charset="UTF-8">
+  <title>在庫管理 - ホーム</title>
 </head>
 <body>
-  <header>
-    <h1>在庫管理システム</h1>
-    <div id="clock">⏱️ 読み込み中...</div>
-    <div id="userInfoHeader">🛡️ ユーザー情報</div>
-    <div id="adminBanner" class="hidden"></div>
-  </header>
+  <h1>在庫管理システム</h1>
+  <p id="welcomeMessage">読み込み中...</p>
 
-  <nav>
-    <button id="hamburgerBtn">☰ メニュー</button>
-    <ul id="hamburgerMenu" class="hidden">
-      <li><a href="#">商品登録</a></li>
-      <li><a href="#">商品一覧</a></li>
-      <li><a href="#">報告</a></li>
-      <li><a href="#">設定</a></li>
-      <li><a href="#">ログアウト</a></li>
-      <li class="admin-only hidden"><a href="#">管理者領域</a></li>
-    </ul>
-  </nav>
-
-  <main>
-    <section id="userInfo">
-      <p>氏名：<span id="userName">---</span></p>
-      <p>権限：<span id="userRole">---</span></p>
-      <p>ID：<span id="userId">---</span></p>
-    </section>
-
-    <section id="inventorySummary">
-      <h2>📦 在庫状況</h2>
-      <p>全在庫：<span id="totalItems">--</span> 件</p>
-      <p>警告：<span id="warningItems">--</span> 件</p>
-      <p>期限切れ：<span id="expiredItems">--</span> 件</p>
-    </section>
-
-    <section id="urgentSection">
-      <h2>⏰ 緊急情報</h2>
-      <ul id="urgentList"></ul>
-    </section>
-
-    <section id="aiSection">
-      <h2>🤖 AI提案</h2>
-      <div id="aiSuggestions"></div>
-    </section>
-
-    <section id="calendarSection">
-      <h2>📅 カレンダー</h2>
-      <label for="calendarView">表示形式：</label>
-      <select id="calendarView">
-        <option value="day">日</option>
-        <option value="week">週</option>
-        <option value="month">月</option>
-      </select>
-      <div id="calendarContent">読み込み中...</div>
-    </section>
-
-    <section id="marketSection">
-      <h2>🛍️ フリマ連携</h2>
-      <p>出品中：<span id="listedItems">--</span> 件</p>
-      <p>売却済：<span id="soldItems">--</span> 件</p>
-    </section>
-
-    <section id="philosophySection">
-      <h2>🌿 思想メッセージ</h2>
-      <p id="philosophyMessage">空間が語りかけています...</p>
-    </section>
-  </main>
-
-  <script type="module" src="home.js"></script>
+  <script>
+    const uid = localStorage.getItem("uid");
+    if (uid) {
+      document.getElementById("welcomeMessage").textContent = `ようこそ、UID: ${uid} さん。この空間はあなたの痕跡を記憶しています。`;
+    } else {
+      document.getElementById("welcomeMessage").textContent = "ログイン情報が見つかりません。入口へ戻ります。";
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 2000);
+    }
+  </script>
 </body>
 </html>
