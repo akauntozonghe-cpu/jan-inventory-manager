@@ -83,7 +83,7 @@ async function loadUserInfo(uid) {
   }
 }
 
-// ✨ ログイン儀式の演出
+// ✨ ログイン儀式
 function showLoginRitual(lastTimestamp) {
   const now = Date.now();
   const diffMs = now - new Date(lastTimestamp).getTime();
@@ -104,17 +104,17 @@ function renderBadge(role) {
 }
 
 // 🚪 ログアウト
-function logout() {
+window.logout = function () {
   localStorage.removeItem("uid");
   sessionStorage.removeItem("temporaryAdmin");
   window.location.href = "index.html";
-}
+};
 
-// 🍔 ハンバーガーメニュー
-function toggleMenu() {
+// 🍔 ハンバーガーメニュー（グローバル公開）
+window.toggleMenu = function () {
   const menu = document.getElementById("mainMenu");
   menu.style.display = menu.style.display === "none" ? "block" : "none";
-}
+};
 
 // 📦 在庫状況
 function loadInventoryStatus() {
@@ -183,7 +183,7 @@ function loadMarketInfo() {
   }
 }
 
-// 🧠 AI判断履歴の表示
+// 🧠 AI判断履歴
 async function loadAIDecisionHistory(uid) {
   const q = query(
     collection(db, "aiDecisions"),
@@ -202,7 +202,7 @@ async function loadAIDecisionHistory(uid) {
   }
 }
 
-// 👑 一時介入判定
+// 👑 一時介入判定（インデックス必要）
 async function checkTemporaryAdmin(uid) {
   const q = query(
     collection(db, "interventionLogs"),
@@ -215,9 +215,10 @@ async function checkTemporaryAdmin(uid) {
     const last = snapshot.docs[0].data();
     const now = Date.now();
     const diff = now - new Date(last.timestamp).getTime();
-    if (diff < 1000 * 60 * 30) {
+        if (diff < 1000 * 60 * 30) {
       sessionStorage.setItem("temporaryAdmin", "true");
-      document.getElementById("adminModeBanner").style.display = "block";
+      const banner = document.getElementById("adminModeBanner");
+      if (banner) banner.style.display = "block";
       enableAdminFeaturesTemporarily();
     }
   }
@@ -235,6 +236,6 @@ function enableAdminFeaturesTemporarily() {
 }
 
 // 🧭 ページ遷移（空間が導く）
-function goToPage(target) {
+window.goToPage = function (target) {
   window.location.href = `${target}.html`;
-}
+};
