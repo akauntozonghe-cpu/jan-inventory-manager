@@ -1,67 +1,61 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>在庫管理システム - ホーム</title>
-  <style>
-    body {
-      font-family: "Segoe UI", sans-serif;
-      background-color: #f5f5f5;
-      padding: 2em;
-      text-align: center;
-    }
-    .container {
-      background: white;
-      padding: 2em;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      display: inline-block;
-    }
-    .uid-message {
-      font-size: 1.2em;
-      margin-top: 1em;
-      color: #333;
-    }
-    .logout-btn {
-      margin-top: 2em;
-      padding: 0.5em 1.5em;
-      font-size: 1em;
-      background-color: #d9534f;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .logout-btn:hover {
-      background-color: #c9302c;
-    }
-  </style>
+  <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>在庫管理システム</h1>
-    <p id="uidMessage" class="uid-message">読み込み中...</p>
+  <header>
+    <h1 onclick="goHome()">在庫管理システム</h1>
+    <nav>
+      <button onclick="navigate('register')">商品登録</button>
+      <button onclick="navigate('list')">商品一覧</button>
+      <button onclick="navigate('market')">フリマ</button>
+      <button onclick="navigate('report')">報告</button>
+      <button onclick="navigate('admin')">管理者</button>
+      <button onclick="navigate('settings')">設定</button>
+    </nav>
+    <div id="clock">--:--:--</div>
+  </header>
+
+  <main>
+    <section id="userInfo">
+      <p id="uidMessage">読み込み中...</p>
+    </section>
+
+    <section id="dashboard">
+      <h2>📊 状況サマリー</h2>
+      <div class="summary-grid">
+        <div id="inventoryStatus" class="summary-card"></div>
+        <div id="urgentItems" class="summary-card"></div>
+        <div id="calendarInfo" class="summary-card"></div>
+        <div id="aiSummary" class="summary-card"></div>
+        <div id="aiInventorySuggestions" class="summary-card"></div>
+        <div id="marketInfo" class="summary-card"></div>
+      </div>
+    </section>
+
+    <section id="settingsPanel" class="admin-only" style="display: none;">
+      <h2>⚙️ 設定</h2>
+      <div>
+        <h3>🧾 バージョン情報</h3>
+        <p>v1.0.0</p>
+      </div>
+      <div>
+        <h3>📚 履歴</h3>
+        <p>ログイン履歴・判断履歴・操作履歴</p>
+      </div>
+    </section>
+
+    <section id="adminPanel" class="admin-only" style="display: none;">
+      <h2>🧑‍💼 管理者パネル</h2>
+      <p>すべての履歴・機能にアクセス可能</p>
+    </section>
+
     <button class="logout-btn" onclick="logout()">ログアウト</button>
-  </div>
+  </main>
 
-  <script>
-    const uid = localStorage.getItem("uid");
-
-    if (uid) {
-      document.getElementById("uidMessage").textContent =
-        `ようこそ、UID: ${uid} さん。この空間はあなたの痕跡を記憶しています。`;
-    } else {
-      document.getElementById("uidMessage").textContent =
-        "ログイン情報が見つかりません。入口へ戻ります。";
-      setTimeout(() => {
-        window.location.href = "index.html";
-      }, 2000);
-    }
-
-    function logout() {
-      localStorage.removeItem("uid");
-      window.location.href = "index.html";
-    }
-  </script>
+  <script type="module" src="home.js"></script>
 </body>
 </html>

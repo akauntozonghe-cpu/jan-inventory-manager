@@ -1,20 +1,16 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  initializeApp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   query,
   where,
-  doc,
   getDocs,
-  addDoc,
-  onSnapshot
+  orderBy,
+  limit
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import {
-  getAuth,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -26,212 +22,129 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const auth = getAuth();
 
-// 時計表示
-function updateClock() {
-  const now = new Date();
-  const formatted = now.toLocaleString("ja-JP", {
-    year: "numeric", month: "2-digit", day: "2-digit",
-    hour: "2-digit", minute: "2-digit", second: "2-digit",
-    weekday: "short", timeZoneName: "short"
-  });
-  document.getElementById("clock").textContent = `⏱️ ${formatted}`;
-}
-setInterval(updateClock, 1000);
-updateClock();
+const uid = localStorage.getItem("uid");
+const uidMessage = document.getElementById("uidMessage");
 
-// ハンバーガー開閉
-document.getElementById("hamburgerBtn").addEventListener("click", () => {
-  document.getElementById("hamburgerMenu").classList.toggle("hidden");
-});
-
-// ログ記録関数群
-async function logLogin(uid, method = "email") {
-  await addDoc(collection(db, "loginLogs"), {
-    uid,
-    method,
-    timestamp: new Date()
-  });
-}
-async function logAction(uid, action, reason = "") {
-  await addDoc(collection(db, "actionLogs"), {
-    performedBy: uid,
-    action,
-    reason,
-    timestamp: new Date()
-  });
-}
-async function logAISuggestion(uid, suggestionId, status) {
-  await addDoc(collection(db, "aiSuggestionLogs"), {
-    decidedBy: uid,
-    suggestionId,
-    status,
-    timestamp: new Date()
-  });
+if (!uid) {
+  uidMessage.textContent = "ログイン情報が見つかりません。入口へ戻ります。";
+  setTimeout(() => {
+    window.location.href = "index.html";
+  }, 2000);
+} else {
+  loadUserInfo(uid);
+  loadInventoryStatus();
+  loadUrgentItems();
+  loadCalendarInfo();
+  loadAISummary(uid);
+  loadAIInventorySuggestions();
+  loadMarketInfo();
+  checkAdmin(uid);
+  startClock();
 }
 
-// ログイン状態監視
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("ログインしていません。");
-    return;
-  }
-
-  const uid = user.uid;
-  await logLogin(uid, "email");
-
-  const usersRef = collection(db, "users");
-  const snapshot = await getDocs(query(usersRef, where("uid", "==", uid)));
-
-  if (snapshot.empty) {
-    alert("ユーザー情報が見つかりません。");
-    return;
-  }
-
-  let userData;
-  snapshot.forEach(doc => {
-    userData = doc.data();
-  });
-
-  const { id, name, role, canDecideAI } = userData;
-
-  // ユーザー情報表示
-  document.getElementById("userName").textContent = name;
-  document.getElementById("userRole").textContent = role;
-  document.getElementById("userId").textContent = id;
-  document.getElementById("userInfoHeader").textContent =
-    `🛡️ 責任者：${name}（${id}）｜権限：${role}`;
-
-  if (role === "管理者") {
-    document.querySelector(".admin-only").classList.remove("hidden");
-    document.getElementById("adminBanner").textContent = "👑 管理者モード中";
-    document.body.classList.add("admin-mode");
-  }
-
-  // リアルタイム監視開始
-  watchInventory(uid);
-  watchAISuggestions(uid);
-  watchActionLogs(uid);
-  watchLoginLogs(uid);
-  displayPhilosophyMessage();
-});
-
-// 在庫状況監視
-function watchInventory(uid) {
-  const itemsRef = collection(db, "items");
-  onSnapshot(itemsRef, (snapshot) => {
-    let total = 0, warning = 0, expired = 0;
+function startClock() {
+  setInterval(() => {
     const now = new Date();
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.registeredBy === uid) {
-        total++;
-        if (data.status === "警告") warning++;
-        if (new Date(data.deadline) < now) expired++;
-      }
-    });
-    document.getElementById("totalItems").textContent = total;
-    document.getElementById("warningItems").textContent = warning;
-    document.getElementById("expiredItems").textContent = expired;
-  });
-
-  // 緊急情報
-  onSnapshot(itemsRef, (snapshot) => {
-    const urgentList = document.getElementById("urgentList");
-    urgentList.innerHTML = "";
-    const now = new Date();
-    const oneMonthLater = new Date();
-    oneMonthLater.setMonth(now.getMonth() + 1);
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const deadline = new Date(data.deadline);
-      if (deadline < now) {
-        urgentList.innerHTML += `<li>期限切れ：${data.name}（${data.deadline}）</li>`;
-      } else if (deadline < oneMonthLater && data.status === "未承認") {
-        urgentList.innerHTML += `<li>承認待ち：${data.name}（${data.deadline}）</li>`;
-      }
-    });
-  });
+    document.getElementById("clock").textContent =
+      now.toLocaleTimeString("ja-JP", { hour12: false });
+  }, 1000);
 }
 
-// AI判断履歴監視
-function watchAISuggestions(uid) {
-  const aiRef = collection(db, "aiSuggestionLogs");
-  onSnapshot(query(aiRef, where("decidedBy", "==", uid)), (snapshot) => {
-    const list = document.getElementById("historyList");
-    list.innerHTML = "";
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      const time = data.timestamp.toDate().toLocaleString("ja-JP");
-      const li = document.createElement("li");
-      li.textContent = `提案 ${data.suggestionId} を「${data.status}」として判断（${time}）`;
-      list.appendChild(li);
-    });
-  });
-}
-
-// 最後の操作監視
-function watchActionLogs(uid) {
-  const logsRef = collection(db, "actionLogs");
-  onSnapshot(query(logsRef, where("performedBy", "==", uid)), (snapshot) => {
-    let latest = null;
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
-        latest = data;
-      }
-    });
-    const lastAction = latest
-      ? `${latest.action}（${latest.timestamp.toDate().toLocaleString("ja-JP")}）`
-      : "記録なし";
-    document.getElementById("lastAction").textContent = lastAction;
-  });
-}
-
-// 最終ログイン監視
-function watchLoginLogs(uid) {
-  const loginRef = collection(db, "loginLogs");
-  const target = document.getElementById("lastLogin");
-  if (!target) {
-    console.warn("lastLogin 要素が見つかりません。");
-    return;
+async function loadUserInfo(uid) {
+  const q = query(collection(db, "users"), where("uid", "==", uid));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    const user = snapshot.docs[0].data();
+    uidMessage.textContent = `責任者：${user.name}（${user.role}）｜UID: ${uid}`;
   }
-
-  onSnapshot(query(loginRef, where("uid", "==", uid)), (snapshot) => {
-    let latest = null;
-
-    snapshot.forEach(doc => {
-      const data = doc.data();
-      if (data.timestamp && data.timestamp.toDate) {
-        if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
-          latest = data;
-        }
-      }
-    });
-
-    const lastLogin = latest
-      ? `${latest.timestamp.toDate().toLocaleString("ja-JP", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit", second: "2-digit",
-          weekday: "short"
-        })}（${latest.method || "不明な方法"}）`
-      : "記録なし";
-
-    target.textContent = lastLogin;
-  });
 }
 
-// 思想メッセージ
-function displayPhilosophyMessage() {
-  const messages = [
-    "あなたの痕跡が空間の質を高めています。",
-    "この操作は、秩序と誇りの一部です。",
-    "空間は、あなたの判断を記憶します。",
-    "責任は、見える形で残されます。",
-    "この瞬間が、空間の未来を形づくります。"
-  ];
-  const msg = messages[Math.floor(Math.random() * messages.length)];
-  document.getElementById("philosophyMessage").textContent = msg;
+function goHome() {
+  window.location.href = "home.html";
+}
+
+function navigate(target) {
+  window.location.href = `${target}.html`;
+}
+
+function logout() {
+  localStorage.removeItem("uid");
+  window.location.href = "index.html";
+}
+
+// 以下は各セクションの表示関数（ダミー構成）
+function loadInventoryStatus() {
+  document.getElementById("inventoryStatus").innerHTML = `
+    <h3>📦 在庫状況</h3>
+    <ul>
+      <li class="danger">期限切れ：商品C</li>
+      <li class="warning">過剰：商品B</li>
+      <li class="warning">不足：商品A</li>
+    </ul>`;
+}
+
+function loadUrgentItems() {
+  document.getElementById("urgentItems").innerHTML = `
+    <h3>⏳ 期限の近いもの</h3>
+    <ul>
+      <li>商品F（本日）</li>
+      <li>商品E（あと1日）</li>
+    </ul>`;
+}
+
+function loadCalendarInfo() {
+  document.getElementById("calendarInfo").innerHTML = `
+    <h3>📅 情報カレンダー</h3>
+    <ul>
+      <li>棚卸（14:00〜）</li>
+      <li>AI提案確認（16:00）</li>
+      <li>商品Gの期限（明日）</li>
+      <li>フリマ更新（今週）</li>
+    </ul>`;
+}
+
+function loadAISummary(uid) {
+  document.getElementById("aiSummary").innerHTML = `
+    <h3>🤖 多機能AI</h3>
+    <ul>
+      <li>未判断：商品H「在庫が過剰です」</li>
+      <li>履歴：商品I「拒否済み（9/14）」</li>
+      <li>予測：商品J「今週中に不足の可能性」</li>
+    </ul>`;
+}
+
+function loadAIInventorySuggestions() {
+  document.getElementById("aiInventorySuggestions").innerHTML = `
+    <h3>🤖 AI提案（現在の在庫状況から）</h3>
+    <ul>
+      <li>商品A：過剰在庫（120個） → 出品または値下げを推奨</li>
+      <li>商品B：在庫切れ → 発注候補として優先度「高」</li>
+      <li>商品C：滞留在庫（30日間未動） → 廃棄または再販検討</li>
+      <li>商品D：今週中に不足予測 → 補充提案</li>
+    </ul>`;
+}
+
+function loadMarketInfo() {
+  document.getElementById("marketInfo").innerHTML = `
+    <h3>🛒 フリマ情報</h3>
+    <ul>
+      <li>出品中：商品K（¥1200）</li>
+      <li class="danger">期限切れ：商品L</li>
+      <li>売却済み：商品M（9/13）</li>
+    </ul>`;
+}
+
+async function checkAdmin(uid) {
+  const q = query(collection(db, "users"), where("uid", "==", uid));
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    const role = snapshot.docs[0].data().role;
+    if (role === "管理者") {
+      document.getElementById("adminPanel").style.display = "block";
+      document.getElementById("settingsPanel").style.display = "block";
+    } else {
+      document.getElementById("settingsPanel").style.display = "block";
+    }
+  }
 }
