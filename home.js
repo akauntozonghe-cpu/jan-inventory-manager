@@ -193,18 +193,33 @@ function watchActionLogs(uid) {
 // 最終ログイン監視
 function watchLoginLogs(uid) {
   const loginRef = collection(db, "loginLogs");
+  const target = document.getElementById("lastLogin");
+  if (!target) {
+    console.warn("lastLogin 要素が見つかりません。");
+    return;
+  }
+
   onSnapshot(query(loginRef, where("uid", "==", uid)), (snapshot) => {
     let latest = null;
+
     snapshot.forEach(doc => {
       const data = doc.data();
-      if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
-        latest = data;
+      if (data.timestamp && data.timestamp.toDate) {
+        if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
+          latest = data;
+        }
       }
     });
+
     const lastLogin = latest
-      ? `${latest.timestamp.toDate().toLocaleString("ja-JP")}（${latest.method || "不明な方法"}）`
+      ? `${latest.timestamp.toDate().toLocaleString("ja-JP", {
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit",
+          weekday: "short"
+        })}（${latest.method || "不明な方法"}）`
       : "記録なし";
-    document.getElementById("lastLogin").textContent = lastLogin;
+
+    target.textContent = lastLogin;
   });
 }
 
