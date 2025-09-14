@@ -9,17 +9,17 @@
 </head>
 <body>
   <header>
-    <div class="header-left">
-      <img src="/icons/icon-192.png" alt="在庫管理アイコン" class="system-icon" />
-      <h1 onclick="goToPage('home')">在庫管理システム</h1>
-    </div>
-    <div class="header-right">
-      <p id="responsibleUser">責任者：読み込み中...</p>
-      <p id="lastLogin">最終ログイン：--</p>
-      <div id="clock">--:--:--</div>
-      <button id="menuToggle" onclick="toggleMenu()">☰</button>
-    </div>
-  </header>
+  <div class="header-left">
+    <button id="menuToggle" onclick="toggleMenu()">☰</button>
+    <img src="/icons/icon-192.png" alt="在庫管理アイコン" class="system-icon" />
+    <h1 onclick="goToPage('home')">在庫管理システム</h1>
+  </div>
+  <div class="header-right">
+    <p id="responsibleUser">責任者：読み込み中...</p>
+    <p id="lastLogin">最終ログイン：--</p>
+    <div id="clock">--:--:--</div>
+  </div>
+</header>
 
   <nav id="mainMenu" style="display: none;">
     <button onclick="goToPage('register')">商品登録</button>
