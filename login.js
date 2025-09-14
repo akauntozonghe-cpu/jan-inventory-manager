@@ -1,6 +1,14 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -10,18 +18,20 @@ const firebaseConfig = {
   appId: "1:245219344089:web:e46105927c302e6a5788c8",
   measurementId: "G-TRH31MJCE3"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 要素取得
 const userCodeInput = document.getElementById("userCode");
 const loginBtn = document.getElementById("loginBtn");
 const userInfo = document.getElementById("userInfo");
 const editVersionBtn = document.getElementById("editVersionBtn");
 const welcomeMessage = document.querySelector(".welcome-message");
 
+// 管理者ID一覧
 const adminIds = ["2488", "1011"];
 
+// 思想メッセージ
 const messages = [
   "この空間は、あなたの責任と誇りを表現する場です。",
   "あなたの判断が、この空間の未来を形作ります。",
@@ -34,13 +44,13 @@ const messages = [
   "あなたの入場は、空間の記憶に刻まれます。",
   "この空間は、あなたの責任が可視化される場所です。"
 ];
-
 function setRandomMessage() {
   const index = Math.floor(Math.random() * messages.length);
   welcomeMessage.textContent = messages[index];
 }
 window.addEventListener("DOMContentLoaded", setRandomMessage);
 
+// 入力監視
 userCodeInput.addEventListener("input", async () => {
   const inputId = userCodeInput.value.trim();
   if (!inputId) {
@@ -48,35 +58,37 @@ userCodeInput.addEventListener("input", async () => {
     return;
   }
 
-  const usersRef = collection(db, "users");
-  const snapshot = await getDocs(usersRef);
+  const q = query(collection(db, "users"), where("id", "==", inputId));
+  const snapshot = await getDocs(q);
 
-  let matchedUser = null;
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    if (data.id === inputId) {
-            matchedUser = { ...data, docId: doc.id };
-    }
-  });
-
-  if (matchedUser) {
-    const { name, role, id } = matchedUser;
-    userInfo.textContent = `ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
-    userInfo.classList.remove("hidden");
-    loginBtn.classList.add("active");
-    loginBtn.disabled = false;
-
-    loginBtn.dataset.userId = id;
-    loginBtn.dataset.userName = name;
-    loginBtn.dataset.userRole = role;
-
-    if (adminIds.includes(id)) {
-      editVersionBtn.classList.remove("hidden");
-    } else {
-      editVersionBtn.classList.add("hidden");
-    }
-  } else {
+  if (snapshot.empty) {
+    welcomeMessage.textContent = "⚠️ 責任者番号が認識されません。空間はまだあなたを迎える準備ができていません。";
     resetUI();
+    return;
+  }
+
+  const doc = snapshot.docs[0];
+  const data = doc.data();
+  const { id, name, role, uid } = data;
+
+  userInfo.textContent = `ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
+  userInfo.classList.remove("hidden");
+  loginBtn.classList.add("active");
+  loginBtn.disabled = false;
+
+  loginBtn.dataset.userId = id;
+  loginBtn.dataset.userName = name;
+  loginBtn.dataset.userRole = role;
+  loginBtn.dataset.userUid = uid;
+
+  localStorage.setItem("uid", uid);
+
+  welcomeMessage.textContent = `🛡️ ようこそ、${name} さん。この空間はあなたの痕跡を記憶します。`;
+
+  if (adminIds.includes(id)) {
+    editVersionBtn.classList.remove("hidden");
+  } else {
+    editVersionBtn.classList.add("hidden");
   }
 });
 
@@ -92,8 +104,9 @@ loginBtn.addEventListener("click", async () => {
   const id = loginBtn.dataset.userId;
   const name = loginBtn.dataset.userName;
   const role = loginBtn.dataset.userRole;
+  const uid = loginBtn.dataset.userUid;
 
-  if (!id || !name || !role) return;
+  if (!id || !name || !role || !uid) return;
 
   const now = new Date();
   const timestamp = now.toISOString();
@@ -101,13 +114,13 @@ loginBtn.addEventListener("click", async () => {
   const device = `${navigator.platform} / ${navigator.userAgent}`;
 
   const logRef = collection(db, "loginLogs");
-  const logData = { id, name, role, timestamp, version, device };
+  const logData = { uid, id, name, role, timestamp, version, device };
 
   try {
     await addDoc(logRef, logData);
-    console.log("ログイン履歴を記録しました");
+    console.log("✅ ログイン履歴を記録しました");
   } catch (error) {
-    console.error("ログイン履歴の記録に失敗:", error);
+    console.error("❌ ログイン履歴の記録に失敗:", error);
   }
 
   window.location.href = "home.html";
@@ -128,5 +141,6 @@ function resetUI() {
   loginBtn.dataset.userId = "";
   loginBtn.dataset.userName = "";
   loginBtn.dataset.userRole = "";
+  loginBtn.dataset.userUid = "";
   editVersionBtn.classList.add("hidden");
 }
