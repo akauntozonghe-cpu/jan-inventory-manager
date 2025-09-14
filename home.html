@@ -1,92 +1,93 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ホーム</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="home.css">
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-  <script src="home.js" defer></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ホーム｜在庫管理システム</title>
+  <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-
-  <!-- ✅ 固定ヘッダー -->
-  <header class="fixed-header">
-    <div class="header-left">
-      <button id="menuToggle" onclick="toggleMenu()">☰</button>
-      <h1 onclick="goToHome()" class="header-title" title="ホームに戻る">在庫管理</h1>
-    </div>
-    <div class="header-right">
-      <div id="currentTime" class="timestamp"></div>
-      <div class="user-info-row">
-        <span id="userName" class="user-name"></span>
-        <span id="userRole" class="user-role"></span>
+  <div class="home-container">
+    <!-- ユーザー情報 -->
+    <section class="user-section">
+      <div class="badge">🛡️ 空間管理者</div>
+      <div class="user-info">
+        <p><strong>氏名：</strong><span id="userName">村本 太郎</span></p>
+        <p><strong>役割：</strong><span id="userRole">責任者</span></p>
+        <p><strong>ID：</strong><span id="userId">RM-001</span></p>
+        <p><strong>最終ログイン：</strong><span id="lastLogin">2025/09/14 20:30</span></p>
       </div>
-    </div>
-  </header>
+    </section>
 
-  <!-- ✅ ハンバーガーメニュー -->
-  <nav id="hamburgerMenu" class="menu-box">
-    <ul>
-      <li><button onclick="goToRegister()">商品登録</button></li>
-      <li><button onclick="goToList()">商品一覧</button></li>
-      <li><button id="fleamarketButton" onclick="goToFleamarket()">フリマ情報</button></li>
-      <li><button onclick="goToReport()">報告</button></li>
-      <li><button id="adminButton" onclick="goToAdmin()">管理者画面</button></li>
-      <li><button onclick="goToSettings()">設定</button></li>
-      <li><button onclick="logout()">ログアウト</button></li>
-    </ul>
-  </nav>
+    <!-- カレンダーと期限 -->
+    <section class="calendar-section">
+      <div class="calendar-header">
+        <h2>情報カレンダー</h2>
+        <select id="calendarView">
+          <option value="day">日</option>
+          <option value="week">週</option>
+          <option value="month">月</option>
+          <option value="year">年</option>
+        </select>
+      </div>
+      <div id="calendarContent">
+        <!-- AIが優先度順に1ヶ月以内の情報を表示 -->
+      </div>
+    </section>
 
-  <!-- ✅ ホーム画面本体 -->
- <main>
-  <!-- ✅ 期限が近いもの -->
-  <section class="dashboard">
-    <h3>期限が近いもの</h3>
-    <ul id="deadlineSummary">
-      <!-- 例：冷凍たこ焼き（9/16） → 値下げ推奨 -->
-    </ul>
-  </section>
+    <!-- 在庫状況 -->
+    <section class="inventory-section">
+      <h2>在庫状況</h2>
+      <ul>
+        <li>📦 全在庫：<span id="totalItems">123</span> 件</li>
+        <li>⚠️ 警告：<span id="warningItems">3</span> 件</li>
+        <li>⏰ 期限切れ：<span id="expiredItems">2</span> 件</li>
+      </ul>
+    </section>
 
-<section id="calendarSection" class="dashboard">
-  <h3>カレンダー</h3>
-  <div id="calendarView" class="calendar-grid"></div>
-</section>
+    <!-- フリマ連携 -->
+    <section class="market-section">
+      <h2>フリマ連携</h2>
+      <ul>
+        <li>🛍️ 出品中：<span id="listedItems">5</span> 件</li>
+        <li>✅ 売却済：<span id="soldItems">2</span> 件</li>
+      </ul>
+    </section>
 
+    <!-- AI支援 -->
+    <section class="ai-section">
+      <h2>AIサポート</h2>
+      <div id="aiSuggestions">
+        <!-- AIが「次にやるべきこと」「期限切れ処理」などを提案 -->
+      </div>
+    </section>
 
-  <!-- ✅ 在庫状況 -->
-  <section class="dashboard">
-    <h3>在庫状況</h3>
-    <ul id="inventorySummary">
-      <!-- 例：折りたたみ傘 → 残り2個 → 発注推奨 -->
-    </ul>
-  </section>
+    <!-- 操作ショートカット -->
+    <section class="actions-section">
+      <h2>操作</h2>
+      <div class="action-buttons">
+        <button onclick="goTo('register')">商品登録</button>
+        <button onclick="goTo('list')">商品一覧</button>
+        <button onclick="goTo('market')">フリマ</button>
+        <button onclick="goTo('report')">報告</button>
+        <button onclick="goTo('settings')">設定</button>
+        <button onclick="goTo('logout')">ログアウト</button>
+      </div>
+    </section>
 
-  <!-- ✅ フリマ状況 -->
-  <section class="dashboard">
-    <h3>フリマ状況</h3>
-    <ul id="fleamarketSummary">
-      <!-- 例：手作りポーチ → 出品中（価格800円） -->
-    </ul>
-  </section>
+    <!-- 管理者専用領域 -->
+    <section class="admin-section hidden" id="adminTools">
+      <h2>管理者ツール</h2>
+      <button onclick="goTo('version')">バージョン編集</button>
+      <button onclick="goTo('admin')">権限管理</button>
+    </section>
 
-  <!-- ✅ AI提案（暫定表示） -->
-  <section class="dashboard">
-    <h3>AIによる改善提案</h3>
-    <ul id="aiSuggestionPreview">
-      <!-- 例：売れ残り傾向 → 写真変更＋値下げ推奨 -->
-    </ul>
-  </section>
+    <!-- 思想メッセージ -->
+    <footer class="philosophy-footer">
+      <p id="philosophyMessage">あなたの判断が、この空間の未来を形作ります。</p>
+    </footer>
+  </div>
 
-  <section class="dashboard">
-  <h3>AI提案一覧（承認・却下可能）</h3>
-  <ul id="suggestionList">
-    <!-- JSで提案が挿入されます -->
-  </ul>
-</section>
-
-</main>
-
+  <script type="module" src="home.js"></script>
 </body>
 </html>
