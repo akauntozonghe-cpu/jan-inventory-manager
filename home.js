@@ -6,6 +6,7 @@ import {
   where,
   doc,
   getDocs,
+  addDoc,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import {
@@ -45,6 +46,31 @@ document.getElementById("hamburgerBtn").addEventListener("click", () => {
   document.getElementById("hamburgerMenu").classList.toggle("hidden");
 });
 
+// ログ記録関数群
+async function logLogin(uid, method = "email") {
+  await addDoc(collection(db, "loginLogs"), {
+    uid,
+    method,
+    timestamp: new Date()
+  });
+}
+async function logAction(uid, action, reason = "") {
+  await addDoc(collection(db, "actionLogs"), {
+    performedBy: uid,
+    action,
+    reason,
+    timestamp: new Date()
+  });
+}
+async function logAISuggestion(uid, suggestionId, status) {
+  await addDoc(collection(db, "aiSuggestionLogs"), {
+    decidedBy: uid,
+    suggestionId,
+    status,
+    timestamp: new Date()
+  });
+}
+
 // ログイン状態監視
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
@@ -53,6 +79,8 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const uid = user.uid;
+  await logLogin(uid, "email");
+
   const usersRef = collection(db, "users");
   const snapshot = await getDocs(query(usersRef, where("uid", "==", uid)));
 
@@ -85,6 +113,7 @@ onAuthStateChanged(auth, async (user) => {
   watchInventory(uid);
   watchAISuggestions(uid);
   watchActionLogs(uid);
+  watchLoginLogs(uid);
   displayPhilosophyMessage();
 });
 
@@ -127,15 +156,15 @@ function watchInventory(uid) {
   });
 }
 
-// AI提案履歴監視
+// AI判断履歴監視
 function watchAISuggestions(uid) {
-  const aiRef = collection(db, "aiSuggestions");
+  const aiRef = collection(db, "aiSuggestionLogs");
   onSnapshot(query(aiRef, where("decidedBy", "==", uid)), (snapshot) => {
     const list = document.getElementById("historyList");
     list.innerHTML = "";
     snapshot.forEach(doc => {
       const data = doc.data();
-      const time = data.decidedAt.toDate().toLocaleString("ja-JP");
+      const time = data.timestamp.toDate().toLocaleString("ja-JP");
       const li = document.createElement("li");
       li.textContent = `提案 ${data.suggestionId} を「${data.status}」として判断（${time}）`;
       list.appendChild(li);
@@ -158,6 +187,24 @@ function watchActionLogs(uid) {
       ? `${latest.action}（${latest.timestamp.toDate().toLocaleString("ja-JP")}）`
       : "記録なし";
     document.getElementById("lastAction").textContent = lastAction;
+  });
+}
+
+// 最終ログイン監視
+function watchLoginLogs(uid) {
+  const loginRef = collection(db, "loginLogs");
+  onSnapshot(query(loginRef, where("uid", "==", uid)), (snapshot) => {
+    let latest = null;
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
+        latest = data;
+      }
+    });
+    const lastLogin = latest
+      ? `${latest.timestamp.toDate().toLocaleString("ja-JP")}（${latest.method || "不明な方法"}）`
+      : "記録なし";
+    document.getElementById("lastLogin").textContent = lastLogin;
   });
 }
 
