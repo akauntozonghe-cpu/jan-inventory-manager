@@ -41,6 +41,7 @@ if (!uid) {
   startClock();
 }
 
+// 🕰️ 秒単位の時計（空間の鼓動）
 function startClock() {
   setInterval(() => {
     const now = new Date();
@@ -49,6 +50,7 @@ function startClock() {
   }, 1000);
 }
 
+// 👤 ユーザー情報とログイン履歴の読み込み
 async function loadUserInfo(uid) {
   const userQuery = query(collection(db, "users"), where("uid", "==", uid));
   const userSnap = await getDocs(userQuery);
@@ -72,85 +74,68 @@ async function loadUserInfo(uid) {
   }
 }
 
-function goHome() {
-  window.location.href = "home.html";
-}
-
+// 🧭 ページ遷移（空間が導く）
 function goToPage(target) {
   window.location.href = `${target}.html`;
 }
 
+// 🚪 ログアウト（痕跡を閉じる）
 function logout() {
   localStorage.removeItem("uid");
   sessionStorage.removeItem("temporaryAdmin");
   window.location.href = "index.html";
 }
 
-// 各セクションの表示関数（ダミー構成）
+// 🍔 ハンバーガーメニュー展開
+function toggleMenu() {
+  const menu = document.getElementById("mainMenu");
+  menu.style.display = menu.style.display === "none" ? "block" : "none";
+}
 
+// 📦 在庫状況（ダミー表示）
 function loadInventoryStatus() {
   document.getElementById("inventoryStatus").innerHTML = `
-    <h3>📦 在庫状況</h3>
-    <ul>
-      <li class="danger">期限切れ：商品C</li>
-      <li class="warning">過剰：商品B</li>
-      <li class="warning">不足：商品A</li>
-    </ul>`;
+    <div class="summary-card">期限切れ：商品C</div>
+    <div class="summary-card">不足：商品A</div>`;
 }
 
 function loadUrgentItems() {
   document.getElementById("urgentItems").innerHTML = `
-    <h3>⏳ 期限の近いもの</h3>
-    <ul>
-      <li>商品F（本日）</li>
-      <li>商品E（あと1日）</li>
-    </ul>`;
+    <div class="summary-card">商品B（本日）</div>
+    <div class="summary-card">商品C（あと1日）</div>`;
 }
 
 function loadCalendarInfo() {
   document.getElementById("calendarInfo").innerHTML = `
-    <h3>📅 情報カレンダー</h3>
-    <ul>
-      <li>棚卸（14:00〜）</li>
-      <li>AI提案確認（16:00）</li>
-      <li>商品Gの期限（明日）</li>
-      <li>フリマ更新（今週）</li>
-    </ul>`;
+    <div class="summary-card">期限（14:00〜）</div>
+    <div class="summary-card">商品登録（16:00）</div>
+    <div class="summary-card">商品一覧更新（明日）</div>
+    <div class="summary-card">フリマ更新（当日）</div>`;
 }
 
 function loadAISummary(uid) {
   document.getElementById("aiSummary").innerHTML = `
-    <h3>🤖 多機能AI</h3>
-    <ul>
-      <li>未判断：商品H「在庫が過剰です」</li>
-      <li>履歴：商品I「拒否済み（9/14）」</li>
-      <li>予測：商品J「今週中に不足の可能性」</li>
-    </ul>`;
+    <div class="summary-card">商品B「在庫が必要です」</div>
+    <div class="summary-card">商品C「期限が迫る（9/14）」</div>
+    <div class="summary-card">商品A「不足の可能性」</div>`;
 }
 
 function loadAIInventorySuggestions() {
   document.getElementById("aiInventorySuggestions").innerHTML = `
-    <h3>🤖 AI提案（現在の在庫状況から）</h3>
-    <ul>
-      <li>商品A：過剰在庫（120個） → 出品または値下げを推奨</li>
-      <li>商品B：在庫切れ → 発注候補として優先度「高」</li>
-      <li>商品C：滞留在庫（30日間未動） → 廃棄または再販検討</li>
-      <li>商品D：今週中に不足予測 → 補充提案</li>
-    </ul>`;
+    <div class="summary-card">商品A：過剰 → 出品または値下げ</div>
+    <div class="summary-card">商品B：在庫切れ → 発注候補</div>
+    <div class="summary-card">商品C：滞留 → 廃棄または再販</div>
+    <div class="summary-card">商品D：不足予測 → 補充提案</div>`;
 }
 
 function loadMarketInfo() {
   document.getElementById("marketInfo").innerHTML = `
-    <h3>🛒 フリマ情報</h3>
-    <ul>
-      <li>出品中：商品K（¥1200）</li>
-      <li class="danger">期限切れ：商品L</li>
-      <li>売却済み：商品M（9/13）</li>
-    </ul>`;
+    <div class="summary-card">出品中：商品K（¥1200）</div>
+    <div class="summary-card">期限切れ：商品L</div>
+    <div class="summary-card">売却済み：商品M（9/13）</div>`;
 }
 
-// 一時介入判定（30分以内の管理者操作があれば解放）
-
+// 👑 一時介入判定（秩序の守護者）
 async function checkTemporaryAdmin(uid) {
   const q = query(
     collection(db, "interventionLogs"),
@@ -171,6 +156,7 @@ async function checkTemporaryAdmin(uid) {
   }
 }
 
+// 🔓 管理者機能の一時解放
 function enableAdminFeaturesTemporarily() {
   const isTempAdmin = sessionStorage.getItem("temporaryAdmin") === "true";
   if (isTempAdmin) {

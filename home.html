@@ -2,28 +2,33 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>在庫管理システム - ホーム</title>
+  <title>在庫管理システム</title>
   <link rel="stylesheet" href="home.css" />
+  <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
+  <link rel="manifest" href="manifest.json" />
 </head>
 <body>
   <header>
     <div class="header-left">
+      <img src="/icons/icon-192.png" alt="在庫管理アイコン" class="system-icon" />
       <h1 onclick="goToPage('home')">在庫管理システム</h1>
-      <nav>
-        <button onclick="goToPage('register')">商品登録</button>
-        <button onclick="goToPage('list')">商品一覧</button>
-        <button onclick="goToPage('market')">フリマ</button>
-        <button onclick="goToPage('report')">報告</button>
-        <button onclick="goToPage('admin')">管理者</button>
-        <button onclick="goToPage('settings')">設定</button>
-      </nav>
     </div>
     <div class="header-right">
       <p id="responsibleUser">責任者：読み込み中...</p>
       <p id="lastLogin">最終ログイン：--</p>
       <div id="clock">--:--:--</div>
+      <button id="menuToggle" onclick="toggleMenu()">☰</button>
     </div>
   </header>
+
+  <nav id="mainMenu" style="display: none;">
+    <button onclick="goToPage('register')">商品登録</button>
+    <button onclick="goToPage('list')">商品一覧</button>
+    <button onclick="goToPage('market')">フリマ</button>
+    <button onclick="goToPage('report')">報告</button>
+    <button onclick="goToPage('admin')">管理者</button>
+    <button onclick="goToPage('settings')">設定</button>
+  </nav>
 
   <main>
     <div id="adminModeBanner" style="display: none;">
@@ -32,26 +37,39 @@
 
     <section id="dashboard">
       <h2>📊 状況サマリー</h2>
-      <div class="summary-grid">
-        <div id="inventoryStatus" class="summary-card"></div>
-        <div id="urgentItems" class="summary-card"></div>
-        <div id="calendarInfo" class="summary-card"></div>
-        <div id="aiSummary" class="summary-card"></div>
-        <div id="aiInventorySuggestions" class="summary-card"></div>
-        <div id="marketInfo" class="summary-card"></div>
+
+      <div class="summary-group">
+        <h3>📦 在庫状況</h3>
+        <div class="summary-card">期限切れ：商品C</div>
+        <div class="summary-card">不足：商品A</div>
+      </div>
+
+      <div class="summary-group">
+        <h3>⏳ 期限の近いもの</h3>
+        <div class="summary-card">商品B（本日）</div>
+        <div class="summary-card">商品C（あと1日）</div>
+      </div>
+
+      <div class="summary-group">
+        <h3>📅 情報カレンダー</h3>
+        <div class="summary-card">期限（14:00〜）</div>
+        <div class="summary-card">商品登録（16:00）</div>
+        <div class="summary-card">商品一覧更新（明日）</div>
+        <div class="summary-card">フリマ更新（当日）</div>
+      </div>
+
+      <div class="summary-group">
+        <h3>🤖 多機能AI</h3>
+        <div class="summary-card">商品B「在庫が必要です」</div>
+        <div class="summary-card">商品C「期限が迫る（9/14）」</div>
+        <div class="summary-card">商品A「不足の可能性」</div>
       </div>
     </section>
 
     <section id="settingsPanel" class="admin-only" style="display: none;">
       <h2>⚙️ 設定</h2>
-      <div>
-        <h3>🧾 バージョン情報</h3>
-        <p>v1.0.0</p>
-      </div>
-      <div>
-        <h3>📚 履歴</h3>
-        <p>ログイン履歴・判断履歴・操作履歴</p>
-      </div>
+      <p>バージョン：v1.0.0</p>
+      <p>履歴：ログイン・判断・操作</p>
     </section>
 
     <section id="adminPanel" class="admin-only" style="display: none;">
