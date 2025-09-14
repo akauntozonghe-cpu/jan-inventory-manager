@@ -5,7 +5,7 @@
   <title>在庫管理システム</title>
   <link rel="stylesheet" href="home.css" />
   <link rel="icon" href="/icons/favicon.ico" type="image/x-icon" />
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="/manifest.json" />
 </head>
 <body>
   <header>
@@ -38,32 +38,12 @@
     <section id="dashboard">
       <h2>📊 状況サマリー</h2>
 
-      <div class="summary-group">
-        <h3>📦 在庫状況</h3>
-        <div class="summary-card">期限切れ：商品C</div>
-        <div class="summary-card">不足：商品A</div>
-      </div>
-
-      <div class="summary-group">
-        <h3>⏳ 期限の近いもの</h3>
-        <div class="summary-card">商品B（本日）</div>
-        <div class="summary-card">商品C（あと1日）</div>
-      </div>
-
-      <div class="summary-group">
-        <h3>📅 情報カレンダー</h3>
-        <div class="summary-card">期限（14:00〜）</div>
-        <div class="summary-card">商品登録（16:00）</div>
-        <div class="summary-card">商品一覧更新（明日）</div>
-        <div class="summary-card">フリマ更新（当日）</div>
-      </div>
-
-      <div class="summary-group">
-        <h3>🤖 多機能AI</h3>
-        <div class="summary-card">商品B「在庫が必要です」</div>
-        <div class="summary-card">商品C「期限が迫る（9/14）」</div>
-        <div class="summary-card">商品A「不足の可能性」</div>
-      </div>
+      <div id="inventoryStatus" class="summary-group"></div>
+      <div id="urgentItems" class="summary-group"></div>
+      <div id="calendarInfo" class="summary-group"></div>
+      <div id="aiSummary" class="summary-group"></div>
+      <div id="aiInventorySuggestions" class="summary-group"></div>
+      <div id="marketInfo" class="summary-group"></div>
     </section>
 
     <section id="settingsPanel" class="admin-only" style="display: none;">
