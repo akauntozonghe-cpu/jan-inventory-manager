@@ -7,7 +7,6 @@ import {
   query,
   where,
   doc,
-  updateDoc,
   addDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
@@ -25,10 +24,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ユーザー情報（仮：IDは固定）
-const userId = "RM-001"; // 実運用ではログイン時に渡す
+const userId = "RM-001";
 let userRole = "責任者";
 let canDecideAI = false;
 
+// ユーザー情報読み込み
 async function loadUserInfo() {
   const usersRef = collection(db, "users");
   const snapshot = await getDocs(query(usersRef, where("id", "==", userId)));
@@ -52,7 +52,7 @@ async function loadUserInfo() {
 }
 loadUserInfo();
 
-// 管理者モード表示
+// 管理者モード演出
 function enableAdminMode() {
   document.getElementById("adminBanner").textContent = "👑 管理者モード中";
   document.body.classList.add("admin-mode");
@@ -120,7 +120,7 @@ async function loadUrgentInfo() {
 }
 loadUrgentInfo();
 
-// AI提案生成（役割分岐＋判断履歴）
+// AI提案生成
 function generateAISuggestions() {
   const container = document.getElementById("aiSuggestions");
   container.innerHTML = "";
@@ -173,7 +173,7 @@ async function handleDecision(id, result) {
 }
 generateAISuggestions();
 
-// JANコード即適応
+// JANコード即応
 async function handleJANScan(janCode) {
   const snapshot = await getDocs(query(collection(db, "items"), where("jan", "==", janCode)));
   if (snapshot.empty) {
@@ -195,7 +195,7 @@ function generateAISuggestionsForJAN(item) {
   `;
 }
 
-// QRコード即適応
+// QRコード即応
 async function handleQRScan(qrData) {
   if (qrData.startsWith("item:")) {
     const itemId = qrData.replace("item:", "");
@@ -211,53 +211,14 @@ async function handleQRScan(qrData) {
   }
 }
 
-// カレンダー切替（責任者設定）
+// カレンダー設定
 document.getElementById("calendarView").addEventListener("change", (e) => {
   const view = e.target.value;
   document.getElementById("calendarContent").innerHTML =
     `📅 ${view}ビューで予定を表示中（仮）`;
 });
 
-// 📜 履歴記録（思想的痕跡）
-async function recordAction(action, reason = "") {
-  await addDoc(collection(db, "actionLogs"), {
-    action,
-    performedBy: userId,
-    reason,
-    timestamp: new Date()
-  });
-}
-
-// 🛍️ フリマ連携（仮表示）
-document.getElementById("listedItems").textContent = "5";
-document.getElementById("soldItems").textContent = "2";
-
-// 📅 カレンダー初期表示（責任者設定）
-async function loadUserSettings() {
-  const ref = collection(db, "userSettings");
-  const snapshot = await getDocs(query(ref, where("userId", "==", userId)));
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    document.getElementById("calendarView").value = data.calendarView || "week";
-    document.getElementById("calendarContent").textContent =
-      `📅 ${data.calendarView}ビューで予定を表示中（設定より）`;
-  });
-}
-loadUserSettings();
-
-// 📷 カメラ準備（JAN／QR読み取り用）
-async function prepareCamera() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-    console.log("カメラ準備完了（JAN／QR読み取り可能）");
-    // 将来的にバーコード／QRライブラリと連携
-  } catch (err) {
-    console.error("カメラ起動失敗:", err);
-  }
-}
-// prepareCamera(); // 必要時に呼び出し
-
-// ☁️ 思想メッセージ（空間の空気演出）
+// 思想メッセージ
 function displayPhilosophyMessage() {
   const messages = [
     "あなたの痕跡が空間の質を高めています。",
@@ -270,3 +231,81 @@ function displayPhilosophyMessage() {
   document.getElementById("philosophyMessage").textContent = msg;
 }
 displayPhilosophyMessage();
+
+// 🧑‍💼 責任者の痕跡表示
+async function loadUserTrace() {
+  const itemsRef = collection(db, "items");
+  const aiRef = collection(db, "aiSuggestions");
+  const logsRef = collection(db, "actionLogs");
+
+  const itemSnap = await getDocs(query(itemsRef, where("registeredBy", "==", userId)));
+  const aiSnap = await getDocs(query(aiRef, where("decidedBy", "==", userId)));
+  const logSnap = await getDocs(query(logsRef, where("performedBy", "==", userId)));
+
+  document.getElementById("registeredCount").textContent = itemSnap.size;
+  document.getElementById("aiDecisions").textContent = aiSnap.size;
+
+  let lastAction = "記録なし";
+  let latest = null;
+  logSnap.forEach(doc => {
+    const data = doc.data();
+    if (!latest || data.timestamp.toDate() > latest.timestamp.toDate()) {
+      latest = data;
+    }
+  });
+  if (latest) {
+    lastAction = `${latest.action}（${latest.timestamp.toDate().toLocaleString("ja-JP")}）`;
+  }
+  document.getElementById("lastAction").textContent = lastAction;
+}
+loadUserTrace();
+
+// 📊 空間の状態表示
+async function loadSpaceStatus() {
+  const itemsRef = collection(db, "items");
+  const snapshot = await getDocs(itemsRef);
+
+  let total = 0, expired = 0, pending = 0, warning = 0;
+  const now = new Date();
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    total++;
+    const deadline = new Date(data.deadline);
+    if (deadline < now) expired++;
+    if (data.status === "未承認") pending++;
+    if (data.status === "警告") warning++;
+  });
+
+  document.getElementById("totalItems").textContent = total;
+  document.getElementById("expiredItems").textContent = expired;
+  document.getElementById("pendingApprovals").textContent = pending;
+  document.getElementById("warningItems").textContent = warning;
+}
+loadSpaceStatus();
+
+// 📜 判断履歴表示
+async function loadDecisionHistory() {
+  const aiRef = collection(db, "aiSuggestions");
+  const snapshot = await getDocs(query(aiRef, where("decidedBy", "==", userId)));
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const time = data.decidedAt.toDate().toLocaleString("ja-JP");
+    const li = document.createElement("li");
+    li.textContent = `提案 ${data.suggestionId} を「${data.status}」として判断（${time}）`;
+    list.appendChild(li);
+  });
+}
+loadDecisionHistory();
+
+// 🛍️ フリマ連携情報表示（仮）
+function loadMarketInfo() {
+  document.getElementById("listedItems").textContent = "5";
+  document.getElementById("soldItems").textContent = "2";
+  document.getElementById("avgPrice").textContent = "1280";
+}
+loadMarketInfo();
+   
