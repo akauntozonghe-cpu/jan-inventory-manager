@@ -24,7 +24,6 @@ const db = getFirestore(app);
 // 管理者ID一覧
 const adminIds = ["2488", "1011"];
 
-// 初期化
 window.addEventListener("DOMContentLoaded", () => {
   const userCodeInput = document.getElementById("userIdInput");
   const loginBtn = document.getElementById("loginBtn");
@@ -36,7 +35,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Enterキー対応（儀式化）
+  // Enterキー対応
   document.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !loginBtn.disabled) {
       loginBtn.click();
@@ -51,33 +50,38 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const q = query(collection(db, "users"), where("id", "==", inputId));
-    const snapshot = await getDocs(q);
+    try {
+      const q = query(collection(db, "users"), where("id", "==", inputId));
+      const snapshot = await getDocs(q);
 
-    if (snapshot.empty) {
-      welcomeMessage.textContent = "⚠️ 責任者番号が認識されません。空間はまだあなたを迎える準備ができていません。";
+      if (snapshot.empty) {
+        welcomeMessage.textContent = "⚠️ 責任者番号が認識されません。";
+        resetUI();
+        return;
+      }
+
+      const data = snapshot.docs[0].data();
+      const { id, name, role, uid } = data;
+
+      loginBtn.disabled = false;
+      loginBtn.classList.add("active");
+      loginBtn.dataset.userId = id;
+      loginBtn.dataset.userName = name;
+      loginBtn.dataset.userRole = role;
+      loginBtn.dataset.userUid = uid;
+
+      localStorage.setItem("uid", uid);
+
+      welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
+
+      if (adminIds.includes(id)) {
+        editVersionBtn.classList.remove("hidden");
+      } else {
+        editVersionBtn.classList.add("hidden");
+      }
+    } catch (error) {
+      console.error("❌ Firestore照合エラー:", error);
       resetUI();
-      return;
-    }
-
-    const data = snapshot.docs[0].data();
-    const { id, name, role, uid } = data;
-
-    loginBtn.disabled = false;
-    loginBtn.classList.add("active");
-    loginBtn.dataset.userId = id;
-    loginBtn.dataset.userName = name;
-    loginBtn.dataset.userRole = role;
-    loginBtn.dataset.userUid = uid;
-
-    localStorage.setItem("uid", uid);
-
-    welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
-
-    if (adminIds.includes(id)) {
-      editVersionBtn.classList.remove("hidden");
-    } else {
-      editVersionBtn.classList.add("hidden");
     }
   });
 
@@ -89,26 +93,27 @@ window.addEventListener("DOMContentLoaded", () => {
     const uid = loginBtn.dataset.userUid;
 
     if (!id || !name || !role || !uid) {
-      console.error("ログイン情報が不完全です。");
+      console.error("❌ ログイン情報が不完全です。");
       return;
     }
 
-    const now = new Date();
-    const timestamp = now.toISOString();
-    const version = "v1.0.0";
-    const device = `${navigator.platform} / ${navigator.userAgent}`;
-
-    const logRef = collection(db, "loginLogs");
-    const logData = { uid, id, name, role, timestamp, version, device };
+    const logData = {
+      uid,
+      id,
+      name,
+      role,
+      timestamp: new Date().toISOString(),
+      version: "v1.0.0",
+      device: `${navigator.platform} / ${navigator.userAgent}`
+    };
 
     try {
-      await addDoc(logRef, logData);
+      await addDoc(collection(db, "loginLogs"), logData);
       console.log("✅ ログイン履歴を記録しました");
+      window.location.href = "home.html";
     } catch (error) {
-      console.error("❌ ログイン履歴の記録に失敗:", error);
+      console.error("❌ Firestoreへの記録失敗:", error);
     }
-
-    window.location.href = "home.html";
   });
 
   // 編集ボタン（管理者のみ）
