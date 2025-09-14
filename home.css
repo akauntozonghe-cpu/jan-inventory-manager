@@ -1,147 +1,181 @@
-/* ✅ 固定ヘッダー */
-.fixed-header {
+/* 全体の空気感 */
+body {
+  margin: 0;
+  font-family: "Noto Sans JP", "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, #fdfdfd, #eaeaea);
+  color: #333;
+}
+
+/* ヘッダー */
+.main-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  background-color: #2c3e50;
+  align-items: center;
+  background-color: #0078d4;
   color: white;
-  padding: 10px 20px;
-  position: fixed;
+  padding: 1rem 1.5rem;
+  position: sticky;
   top: 0;
-  left: 0;
-  width: 100%;
-  box-sizing: border-box;
   z-index: 1000;
 }
 
-/* ✅ ヘッダー左側 */
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.main-header h1 {
+  font-size: 1.4rem;
+  margin: 0;
 }
 
-.header-title {
-  font-size: 1.5em;
+#clock {
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+}
+
+#userInfoHeader {
+  font-size: 0.85rem;
+  margin-top: 0.2rem;
+}
+
+#hamburgerBtn {
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: white;
   cursor: pointer;
 }
 
-/* ✅ ヘッダー右側（日時＋氏名＋権限） */
-.header-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  text-align: right;
+/* ハンバーガーメニュー */
+#hamburgerMenu {
+  background-color: #f4f4f4;
+  padding: 1rem;
+  border-top: 1px solid #ccc;
 }
 
-.timestamp {
-  font-family: monospace;
-  font-size: 0.9em;
-  margin-bottom: 4px;
-}
-
-.user-info-row {
-  display: flex;
-  gap: 8px;
-  font-size: 0.95em;
-}
-
-.user-name {
-  font-weight: bold;
-}
-
-.user-role {
-  color: #ccc;
-}
-
-/* ✅ メニュー */
-.menu-box {
-  position: absolute;
-  top: 60px;
-  left: 10px;
-  background-color: #34495e;
-  color: white;
-  padding: 10px;
-  border-radius: 4px;
-  display: none;
-  z-index: 999;
-}
-
-.menu-box ul {
+#hamburgerMenu ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.menu-box li {
-  margin-bottom: 8px;
+#hamburgerMenu li {
+  margin-bottom: 0.8rem;
 }
 
-.menu-box button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1em;
-  cursor: pointer;
+#hamburgerMenu a {
+  text-decoration: none;
+  color: #0078d4;
+  font-weight: bold;
 }
 
-/* ✅ ホーム画面本体の余白（ヘッダー対策） */
-main {
-  padding-top: 80px;
+.hidden {
+  display: none;
 }
 
-@media screen and (max-width: 600px) {
-  main {
-    padding-top: 100px;
+/* ダッシュボード本体 */
+.dashboard {
+  padding: 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+/* 各セクション共通 */
+section {
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.05);
+  padding: 1.2rem;
+  transition: box-shadow 0.3s ease;
+}
+
+section:hover {
+  box-shadow: 0 0 18px rgba(0,0,0,0.1);
+}
+
+section h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #0078d4;
+}
+
+/* ユーザー情報 */
+.user-section .badge {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #d4af37;
+  margin-bottom: 0.5rem;
+}
+
+.user-info p {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+}
+
+/* 緊急情報・在庫・フリマ */
+.urgent-section ul,
+.inventory-section ul,
+.market-section ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.urgent-section li,
+.inventory-section li,
+.market-section li {
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+}
+
+/* カレンダー */
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#calendarView {
+  padding: 0.3rem;
+  font-size: 0.9rem;
+}
+
+/* AI提案 */
+.ai-section #aiSuggestions {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  background-color: #f9f9f9;
+  padding: 0.8rem;
+  border-radius: 6px;
+  border-left: 4px solid #0078d4;
+}
+
+/* 思想メッセージ */
+.philosophy-footer {
+  grid-column: 1 / -1;
+  text-align: center;
+  margin-top: 2rem;
+  font-style: italic;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+/* 管理者専用項目 */
+.admin-only {
+  color: #d4af37;
+}
+
+/* レスポンシブ対応 */
+@media (max-width: 768px) {
+  .dashboard {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+
+  .main-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  #hamburgerBtn {
+    align-self: flex-end;
+    margin-top: 0.5rem;
   }
 }
-
-/* ✅ カレンダー月間ビュー */
-.calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.calendar-day {
-  border: 1px solid #ccc;
-  padding: 6px;
-  min-height: 80px;
-  font-size: 0.85em;
-  background-color: #f9f9f9;
-}
-
-/* ✅ AI提案タグ（種類別色分け） */
-.calendar-tag {
-  display: block;
-  margin-top: 4px;
-  padding: 4px 6px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  color: white;
-}
-
-.calendar-tag.expiry {
-  background-color: #e74c3c; /* 赤：期限注意 */
-}
-
-.calendar-tag.reorder {
-  background-color: #3498db; /* 青：発注推奨 */
-}
-
-.calendar-tag.improvement {
-  background-color: #27ae60; /* 緑：改善提案 */
-}
-.calendar-tag {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-size: 0.8em;
-  color: white;
-  margin-bottom: 4px;
-}
-
-.calendar-tag.expiry { background-color: #e74c3c; }
-.calendar-tag.reorder { background-color: #3498db; }
-.calendar-tag.improvement { background-color: #27ae60; }

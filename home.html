@@ -3,12 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ホーム｜在庫管理システム</title>
+  <title>在庫管理システム｜ホーム</title>
   <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-  <div class="home-container">
-    <!-- ユーザー情報 -->
+  <!-- ヘッダー：タイトル・日時・責任者・ハンバーガー -->
+  <header class="main-header">
+    <div class="header-left">
+      <h1>在庫管理システム</h1>
+      <p id="clock">⏱️ 読み込み中...</p>
+      <p id="userInfoHeader">🛡️ 責任者：村本 太郎（RM-001）｜権限：管理者</p>
+    </div>
+    <div class="header-right">
+      <button id="hamburgerBtn">☰</button>
+    </div>
+  </header>
+
+  <!-- ハンバーガーメニュー（折りたたみ） -->
+  <nav id="hamburgerMenu" class="hidden">
+    <ul>
+      <li><a href="register.html">商品登録</a></li>
+      <li><a href="list.html">商品一覧</a></li>
+      <li><a href="market.html">フリマ</a></li>
+      <li><a href="report.html">報告</a></li>
+      <li><a href="settings.html">設定</a></li>
+      <li class="admin-only"><a href="admin.html">管理者</a></li>
+      <li><a href="logout.html">ログアウト</a></li>
+    </ul>
+  </nav>
+
+  <!-- 常時表示：即応性のための思想的情報群 -->
+  <main class="dashboard">
+    <!-- 自分の情報 -->
     <section class="user-section">
       <div class="badge">🛡️ 空間管理者</div>
       <div class="user-info">
@@ -19,10 +45,18 @@
       </div>
     </section>
 
-    <!-- カレンダーと期限 -->
+    <!-- 緊急情報 -->
+    <section class="urgent-section">
+      <h2>⏰ 緊急情報</h2>
+      <ul id="urgentList">
+        <!-- 期限切れ・承認待ちなどをAIが抽出 -->
+      </ul>
+    </section>
+
+    <!-- 今日の予定（カレンダー） -->
     <section class="calendar-section">
       <div class="calendar-header">
-        <h2>情報カレンダー</h2>
+        <h2>📅 今日の予定</h2>
         <select id="calendarView">
           <option value="day">日</option>
           <option value="week">週</option>
@@ -31,62 +65,42 @@
         </select>
       </div>
       <div id="calendarContent">
-        <!-- AIが優先度順に1ヶ月以内の情報を表示 -->
+        <!-- AIが優先度順に表示 -->
       </div>
     </section>
 
     <!-- 在庫状況 -->
     <section class="inventory-section">
-      <h2>在庫状況</h2>
+      <h2>📦 在庫状況</h2>
       <ul>
-        <li>📦 全在庫：<span id="totalItems">123</span> 件</li>
-        <li>⚠️ 警告：<span id="warningItems">3</span> 件</li>
-        <li>⏰ 期限切れ：<span id="expiredItems">2</span> 件</li>
+        <li>全在庫：<span id="totalItems">123</span> 件</li>
+        <li>警告：<span id="warningItems">3</span> 件</li>
+        <li>期限切れ：<span id="expiredItems">2</span> 件</li>
       </ul>
     </section>
 
     <!-- フリマ連携 -->
     <section class="market-section">
-      <h2>フリマ連携</h2>
+      <h2>🛍️ フリマ連携</h2>
       <ul>
-        <li>🛍️ 出品中：<span id="listedItems">5</span> 件</li>
-        <li>✅ 売却済：<span id="soldItems">2</span> 件</li>
+        <li>出品中：<span id="listedItems">5</span> 件</li>
+        <li>売却済：<span id="soldItems">2</span> 件</li>
       </ul>
     </section>
 
-    <!-- AI支援 -->
+    <!-- AI提案 -->
     <section class="ai-section">
-      <h2>AIサポート</h2>
+      <h2>🤖 AIサポート</h2>
       <div id="aiSuggestions">
-        <!-- AIが「次にやるべきこと」「期限切れ処理」などを提案 -->
+        <!-- 優先処理・次の行動・分析などを表示 -->
       </div>
-    </section>
-
-    <!-- 操作ショートカット -->
-    <section class="actions-section">
-      <h2>操作</h2>
-      <div class="action-buttons">
-        <button onclick="goTo('register')">商品登録</button>
-        <button onclick="goTo('list')">商品一覧</button>
-        <button onclick="goTo('market')">フリマ</button>
-        <button onclick="goTo('report')">報告</button>
-        <button onclick="goTo('settings')">設定</button>
-        <button onclick="goTo('logout')">ログアウト</button>
-      </div>
-    </section>
-
-    <!-- 管理者専用領域 -->
-    <section class="admin-section hidden" id="adminTools">
-      <h2>管理者ツール</h2>
-      <button onclick="goTo('version')">バージョン編集</button>
-      <button onclick="goTo('admin')">権限管理</button>
     </section>
 
     <!-- 思想メッセージ -->
     <footer class="philosophy-footer">
       <p id="philosophyMessage">あなたの判断が、この空間の未来を形作ります。</p>
     </footer>
-  </div>
+  </main>
 
   <script type="module" src="home.js"></script>
 </body>

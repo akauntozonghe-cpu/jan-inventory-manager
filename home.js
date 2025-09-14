@@ -1,274 +1,144 @@
-// ✅ Firebase初期化
-firebase.initializeApp({
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  query,
+  where
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+// Firebase初期化
+const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
-  projectId: "inventory-app-312ca"
-});
-const db = firebase.firestore();
-
-// ✅ 起動時処理
-window.onload = () => {
-  updateTime();
-  setInterval(updateTime, 1000);
-  loadUserInfo();
-  controlUIByRole();
-  setupMenuCloseOnOutsideClick();
-  loadHomeSummaries();      // ← 追加：ホーム情報表示
-  loadAISuggestions();      // AI提案表示
-  loadCalendar();           // カレンダー表示
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.appspot.com",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
 };
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// ✅ 秒付き現在時刻
-function updateTime() {
+// ⏱️ リアルタイム日時
+function updateClock() {
   const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}) `
-    + `${now.getHours().toString().padStart(2, "0")}:`
-    + `${now.getMinutes().toString().padStart(2, "0")}:`
-    + `${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = formatted;
+  const formatted = now.toLocaleString("ja-JP", {
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit", second: "2-digit",
+    weekday: "short", timeZoneName: "short"
+  });
+  document.getElementById("clock").textContent = `⏱️ ${formatted}`;
 }
+setInterval(updateClock, 1000);
+updateClock();
 
-// ✅ 氏名＋権限（横並び）
-function loadUserInfo() {
-  const userName = sessionStorage.getItem("userName") || "村本悠気";
-  const userRole = sessionStorage.getItem("userRole") || "管理者";
-  document.getElementById("userName").textContent = userName;
-  document.getElementById("userRole").textContent = `（${userRole}）`;
-}
+// ☰ ハンバーガー開閉
+document.getElementById("hamburgerBtn").addEventListener("click", () => {
+  document.getElementById("hamburgerMenu").classList.toggle("hidden");
+});
 
-// ✅ ログアウト処理
-function logout() {
-  sessionStorage.clear();
-  window.location.href = "login.html";
-}
+// 🧑‍💼 ユーザー情報（仮：IDは固定）
+const userId = "RM-001"; // 実運用ではログイン時に渡す
+async function loadUserInfo() {
+  const usersRef = collection(db, "users");
+  const snapshot = await getDocs(query(usersRef, where("id", "==", userId)));
 
-// ✅ ホームに戻る
-function goToHome() {
-  window.location.href = "home.html";
-}
-
-// ✅ メニュー展開
-function toggleMenu() {
-  const menu = document.getElementById("hamburgerMenu");
-  if (!menu) return;
-  menu.style.display = "block";
-}
-
-// ✅ メニュー外クリックで閉じる
-function setupMenuCloseOnOutsideClick() {
-  document.addEventListener("click", (event) => {
-    const menu = document.getElementById("hamburgerMenu");
-    const toggle = document.getElementById("menuToggle");
-    if (!menu || !toggle) return;
-    const isClickInside = menu.contains(event.target) || toggle.contains(event.target);
-    if (!isClickInside) {
-      menu.style.display = "none";
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    document.getElementById("userName").textContent = data.name;
+    document.getElementById("userRole").textContent = data.role;
+    document.getElementById("userId").textContent = data.id;
+    document.getElementById("userInfoHeader").textContent =
+      `🛡️ 責任者：${data.name}（${data.id}）｜権限：${data.role}`;
+    if (data.role === "管理者") {
+      document.querySelector(".admin-only").classList.remove("hidden");
     }
   });
 }
+loadUserInfo();
 
-// ✅ 権限によるUI制御
-function controlUIByRole() {
-  const role = sessionStorage.getItem("userRole");
-  if (!role) return;
-  const show = (id) => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = "inline-block";
-  };
-  if (["責任者", "管理者"].includes(role)) {
-    show("calendarSection");
-    show("fleamarketButton");
-  }
-  if (role === "管理者") {
-    show("adminButton");
-  }
+// ⏰ 緊急情報抽出
+async function loadUrgentInfo() {
+  const itemsRef = collection(db, "items");
+  const snapshot = await getDocs(itemsRef);
+  const urgentList = document.getElementById("urgentList");
+  urgentList.innerHTML = "";
+
+  const now = new Date();
+  const oneMonthLater = new Date();
+  oneMonthLater.setMonth(now.getMonth() + 1);
+
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    const deadline = new Date(data.deadline);
+    if (deadline < now) {
+      urgentList.innerHTML += `<li>期限切れ：${data.name}（${data.deadline}）</li>`;
+    } else if (deadline < oneMonthLater && data.status === "未承認") {
+      urgentList.innerHTML += `<li>承認待ち：${data.name}（${data.deadline}）</li>`;
+    }
+  });
 }
+loadUrgentInfo();
 
-// ✅ 画面遷移関数群
-function goToRegister() { window.location.href = "register.html"; }
-function goToList() { window.location.href = "list.html"; }
-function goToFleamarket() { window.location.href = "fleamarket.html"; }
-function goToReport() { window.location.href = "report.html"; }
-function goToAdmin() { window.location.href = "admin.html"; }
-function goToSettings() { window.location.href = "settings.html"; }
+// 📦 在庫状況
+async function loadInventorySummary() {
+  const itemsRef = collection(db, "items");
+  const snapshot = await getDocs(itemsRef);
 
-// ✅ ホーム画面：期限・在庫・フリマ・AI提案（暫定）
-function loadHomeSummaries() {
-  const deadlineList = document.getElementById("deadlineSummary");
-  const inventoryList = document.getElementById("inventorySummary");
-  const fleamarketList = document.getElementById("fleamarketSummary");
-  const aiList = document.getElementById("aiSuggestionPreview");
+  let total = 0, warning = 0, expired = 0;
+  const now = new Date();
 
-  deadlineList.innerHTML = "";
-  inventoryList.innerHTML = "";
-  fleamarketList.innerHTML = "";
-  aiList.innerHTML = "";
-
-  const today = new Date();
-  const soon = new Date();
-  soon.setDate(today.getDate() + 7);
-
-  db.collection("products").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const p = doc.data();
-      const expiry = p.expiryDate ? new Date(p.expiryDate) : null;
-
-      if (expiry && expiry <= soon) {
-        deadlineList.innerHTML += `<li>${p.name}（${p.expiryDate}） → 値下げ検討</li>`;
-      }
-
-      if (p.stock !== undefined && p.stock <= 3) {
-        inventoryList.innerHTML += `<li>${p.name} → 残り${p.stock}個 → 発注推奨</li>`;
-      }
-
-      if (p.marketStatus === "listed") {
-        fleamarketList.innerHTML += `<li>${p.name} → 出品中（${p.price || "価格未設定"}円）</li>`;
-      }
-    });
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    total++;
+    if (data.status === "警告") warning++;
+    if (new Date(data.deadline) < now) expired++;
   });
 
-  db.collection("aiSuggestions")
-    .where("status", "==", "未処理")
-    .limit(3)
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const s = doc.data();
-        aiList.innerHTML += `<li>${s.product} → ${s.recommendedAction}（${s.type}）</li>`;
-      });
-    });
+  document.getElementById("totalItems").textContent = total;
+  document.getElementById("warningItems").textContent = warning;
+  document.getElementById("expiredItems").textContent = expired;
 }
+loadInventorySummary();
 
-// ✅ AI提案表示（管理者のみ承認可能）
-function loadAISuggestions() {
-  const role = sessionStorage.getItem("userRole");
-  const container = document.getElementById("suggestionList");
-  if (!container) {
-    console.warn("suggestionList が見つかりません。HTMLに <ul id='suggestionList'> を追加してください。");
-    return;
-  }
+// 🛍️ フリマ連携（仮）
+document.getElementById("listedItems").textContent = "5";
+document.getElementById("soldItems").textContent = "2";
 
+// 🤖 AI提案
+function generateAISuggestions() {
+  const messages = [
+    "期限切れの在庫が2件あります。処理しますか？",
+    "次の予定は明日10:00の承認です。",
+    "このJANコードの商品は平均¥1,200で取引されています。",
+    "今月の操作件数：12件｜ログイン回数：5回",
+    "商品一覧へ移動しますか？",
+    "あなたの痕跡が空間の質を高めています。"
+  ];
+  const container = document.getElementById("aiSuggestions");
   container.innerHTML = "";
-
-  db.collection("aiSuggestions").get().then(snapshot => {
-    snapshot.forEach(doc => {
-      const s = doc.data();
-      const li = document.createElement("li");
-
-      // ✅ 提案の種類と日付を明示
-      const typeIcon = getTagIcon(s.type);
-      const typeClass = getTagClass(s.type);
-      const dateStr = s.scheduledDate || "未設定";
-
-      li.innerHTML = `
-        <span class="calendar-tag ${typeClass}">${typeIcon} ${s.type}</span><br>
-        <strong>${s.product}</strong>（${dateStr}）<br>
-        ${s.message}<br>
-        提案：${s.recommendedAction}<br>
-      `;
-
-      // ✅ 管理者のみ操作可能
-      if (role === "管理者" && s.status === "未処理") {
-        li.innerHTML += `
-          <button onclick="approveSuggestion('${doc.id}')">承認</button>
-          <button onclick="rejectSuggestion('${doc.id}')">却下</button>
-        `;
-      }
-
-      // ✅ 承認済み・却下済みの表示
-      if (s.status !== "未処理") {
-        li.innerHTML += `
-          状態：${s.status}（${s.approvedBy || "不明"}）<br>
-          時刻：${s.approvedAt ? new Date(s.approvedAt).toLocaleString() : "未記録"}
-        `;
-      }
-
-      container.appendChild(li);
-    });
+  messages.forEach(msg => {
+    container.innerHTML += `<p>🤖 ${msg}</p>`;
   });
 }
+generateAISuggestions();
 
-// ✅ 承認・却下処理（管理者のみ）
-function approveSuggestion(id) {
-  const role = sessionStorage.getItem("userRole");
-  if (role !== "管理者") return alert("管理者のみ承認可能です");
-  const userName = sessionStorage.getItem("userName");
-  const now = new Date().toISOString();
-  db.collection("aiSuggestions").doc(id).update({
-    status: "承認",
-    approvedBy: userName,
-    approvedAt: now
-  }).then(() => {
-    loadAISuggestions();
-    loadCalendar();
-  });
-}
+// 📅 カレンダー切替
+document.getElementById("calendarView").addEventListener("change", (e) => {
+  const view = e.target.value;
+  document.getElementById("calendarContent").innerHTML =
+    `📅 ${view}ビューで予定を表示中（仮）`;
+});
 
-function rejectSuggestion(id) {
-  const role = sessionStorage.getItem("userRole");
-  if (role !== "管理者") return alert("管理者のみ却下可能です");
-  const userName = sessionStorage.getItem("userName");
-  const now = new Date().toISOString();
-  db.collection("aiSuggestions").doc(id).update({
-    status: "却下",
-    approvedBy: userName,
-    approvedAt: now
-  }).then(() => {
-    loadAISuggestions();
-    loadCalendar();
-  });
-}
-
-// ✅ カレンダー表示（月間ビュー＋AI提案反映）
-function loadCalendar() {
-  const calendarGrid = document.getElementById("calendarView");
-  if (!calendarGrid) {
-    console.warn("calendarView が見つかりません。HTMLに <div id='calendarView'> を追加してください。");
-    return;
+// 📷 JANコード読み取り準備（拡張性確保）
+async function prepareCamera() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    console.log("カメラ準備完了（JANコード読み取り可能）");
+    // 将来的にバーコードライブラリと連携
+  } catch (err) {
+    console.error("カメラ起動失敗:", err);
   }
-
-  calendarGrid.innerHTML = "";
-
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth();
-
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
-  const startDay = firstDay.getDay();
-    const totalDays = lastDay.getDate();
-
-  // 空白セル（前月分）
-  for (let i = 0; i < startDay; i++) {
-    const empty = document.createElement("div");
-    empty.className = "calendar-day";
-    calendarGrid.appendChild(empty);
-  }
-
-  // 日付セル生成
-  for (let d = 1; d <= totalDays; d++) {
-    const cell = document.createElement("div");
-    cell.className = "calendar-day";
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-    cell.innerHTML = `<strong>${d}</strong><div id="day-${dateStr}"></div>`;
-    calendarGrid.appendChild(cell);
-  }
-
-  // 承認済みAI提案を日付に反映
-  db.collection("aiSuggestions")
-    .where("status", "==", "承認")
-    .get()
-    .then(snapshot => {
-      snapshot.forEach(doc => {
-        const s = doc.data();
-        const tagContainer = document.getElementById(`day-${s.scheduledDate}`);
-        if (tagContainer) {
-          const tag = document.createElement("span");
-          tag.className = `calendar-tag ${getTagClass(s.type)}`;
-          tag.textContent = `${getTagIcon(s.type)} ${s.product}：${s.calendarTag}`;
-          tagContainer.appendChild(tag);
-        }
-      });
-    });
 }
+// prepareCamera(); // 必要時に呼び出し
