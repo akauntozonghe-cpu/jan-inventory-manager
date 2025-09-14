@@ -3,103 +3,74 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム｜ホーム</title>
+  <title>在庫管理｜思想的司令室</title>
   <link rel="stylesheet" href="home.css" />
 </head>
 <body>
-  <!-- ヘッダー：タイトル・日時・責任者・ハンバーガー -->
-  <header class="main-header">
-    <div class="header-left">
-      <h1>在庫管理システム</h1>
-      <p id="clock">⏱️ 読み込み中...</p>
-      <p id="userInfoHeader">🛡️ 責任者：村本 太郎（RM-001）｜権限：管理者</p>
-    </div>
-    <div class="header-right">
-      <button id="hamburgerBtn">☰</button>
-    </div>
+  <header>
+    <h1>在庫管理システム</h1>
+    <div id="clock">⏱️ 読み込み中...</div>
+    <div id="userInfoHeader">🛡️ ユーザー情報</div>
+    <div id="adminBanner" class="hidden"></div>
   </header>
 
-  <!-- ハンバーガーメニュー（折りたたみ） -->
-  <nav id="hamburgerMenu" class="hidden">
-    <ul>
-      <li><a href="register.html">商品登録</a></li>
-      <li><a href="list.html">商品一覧</a></li>
-      <li><a href="market.html">フリマ</a></li>
-      <li><a href="report.html">報告</a></li>
-      <li><a href="settings.html">設定</a></li>
-      <li class="admin-only"><a href="admin.html">管理者</a></li>
-      <li><a href="logout.html">ログアウト</a></li>
+  <nav>
+    <button id="hamburgerBtn">☰ メニュー</button>
+    <ul id="hamburgerMenu" class="hidden">
+      <li><a href="#">商品登録</a></li>
+      <li><a href="#">商品一覧</a></li>
+      <li><a href="#">報告</a></li>
+      <li><a href="#">設定</a></li>
+      <li><a href="#">ログアウト</a></li>
+      <li class="admin-only hidden"><a href="#">管理者領域</a></li>
     </ul>
   </nav>
 
-  <!-- 常時表示：即応性のための思想的情報群 -->
-  <main class="dashboard">
-    <!-- 自分の情報 -->
-    <section class="user-section">
-      <div class="badge">🛡️ 空間管理者</div>
-      <div class="user-info">
-        <p><strong>氏名：</strong><span id="userName">村本 太郎</span></p>
-        <p><strong>役割：</strong><span id="userRole">責任者</span></p>
-        <p><strong>ID：</strong><span id="userId">RM-001</span></p>
-        <p><strong>最終ログイン：</strong><span id="lastLogin">2025/09/14 20:30</span></p>
-      </div>
+  <main>
+    <section id="userInfo">
+      <p>氏名：<span id="userName">---</span></p>
+      <p>権限：<span id="userRole">---</span></p>
+      <p>ID：<span id="userId">---</span></p>
     </section>
 
-    <!-- 緊急情報 -->
-    <section class="urgent-section">
-      <h2>⏰ 緊急情報</h2>
-      <ul id="urgentList">
-        <!-- 期限切れ・承認待ちなどをAIが抽出 -->
-      </ul>
-    </section>
-
-    <!-- 今日の予定（カレンダー） -->
-    <section class="calendar-section">
-      <div class="calendar-header">
-        <h2>📅 今日の予定</h2>
-        <select id="calendarView">
-          <option value="day">日</option>
-          <option value="week">週</option>
-          <option value="month">月</option>
-          <option value="year">年</option>
-        </select>
-      </div>
-      <div id="calendarContent">
-        <!-- AIが優先度順に表示 -->
-      </div>
-    </section>
-
-    <!-- 在庫状況 -->
-    <section class="inventory-section">
+    <section id="inventorySummary">
       <h2>📦 在庫状況</h2>
-      <ul>
-        <li>全在庫：<span id="totalItems">123</span> 件</li>
-        <li>警告：<span id="warningItems">3</span> 件</li>
-        <li>期限切れ：<span id="expiredItems">2</span> 件</li>
-      </ul>
+      <p>全在庫：<span id="totalItems">--</span> 件</p>
+      <p>警告：<span id="warningItems">--</span> 件</p>
+      <p>期限切れ：<span id="expiredItems">--</span> 件</p>
     </section>
 
-    <!-- フリマ連携 -->
-    <section class="market-section">
+    <section id="urgentSection">
+      <h2>⏰ 緊急情報</h2>
+      <ul id="urgentList"></ul>
+    </section>
+
+    <section id="aiSection">
+      <h2>🤖 AI提案</h2>
+      <div id="aiSuggestions"></div>
+    </section>
+
+    <section id="calendarSection">
+      <h2>📅 カレンダー</h2>
+      <label for="calendarView">表示形式：</label>
+      <select id="calendarView">
+        <option value="day">日</option>
+        <option value="week">週</option>
+        <option value="month">月</option>
+      </select>
+      <div id="calendarContent">読み込み中...</div>
+    </section>
+
+    <section id="marketSection">
       <h2>🛍️ フリマ連携</h2>
-      <ul>
-        <li>出品中：<span id="listedItems">5</span> 件</li>
-        <li>売却済：<span id="soldItems">2</span> 件</li>
-      </ul>
+      <p>出品中：<span id="listedItems">--</span> 件</p>
+      <p>売却済：<span id="soldItems">--</span> 件</p>
     </section>
 
-    <!-- AI提案 -->
-    <section class="ai-section">
-      <h2>🤖 AIサポート</h2>
-      <div id="aiSuggestions">
-        <!-- 優先処理・次の行動・分析などを表示 -->
-      </div>
+    <section id="philosophySection">
+      <h2>🌿 思想メッセージ</h2>
+      <p id="philosophyMessage">空間が語りかけています...</p>
     </section>
-
-    <!-- 思想メッセージ -->
-    <footer class="philosophy-footer">
-      <p id="philosophyMessage">あなたの判断が、この空間の未来を形作ります。</p>
-    </footer>
   </main>
 
   <script type="module" src="home.js"></script>
