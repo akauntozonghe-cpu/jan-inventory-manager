@@ -76,11 +76,7 @@ function goHome() {
   window.location.href = "home.html";
 }
 
-function navigate(target) {
-  window.location.href = `${target}.html`;
-}
-
-function navigate(target) {
+function goToPage(target) {
   window.location.href = `${target}.html`;
 }
 
