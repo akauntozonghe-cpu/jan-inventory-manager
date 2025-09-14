@@ -119,7 +119,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // 編集ボタン（管理者のみ）
   editVersionBtn.addEventListener("click", () => {
     alert("バージョン編集画面へ遷移します（管理者専用）");
-    // window.location.href = "version-edit.html";
+    // window.location.href = "home.html";
   });
 
   // UIリセット
