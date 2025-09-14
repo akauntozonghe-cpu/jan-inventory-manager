@@ -24,10 +24,8 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const uid = localStorage.getItem("uid");
-const uidMessage = document.getElementById("uidMessage");
 
 if (!uid) {
-  uidMessage.textContent = "ログイン情報が見つかりません。入口へ戻ります。";
   setTimeout(() => {
     window.location.href = "index.html";
   }, 2000);
@@ -39,7 +37,7 @@ if (!uid) {
   loadAISummary(uid);
   loadAIInventorySuggestions();
   loadMarketInfo();
-  checkAdmin(uid);
+  checkTemporaryAdmin(uid);
   startClock();
 }
 
@@ -52,11 +50,25 @@ function startClock() {
 }
 
 async function loadUserInfo(uid) {
-  const q = query(collection(db, "users"), where("uid", "==", uid));
-  const snapshot = await getDocs(q);
-  if (!snapshot.empty) {
-    const user = snapshot.docs[0].data();
-    uidMessage.textContent = `責任者：${user.name}（${user.role}）｜UID: ${uid}`;
+  const userQuery = query(collection(db, "users"), where("uid", "==", uid));
+  const userSnap = await getDocs(userQuery);
+  if (!userSnap.empty) {
+    const user = userSnap.docs[0].data();
+    document.getElementById("responsibleUser").textContent =
+      `責任者：${user.name}（${user.role}）`;
+  }
+
+  const loginQuery = query(
+    collection(db, "loginLogs"),
+    where("uid", "==", uid),
+    orderBy("timestamp", "desc"),
+    limit(1)
+  );
+  const loginSnap = await getDocs(loginQuery);
+  if (!loginSnap.empty) {
+    const last = loginSnap.docs[0].data().timestamp;
+    document.getElementById("lastLogin").textContent =
+      `最終ログイン：${last}`;
   }
 }
 
@@ -68,12 +80,18 @@ function navigate(target) {
   window.location.href = `${target}.html`;
 }
 
+function navigate(target) {
+  window.location.href = `${target}.html`;
+}
+
 function logout() {
   localStorage.removeItem("uid");
+  sessionStorage.removeItem("temporaryAdmin");
   window.location.href = "index.html";
 }
 
-// 以下は各セクションの表示関数（ダミー構成）
+// 各セクションの表示関数（ダミー構成）
+
 function loadInventoryStatus() {
   document.getElementById("inventoryStatus").innerHTML = `
     <h3>📦 在庫状況</h3>
@@ -135,16 +153,32 @@ function loadMarketInfo() {
     </ul>`;
 }
 
-async function checkAdmin(uid) {
-  const q = query(collection(db, "users"), where("uid", "==", uid));
+// 一時介入判定（30分以内の管理者操作があれば解放）
+
+async function checkTemporaryAdmin(uid) {
+  const q = query(
+    collection(db, "interventionLogs"),
+    where("targetUid", "==", uid),
+    orderBy("timestamp", "desc"),
+    limit(1)
+  );
   const snapshot = await getDocs(q);
   if (!snapshot.empty) {
-    const role = snapshot.docs[0].data().role;
-    if (role === "管理者") {
-      document.getElementById("adminPanel").style.display = "block";
-      document.getElementById("settingsPanel").style.display = "block";
-    } else {
-      document.getElementById("settingsPanel").style.display = "block";
+    const last = snapshot.docs[0].data();
+    const now = Date.now();
+    const diff = now - new Date(last.timestamp).getTime();
+    if (diff < 1000 * 60 * 30) {
+      sessionStorage.setItem("temporaryAdmin", "true");
+      document.getElementById("adminModeBanner").style.display = "block";
+      enableAdminFeaturesTemporarily();
     }
+  }
+}
+
+function enableAdminFeaturesTemporarily() {
+  const isTempAdmin = sessionStorage.getItem("temporaryAdmin") === "true";
+  if (isTempAdmin) {
+    document.getElementById("settingsPanel").style.display = "block";
+    document.getElementById("adminPanel").style.display = "block";
   }
 }
