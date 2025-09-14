@@ -110,7 +110,8 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       await addDoc(collection(db, "loginLogs"), logData);
       console.log("✅ ログイン履歴を記録しました");
-      window.location.href = "home.html";
+      console.log("➡️ home.html へ遷移します");
+      window.location.href = "./home.html"; // 相対パスで明示
     } catch (error) {
       console.error("❌ Firestoreへの記録失敗:", error);
     }
@@ -119,7 +120,7 @@ window.addEventListener("DOMContentLoaded", () => {
   // 編集ボタン（管理者のみ）
   editVersionBtn.addEventListener("click", () => {
     alert("バージョン編集画面へ遷移します（管理者専用）");
-    // window.location.href = "home.html";
+    // window.location.href = "version-edit.html";
   });
 
   // UIリセット
