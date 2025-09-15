@@ -12,30 +12,29 @@
 <body>
   <!-- 🧭 空間の顔 -->
   <header class="system-header">
-    <div class="header-top">
-      <div class="header-left">
-        <img src="icon-192.png" class="system-icon" />
-        <span class="system-title" onclick="goToPage('home')" style="cursor:pointer;">在庫管理</span>
-      </div>
-      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  <div class="header-top">
+    <div class="header-left">
+      <img src="icon-192.png" class="system-icon" />
+      <span class="system-title" onclick="goToPage('home')">在庫管理</span>
     </div>
-
-    <div class="user-meta">
-      <span id="responsibleUser">👑 初期管理者（管理者）</span>
-      <span id="lastJudgment">🕒 2025/09/16(火) 00:21:12</span>
-      <span id="clock">⏱ 2025/09/16(火) 00:21:13</span>
+    <div class="header-meta">
+      <span id="responsibleUser">👑 村本悠気（管理者）</span>
+      <span id="lastJudgment">🕒 最終判断：--</span>
+      <span id="clock">⏱ --:--:--</span>
     </div>
-  </header>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+  </div>
+</header>
 
   <!-- 🧭 空間の意志 -->
-  <nav id="mainMenu">
-    <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
-    <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
-    <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
-    <button onclick="expandMenu('report')">📊<span>報告</span></button>
-    <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
-    <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
-  </nav>
+  <nav id="mainMenu" style="display: none;">
+  <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
+  <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
+  <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
+  <button onclick="expandMenu('report')">📊<span>報告</span></button>
+  <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
+  <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
+</nav>
 
   <!-- 🧭 空間の応答 -->
   <div id="menuDetail"></div>

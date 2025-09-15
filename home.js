@@ -155,8 +155,7 @@ window.expandMenu = function (target) {
 window.toggleMenu = function () {
   const menu = document.getElementById("mainMenu");
   if (menu) {
-    const isVisible = menu.style.display === "grid";
-    menu.style.display = isVisible ? "none" : "grid";
+    menu.style.display = menu.style.display === "grid" ? "none" : "grid";
   }
 };
 
@@ -283,3 +282,14 @@ function enableAdminFeaturesTemporarily() {
 window.goToPage = function (target) {
   window.location.href = `${target}.html`;
 };
+
+document.addEventListener("click", function (e) {
+  const menu = document.getElementById("mainMenu");
+  const toggle = document.querySelector(".menu-toggle");
+
+  if (menu && menu.style.display === "grid") {
+    if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+      menu.style.display = "none";
+    }
+  }
+});
