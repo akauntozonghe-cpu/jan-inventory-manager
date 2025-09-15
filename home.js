@@ -103,14 +103,19 @@ function showLoginRitual(lastTimestamp) {
   const now = Date.now();
   const diffHours = Math.floor((now - lastTimestamp.getTime()) / (1000 * 60 * 60));
   const html = `
-    <div style="text-align:center; padding:1em; background:#fefefe; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-bottom:1em;">
-      <img src="icon-192.png" width="64" height="64" style="margin-bottom:0.5em;" />
-      <p style="font-weight:bold; font-size:1.1em;">ようこそ、秩序の守護者。</p>
-      <p style="color:#333;">前回の判断から ${diffHours} 時間が経過しました</p>
+    <div id="ritualOverlay" class="ritual-overlay">
+      <div class="ritual-box">
+        <img src="icon-192.png" width="64" height="64" />
+        <p class="ritual-title">ようこそ、秩序の守護者。</p>
+        <p class="ritual-message">前回の判断から ${diffHours} 時間が経過しました</p>
+      </div>
     </div>`;
-  const container = document.createElement("div");
-  container.innerHTML = html;
-  document.body.prepend(container);
+  document.body.insertAdjacentHTML("afterbegin", html);
+
+  setTimeout(() => {
+    const overlay = document.getElementById("ritualOverlay");
+    if (overlay) overlay.remove();
+  }, 4000); // 4秒後に自動消滅
 }
 
 // 👑 称号バッジ
