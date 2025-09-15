@@ -20,11 +20,23 @@
   </div>
 
   <div class="user-meta">
-    <span id="responsibleUser">👑 読み込み中...</span>
-    <span id="lastJudgment">🕒 --</span>
-    <span id="clock">⏱ --:--:--</span>
+    <span id="responsibleUser">👑 初期管理者（管理者）</span>
+    <span id="lastJudgment">🕒 2025/09/16(火) 00:21:12</span>
+    <span id="clock">⏱ 2025/09/16(火) 00:21:13</span>
   </div>
 </header>
+
+<!-- メニュー：顔の下に意志 -->
+<nav id="mainMenu" class="menu-grid">
+  <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
+  <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
+  <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
+  <button onclick="expandMenu('report')">📊<span>報告</span></button>
+  <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
+  <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
+</nav>
+
+<div id="menuDetail"></div>
 
 <!-- 🧭 メニュー選択領域（空間の意志） -->
 <nav class="menu-bar">

@@ -91,6 +91,16 @@ header {
   background-color: #e0e0e0;
 }
 
+/* メニュー展開領域 */
+#menuDetail {
+  padding: 1em;
+  margin: 1em;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
 /* メイン */
 main {
   padding: 2em;
@@ -185,6 +195,7 @@ main {
 
   #mainMenu {
     grid-template-columns: repeat(2, 1fr);
+    margin-top: 0.5em;
   }
 
   #mainMenu button {
@@ -203,5 +214,10 @@ main {
   .summary-card {
     font-size: 1em;
     padding: 0.8em;
+  }
+
+  #menuDetail {
+    padding: 0.8em;
+    font-size: 0.95em;
   }
 }
