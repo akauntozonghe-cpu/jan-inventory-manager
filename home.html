@@ -12,22 +12,13 @@
 <body>
   <header class="system-header">
   <div class="header-left">
-    <img src="icon-192.png" alt="在庫管理アイコン" class="system-icon" />
-    <h1 class="system-title">在庫管理システム</h1>
+    <img src="icon-192.png" alt="在庫管理" class="system-icon" />
+    <span class="system-title">在庫管理</span>
   </div>
   <div class="header-right">
-    <div class="user-info">
-      <span class="badge">👑</span>
-      <span class="label">責任者：</span>
-      <span id="responsibleUser" class="value">読み込み中...</span>
-    </div>
-    <div class="login-info">
-      <span class="label">最終ログイン：</span>
-      <span id="lastLogin" class="value">--</span>
-    </div>
-    <div class="clock-info">
-      <span class="label">現在時刻：</span>
-      <span id="clock" class="value">--:--:--</span>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="user-meta">
+      👑 村本悠気（管理者）｜🕒 最終：2025-09-15 14:24｜⏱ 現在：23:25:04
     </div>
   </div>
 </header>

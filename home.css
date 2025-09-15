@@ -5,21 +5,63 @@ body {
   padding: 0;
 }
 
+/* ヘッダー構成 */
 header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   background-color: #1a1a2e;
   color: white;
-  padding: 1em 2em;
-  position: relative;
+  padding: 0.6em 1em;
   flex-wrap: wrap;
 }
 
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
 .system-icon {
-  width: 40px;
-  height: 40px;
-  margin-right: 1em;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  background-color: #fff;
+  padding: 4px;
+}
+
+.system-title {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: white;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  flex-wrap: wrap;
+}
+
+.user-meta {
+  font-size: 0.9em;
+  color: #ddd;
+  white-space: nowrap;
+}
+
+.menu-toggle {
+  font-size: 1.5em;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* メニュー */
+#mainMenu {
+  background-color: #1a1a2e;
+  padding: 1em;
+  text-align: center;
 }
 
 nav button {
@@ -36,27 +78,12 @@ nav button:hover {
   background-color: #e0e0e0;
 }
 
-#menuToggle {
-  position: absolute;
-  top: 1em;
-  right: 1em;
-  font-size: 1.5em;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-}
-
-#mainMenu {
-  background-color: #1a1a2e;
-  padding: 1em;
-  text-align: center;
-}
-
+/* メイン */
 main {
   padding: 2em;
 }
 
+/* サマリー */
 .summary-group {
   margin-bottom: 2em;
   padding: 1em;
@@ -83,6 +110,7 @@ main {
   box-shadow: 0 0 3px rgba(0,0,0,0.03);
 }
 
+/* 管理者モード */
 #adminModeBanner {
   background-color: #f5c518;
   color: #1a1a2e;
@@ -94,6 +122,7 @@ main {
   border-radius: 6px;
 }
 
+/* ログアウト */
 .logout-btn {
   margin-top: 2em;
   padding: 0.6em 2em;
@@ -121,13 +150,28 @@ main {
 
 /* スマホ最適化 */
 @media screen and (max-width: 768px) {
-  .summary-group {
-    padding: 0.8em;
+  header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
-  .summary-card {
+  .header-right {
+    margin-top: 0.5em;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .user-meta {
+    font-size: 0.85em;
+  }
+
+  .system-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .system-title {
     font-size: 1em;
-    padding: 0.8em;
   }
 
   nav button {
@@ -136,44 +180,12 @@ main {
     margin: 0.5em auto;
   }
 
-  .header-right {
-    text-align: left;
-    margin-top: 1em;
+  .summary-group {
+    padding: 0.8em;
   }
 
-  #clock {
-    font-size: 1.2em;
+  .summary-card {
+    font-size: 1em;
+    padding: 0.8em;
   }
-
-  .system-icon {
-    width: 32px;
-    height: 32px;
-  }
-
-  h1 {
-    font-size: 1.2em;
-  }
-
-  #menuToggle {
-    top: 0.5em;
-    right: 0.5em;
-    font-size: 2em;
-  }
-}
-#menuToggle {
-  position: absolute;
-  top: 1em;
-  left: 1em;
-  font-size: 1.5em;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  z-index: 10;
-}
-.system-icon {
-  width: 40px;
-  height: 40px;
-  margin-right: 0.5em;
-  vertical-align: middle;
 }
