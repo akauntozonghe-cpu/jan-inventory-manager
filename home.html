@@ -13,36 +13,31 @@
   <header class="system-header">
   <div class="header-top">
     <div class="header-left">
-      <img src="icon-192.png" alt="在庫管理" class="system-icon" />
+      <img src="icon-192.png" class="system-icon" />
       <span class="system-title">在庫管理</span>
     </div>
     <button class="menu-toggle" onclick="toggleMenu()">☰</button>
   </div>
 
-  <div class="status-bar">
-    <span id="responsibleUser">👑 村本悠弥（管理者）</span>
-    <span id="lastJudgment">🕒 最終判断：--</span>
+  <div class="user-meta">
+    <span id="responsibleUser">👑 読み込み中...</span>
+    <span id="lastJudgment">🕒 --</span>
     <span id="clock">⏱ --:--:--</span>
   </div>
-
-  <nav id="mainMenu" class="menu-grid">
-    <button onclick="goToPage('register')">📥<span>商品登録</span></button>
-    <button onclick="goToPage('list')">📦<span>商品一覧</span></button>
-    <button onclick="goToPage('market')">🛒<span>フリマ</span></button>
-    <button onclick="goToPage('report')">📊<span>報告</span></button>
-    <button onclick="goToPage('admin')">🧑‍💼<span>管理者</span></button>
-    <button onclick="goToPage('settings')">⚙️<span>設定</span></button>
-  </nav>
 </header>
 
-  <nav id="mainMenu" style="display: none;">
-    <button onclick="goToPage('register')">商品登録</button>
-    <button onclick="goToPage('list')">商品一覧</button>
-    <button onclick="goToPage('market')">フリマ</button>
-    <button onclick="goToPage('report')">報告</button>
-    <button onclick="goToPage('admin')">管理者</button>
-    <button onclick="goToPage('settings')">設定</button>
-  </nav>
+<!-- 🧭 メニュー選択領域（空間の意志） -->
+<nav class="menu-bar">
+  <button onclick="expandMenu('register')">📥</button>
+  <button onclick="expandMenu('list')">📦</button>
+  <button onclick="expandMenu('market')">🛒</button>
+  <button onclick="expandMenu('report')">📊</button>
+  <button onclick="expandMenu('admin')">🧑‍💼</button>
+  <button onclick="expandMenu('settings')">⚙️</button>
+</nav>
+
+<!-- 🧭 メニュー展開領域（空間の応答） -->
+<div id="menuDetail"></div>
 
   <main>
     <div id="adminModeBanner" style="display: none;">

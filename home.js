@@ -67,6 +67,8 @@ if (raw instanceof Date) {
   last = raw;
 } else if (typeof raw.toDate === "function") {
   last = raw.toDate();
+} else if (typeof raw._seconds === "number") {
+  last = new Date(raw._seconds * 1000);
 } else {
   last = new Date(raw); // 最終手段
 }
@@ -147,10 +149,25 @@ window.logout = function () {
 };
 
 // 🍔 メニュー展開
-window.toggleMenu = function () {
-  const menu = document.getElementById("mainMenu");
-  menu.style.display = menu.style.display === "none" ? "grid" : "none";
-};
+window.toggleMenu = function expandMenu(target) {
+  const menuDetails = {
+    register: { label: "商品登録", desc: "新しい商品を登録します" },
+    list: { label: "商品一覧", desc: "現在の在庫を確認します" },
+    market: { label: "フリマ", desc: "出品・売却情報を管理します" },
+    report: { label: "報告", desc: "在庫や売上の報告を行います" },
+    admin: { label: "管理者", desc: "システム設定と権限管理" },
+    settings: { label: "設定", desc: "表示や通知の調整" }
+  };
+
+  const info = menuDetails[target];
+  const html = `
+    <div class="menu-expanded">
+      <h3>🧭 ${info.label}</h3>
+      <p>${info.desc}</p>
+      <button onclick="goToPage('${target}')">この操作を開始</button>
+    </div>`;
+  document.getElementById("menuDetail").innerHTML = html;
+}
 
 // 📦 在庫状況
 function loadInventoryStatus() {
