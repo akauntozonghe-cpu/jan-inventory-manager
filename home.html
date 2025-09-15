@@ -5,40 +5,42 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理システム</title>
   <link rel="icon" href="icon-192.png" type="image/png" />
-<link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="stylesheet" href="home.css" />
   <script type="module" src="home.js"></script>
 </head>
 <body>
+  <!-- 🧭 空間の顔 -->
   <header class="system-header">
-  <div class="header-top">
-    <div class="header-left">
-      <img src="icon-192.png" class="system-icon" />
-      <span class="system-title">在庫管理</span>
+    <div class="header-top">
+      <div class="header-left">
+        <img src="icon-192.png" class="system-icon" />
+        <span class="system-title" onclick="goToPage('home')" style="cursor:pointer;">在庫管理</span>
+      </div>
+      <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     </div>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
-  </div>
 
-  <div class="user-meta">
-    <span id="responsibleUser">👑 初期管理者（管理者）</span>
-    <span id="lastJudgment">🕒 2025/09/16(火) 00:21:12</span>
-    <span id="clock">⏱ 2025/09/16(火) 00:21:13</span>
-  </div>
-</header>
+    <div class="user-meta">
+      <span id="responsibleUser">👑 初期管理者（管理者）</span>
+      <span id="lastJudgment">🕒 2025/09/16(火) 00:21:12</span>
+      <span id="clock">⏱ 2025/09/16(火) 00:21:13</span>
+    </div>
+  </header>
 
-<!-- メニュー：顔の下に意志 -->
-<nav id="mainMenu" class="menu-grid">
-  <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
-  <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
-  <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
-  <button onclick="expandMenu('report')">📊<span>報告</span></button>
-  <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
-  <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
-</nav>
+  <!-- 🧭 空間の意志 -->
+  <nav id="mainMenu">
+    <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
+    <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
+    <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
+    <button onclick="expandMenu('report')">📊<span>報告</span></button>
+    <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
+    <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
+  </nav>
 
-<!-- 🧭 メニュー展開領域（空間の応答） -->
-<div id="menuDetail"></div>
+  <!-- 🧭 空間の応答 -->
+  <div id="menuDetail"></div>
 
+  <!-- 🧭 空間の記憶と判断 -->
   <main>
     <div id="adminModeBanner" style="display: none;">
       👑 管理者モード：一時介入中（操作は記録されます）
@@ -46,13 +48,13 @@
 
     <section id="dashboard">
       <h2>📊 状況サマリー</h2>
-
       <div id="inventoryStatus" class="summary-group"></div>
       <div id="urgentItems" class="summary-group"></div>
       <div id="calendarInfo" class="summary-group"></div>
       <div id="aiSummary" class="summary-group"></div>
       <div id="aiInventorySuggestions" class="summary-group"></div>
       <div id="marketInfo" class="summary-group"></div>
+      <div id="aiHistory" class="summary-group"></div>
     </section>
 
     <section id="settingsPanel" class="admin-only" style="display: none;">
@@ -68,7 +70,5 @@
 
     <button class="logout-btn" onclick="logout()">ログアウト</button>
   </main>
-
-  <script type="module" src="home.js"></script>
 </body>
 </html>

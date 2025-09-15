@@ -60,8 +60,6 @@ function startClock() {
   }, 1000);
 }
 
-const raw = loginSnap.docs[0].data().timestamp;
-
 let last;
 if (raw instanceof Date) {
   last = raw;
@@ -106,9 +104,32 @@ async function loadUserInfo(uid) {
   );
   const loginSnap = await getDocs(loginQuery);
   if (!loginSnap.empty) {
-    const last = loginSnap.docs[0].data().timestamp.toDate();
+    const raw = loginSnap.docs[0].data().timestamp;
+
+    let last;
+    if (raw instanceof Date) {
+      last = raw;
+    } else if (typeof raw.toDate === "function") {
+      last = raw.toDate();
+    } else if (typeof raw._seconds === "number") {
+      last = new Date(raw._seconds * 1000);
+    } else {
+      last = new Date(raw); // 最終手段
+    }
+
+    const formatted = last.toLocaleString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
+
     const el = document.getElementById("lastJudgment");
-    if (el) el.textContent = `🕒 最終判断：${last.toLocaleTimeString("ja-JP", { hour12: false })}`;
+    if (el) el.textContent = `🕒 最終判断：${formatted}`;
     showLoginRitual(last);
   }
 }
