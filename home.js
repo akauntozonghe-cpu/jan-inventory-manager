@@ -106,7 +106,7 @@ function renderBadge(role) {
   const badge = {
     "管理者": "👑",
     "責任者": "🧑‍💼",
-    "一般": "📦"
+    "担当者": "📦"
   };
   const el = document.getElementById("responsibleUser");
   if (el) el.innerHTML = `${badge[role] || ""} ${el.textContent}`;

@@ -10,15 +10,25 @@
   <script type="module" src="home.js"></script>
 </head>
 <body>
-  <header>
+  <header class="system-header">
   <div class="header-left">
     <img src="./icons/icon-192.png" alt="在庫管理アイコン" class="system-icon" />
-    <h1 onclick="goToPage('home')">在庫管理システム</h1>
+    <h1 class="system-title">在庫管理システム</h1>
   </div>
   <div class="header-right">
-    <p id="responsibleUser">責任者：読み込み中...</p>
-    <p id="lastLogin">最終ログイン：--</p>
-    <div id="clock">--:--:--</div>
+    <div class="user-info">
+      <span class="badge">👑</span>
+      <span class="label">責任者：</span>
+      <span id="responsibleUser" class="value">読み込み中...</span>
+    </div>
+    <div class="login-info">
+      <span class="label">最終ログイン：</span>
+      <span id="lastLogin" class="value">--</span>
+    </div>
+    <div class="clock-info">
+      <span class="label">現在時刻：</span>
+      <span id="clock" class="value">--:--:--</span>
+    </div>
   </div>
 </header>
 
