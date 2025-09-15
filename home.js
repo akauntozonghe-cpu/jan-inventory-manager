@@ -43,11 +43,46 @@ if (!uid) {
 function startClock() {
   setInterval(() => {
     const now = new Date();
+    const date = now.toLocaleDateString("ja-JP", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      weekday: "short"
+    });
+    const time = now.toLocaleTimeString("ja-JP", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
     const el = document.getElementById("clock");
-    if (el) el.textContent = `⏱ ${now.toLocaleTimeString("ja-JP", { hour12: false })}`;
+    if (el) el.textContent = `⏱ ${date} ${time}`;
   }, 1000);
 }
 
+const raw = loginSnap.docs[0].data().timestamp;
+
+let last;
+if (raw instanceof Date) {
+  last = raw;
+} else if (typeof raw.toDate === "function") {
+  last = raw.toDate();
+} else {
+  last = new Date(raw); // 最終手段
+}
+
+const formatted = last.toLocaleString("ja-JP", {
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  weekday: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false
+});
+
+document.getElementById("lastJudgment").textContent = `🕒 最終判断：${formatted}`;
 // 👤 ユーザー情報と判断履歴
 async function loadUserInfo(uid) {
   const userQuery = query(collection(db, "users"), where("uid", "==", uid));
