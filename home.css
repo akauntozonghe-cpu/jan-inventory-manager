@@ -10,7 +10,7 @@ header {
   background-color: #1a1a2e;
   color: white;
   padding: 0.8em 1em;
-  border-bottom: 1px solid #444;
+  /* ✅ 枠削除 */
 }
 
 .header-top {
@@ -18,6 +18,7 @@ header {
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
+  gap: 0.5em;
 }
 
 .header-left {
@@ -52,6 +53,7 @@ header {
   border: none;
   color: white;
   cursor: pointer;
+  margin-left: auto;
 }
 
 /* 秩序メタ情報 */
@@ -60,8 +62,8 @@ header {
   gap: 0.8em;
   font-size: 0.85em;
   color: #ddd;
-  margin-top: 0.5em;
   flex-wrap: wrap;
+  margin-top: 0.5em;
 }
 
 /* メニュー構成（初期非表示） */
@@ -190,22 +192,35 @@ main {
 @media screen and (max-width: 768px) {
   .header-top {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: stretch;
+  }
+
+  .header-left {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .menu-toggle {
+    align-self: flex-end;
+    font-size: 1.6em;
+    margin-top: 0.5em;
+  }
+
+  .system-title {
+    font-size: 1em;
+    margin-top: 0.3em;
   }
 
   .user-meta {
     flex-direction: column;
     gap: 0.3em;
     font-size: 0.85em;
+    margin-top: 0.5em;
   }
 
   .system-icon {
     width: 28px;
     height: 28px;
-  }
-
-  .system-title {
-    font-size: 1em;
   }
 
   #mainMenu {
