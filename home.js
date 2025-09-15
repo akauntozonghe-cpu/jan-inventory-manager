@@ -44,45 +44,16 @@ function startClock() {
   setInterval(() => {
     const now = new Date();
     const date = now.toLocaleDateString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      weekday: "short"
+      year: "numeric", month: "2-digit", day: "2-digit", weekday: "short"
     });
     const time = now.toLocaleTimeString("ja-JP", {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
     });
     const el = document.getElementById("clock");
     if (el) el.textContent = `⏱ ${date} ${time}`;
   }, 1000);
 }
 
-let last;
-if (raw instanceof Date) {
-  last = raw;
-} else if (typeof raw.toDate === "function") {
-  last = raw.toDate();
-} else if (typeof raw._seconds === "number") {
-  last = new Date(raw._seconds * 1000);
-} else {
-  last = new Date(raw); // 最終手段
-}
-
-const formatted = last.toLocaleString("ja-JP", {
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  weekday: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-  hour12: false
-});
-
-document.getElementById("lastJudgment").textContent = `🕒 最終判断：${formatted}`;
 // 👤 ユーザー情報と判断履歴
 async function loadUserInfo(uid) {
   const userQuery = query(collection(db, "users"), where("uid", "==", uid));
@@ -105,7 +76,6 @@ async function loadUserInfo(uid) {
   const loginSnap = await getDocs(loginQuery);
   if (!loginSnap.empty) {
     const raw = loginSnap.docs[0].data().timestamp;
-
     let last;
     if (raw instanceof Date) {
       last = raw;
@@ -114,18 +84,12 @@ async function loadUserInfo(uid) {
     } else if (typeof raw._seconds === "number") {
       last = new Date(raw._seconds * 1000);
     } else {
-      last = new Date(raw); // 最終手段
+      last = new Date(raw);
     }
 
     const formatted = last.toLocaleString("ja-JP", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      weekday: "short",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false
+      year: "numeric", month: "2-digit", day: "2-digit", weekday: "short",
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
     });
 
     const el = document.getElementById("lastJudgment");
@@ -137,14 +101,12 @@ async function loadUserInfo(uid) {
 // ✨ ログイン儀式
 function showLoginRitual(lastTimestamp) {
   const now = Date.now();
-  const diffMs = now - lastTimestamp.getTime();
-  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  const message = `前回の判断から ${diffHours} 時間が経過しました`;
+  const diffHours = Math.floor((now - lastTimestamp.getTime()) / (1000 * 60 * 60));
   const html = `
     <div style="text-align:center; padding:1em; background:#fefefe; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-bottom:1em;">
       <img src="icon-192.png" width="64" height="64" style="margin-bottom:0.5em;" />
       <p style="font-weight:bold; font-size:1.1em;">ようこそ、秩序の守護者。</p>
-      <p style="color:#333;">${message}</p>
+      <p style="color:#333;">前回の判断から ${diffHours} 時間が経過しました</p>
     </div>`;
   const container = document.createElement("div");
   container.innerHTML = html;
@@ -170,7 +132,7 @@ window.logout = function () {
 };
 
 // 🍔 メニュー展開
-window.toggleMenu = function expandMenu(target) {
+window.expandMenu = function (target) {
   const menuDetails = {
     register: { label: "商品登録", desc: "新しい商品を登録します" },
     list: { label: "商品一覧", desc: "現在の在庫を確認します" },
@@ -179,7 +141,6 @@ window.toggleMenu = function expandMenu(target) {
     admin: { label: "管理者", desc: "システム設定と権限管理" },
     settings: { label: "設定", desc: "表示や通知の調整" }
   };
-
   const info = menuDetails[target];
   const html = `
     <div class="menu-expanded">
@@ -188,7 +149,16 @@ window.toggleMenu = function expandMenu(target) {
       <button onclick="goToPage('${target}')">この操作を開始</button>
     </div>`;
   document.getElementById("menuDetail").innerHTML = html;
-}
+};
+
+// 🍔 ハンバーガー開閉
+window.toggleMenu = function () {
+  const menu = document.getElementById("mainMenu");
+  if (menu) {
+    const isVisible = menu.style.display === "grid";
+    menu.style.display = isVisible ? "none" : "grid";
+  }
+};
 
 // 📦 在庫状況
 function loadInventoryStatus() {
@@ -237,7 +207,6 @@ function loadAISummary(uid) {
   }
 }
 
-// 📊 AI在庫提案
 function loadAIInventorySuggestions() {
   const el = document.getElementById("aiInventorySuggestions");
   if (el) {
@@ -250,7 +219,6 @@ function loadAIInventorySuggestions() {
   }
 }
 
-// 🛒 フリマ情報
 function loadMarketInfo() {
   const el = document.getElementById("marketInfo");
   if (el) {
@@ -262,7 +230,6 @@ function loadMarketInfo() {
   }
 }
 
-// 🧠 AI判断履歴
 async function loadAIDecisionHistory(uid) {
   const q = query(
     collection(db, "aiDecisions"),
@@ -282,7 +249,6 @@ async function loadAIDecisionHistory(uid) {
   }
 }
 
-// 🧑‍💼 一時介入判定（インデックス必要）
 async function checkTemporaryAdmin(uid) {
   const q = query(
     collection(db, "interventionLogs"),
@@ -304,7 +270,6 @@ async function checkTemporaryAdmin(uid) {
   }
 }
 
-// 🔓 管理者機能の一時解放
 function enableAdminFeaturesTemporarily() {
   const isTempAdmin = sessionStorage.getItem("temporaryAdmin") === "true";
   if (isTempAdmin) {
@@ -315,7 +280,6 @@ function enableAdminFeaturesTemporarily() {
   }
 }
 
-// 🧭 ページ遷移（空間が導く）
 window.goToPage = function (target) {
   window.location.href = `${target}.html`;
 };
