@@ -7,12 +7,16 @@ body {
 
 /* ヘッダー構成 */
 header {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 1em;
+  border-bottom: 1px solid #444;
+}
+
+.header-top {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #1a1a2e;
-  color: white;
-  padding: 0.6em 1em;
   flex-wrap: wrap;
 }
 
@@ -36,19 +40,6 @@ header {
   color: white;
 }
 
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 1em;
-  flex-wrap: wrap;
-}
-
-.user-meta {
-  font-size: 0.9em;
-  color: #ddd;
-  white-space: nowrap;
-}
-
 .menu-toggle {
   font-size: 1.5em;
   background: none;
@@ -57,24 +48,46 @@ header {
   cursor: pointer;
 }
 
-/* メニュー */
+/* 秩序メタ情報 */
+.user-meta {
+  display: flex;
+  gap: 1em;
+  font-size: 0.9em;
+  color: #ddd;
+  margin-top: 0.5em;
+  flex-wrap: wrap;
+}
+
+/* メニュー構成 */
 #mainMenu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1em;
   background-color: #1a1a2e;
   padding: 1em;
   text-align: center;
 }
 
-nav button {
-  margin: 0.5em;
-  padding: 0.6em 1.2em;
+#mainMenu button {
   background-color: white;
   color: #1a1a2e;
   border: none;
-  border-radius: 6px;
+  padding: 1em;
+  border-radius: 8px;
+  font-size: 1.2em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   cursor: pointer;
+  box-shadow: 0 0 4px rgba(0,0,0,0.05);
 }
 
-nav button:hover {
+#mainMenu button span {
+  margin-top: 0.5em;
+  font-size: 0.9em;
+}
+
+#mainMenu button:hover {
   background-color: #e0e0e0;
 }
 
@@ -150,18 +163,14 @@ main {
 
 /* スマホ最適化 */
 @media screen and (max-width: 768px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-right {
-    margin-top: 0.5em;
+  .header-top {
     flex-direction: column;
     align-items: flex-start;
   }
 
   .user-meta {
+    flex-direction: column;
+    gap: 0.3em;
     font-size: 0.85em;
   }
 
@@ -174,10 +183,17 @@ main {
     font-size: 1em;
   }
 
-  nav button {
-    display: block;
-    width: 90%;
-    margin: 0.5em auto;
+  #mainMenu {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  #mainMenu button {
+    font-size: 1em;
+    padding: 0.8em;
+  }
+
+  #mainMenu button span {
+    font-size: 0.85em;
   }
 
   .summary-group {

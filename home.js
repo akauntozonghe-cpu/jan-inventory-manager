@@ -1,6 +1,4 @@
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -11,6 +9,7 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// 🔧 Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -23,12 +22,10 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// 🧭 UID確認と起動
 const uid = localStorage.getItem("uid");
-
 if (!uid) {
-  setTimeout(() => {
-    window.location.href = "index.html";
-  }, 2000);
+  setTimeout(() => window.location.href = "index.html", 2000);
 } else {
   loadUserInfo(uid);
   loadInventoryStatus();
@@ -42,29 +39,25 @@ if (!uid) {
   startClock();
 }
 
-// 🕰️ 秒単位の時計
+// 🕰️ 現在時刻（秒単位）
 function startClock() {
   setInterval(() => {
     const now = new Date();
-    const clockEl = document.getElementById("clock");
-    if (clockEl) {
-      clockEl.textContent = now.toLocaleTimeString("ja-JP", { hour12: false });
-    }
+    const el = document.getElementById("clock");
+    if (el) el.textContent = `⏱ ${now.toLocaleTimeString("ja-JP", { hour12: false })}`;
   }, 1000);
 }
 
-// 👤 ユーザー情報とログイン履歴
+// 👤 ユーザー情報と判断履歴
 async function loadUserInfo(uid) {
   const userQuery = query(collection(db, "users"), where("uid", "==", uid));
   const userSnap = await getDocs(userQuery);
   if (!userSnap.empty) {
     const user = userSnap.docs[0].data();
-    const role = user.role;
-    const name = user.name;
     const el = document.getElementById("responsibleUser");
     if (el) {
-      el.textContent = `責任者：${name}（${role}）`;
-      renderBadge(role);
+      el.textContent = `${user.name}（${user.role}）`;
+      renderBadge(user.role);
     }
   }
 
@@ -76,9 +69,9 @@ async function loadUserInfo(uid) {
   );
   const loginSnap = await getDocs(loginQuery);
   if (!loginSnap.empty) {
-    const last = loginSnap.docs[0].data().timestamp;
-    const el = document.getElementById("lastLogin");
-    if (el) el.textContent = `最終ログイン：${last}`;
+    const last = loginSnap.docs[0].data().timestamp.toDate();
+    const el = document.getElementById("lastJudgment");
+    if (el) el.textContent = `🕒 最終判断：${last.toLocaleTimeString("ja-JP", { hour12: false })}`;
     showLoginRitual(last);
   }
 }
@@ -86,13 +79,12 @@ async function loadUserInfo(uid) {
 // ✨ ログイン儀式
 function showLoginRitual(lastTimestamp) {
   const now = Date.now();
-  const diffMs = now - new Date(lastTimestamp).getTime();
+  const diffMs = now - lastTimestamp.getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
   const message = `前回の判断から ${diffHours} 時間が経過しました`;
-  const icon = "./icons/icon-192.png";
   const html = `
     <div style="text-align:center; padding:1em; background:#fefefe; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-bottom:1em;">
-      <img src="${icon}" width="64" height="64" style="margin-bottom:0.5em;" />
+      <img src="icon-192.png" width="64" height="64" style="margin-bottom:0.5em;" />
       <p style="font-weight:bold; font-size:1.1em;">ようこそ、秩序の守護者。</p>
       <p style="color:#333;">${message}</p>
     </div>`;
@@ -101,7 +93,7 @@ function showLoginRitual(lastTimestamp) {
   document.body.prepend(container);
 }
 
-// 👑 称号バッジ表示
+// 👑 称号バッジ
 function renderBadge(role) {
   const badge = {
     "管理者": "👑",
@@ -119,10 +111,10 @@ window.logout = function () {
   window.location.href = "index.html";
 };
 
-// 🍔 ハンバーガーメニュー（グローバル公開）
+// 🍔 メニュー展開
 window.toggleMenu = function () {
   const menu = document.getElementById("mainMenu");
-  menu.style.display = menu.style.display === "none" ? "block" : "none";
+  menu.style.display = menu.style.display === "none" ? "grid" : "none";
 };
 
 // 📦 在庫状況
@@ -136,6 +128,7 @@ function loadInventoryStatus() {
   }
 }
 
+// ⏳ 緊急アイテム
 function loadUrgentItems() {
   const el = document.getElementById("urgentItems");
   if (el) {
@@ -146,6 +139,7 @@ function loadUrgentItems() {
   }
 }
 
+// 📅 カレンダー情報
 function loadCalendarInfo() {
   const el = document.getElementById("calendarInfo");
   if (el) {
@@ -158,6 +152,7 @@ function loadCalendarInfo() {
   }
 }
 
+// 🤖 AIサマリー
 function loadAISummary(uid) {
   const el = document.getElementById("aiSummary");
   if (el) {
@@ -169,6 +164,7 @@ function loadAISummary(uid) {
   }
 }
 
+// 📊 AI在庫提案
 function loadAIInventorySuggestions() {
   const el = document.getElementById("aiInventorySuggestions");
   if (el) {
@@ -181,6 +177,7 @@ function loadAIInventorySuggestions() {
   }
 }
 
+// 🛒 フリマ情報
 function loadMarketInfo() {
   const el = document.getElementById("marketInfo");
   if (el) {
@@ -206,12 +203,13 @@ async function loadAIDecisionHistory(uid) {
     el.innerHTML = "<h3>🧠 AI判断履歴</h3>";
     snap.forEach(doc => {
       const d = doc.data();
-      el.innerHTML += `<div class="summary-card">${d.message}（${d.timestamp}）</div>`;
+      const time = new Date(d.timestamp.seconds * 1000).toLocaleTimeString("ja-JP", { hour12: false });
+      el.innerHTML += `<div class="summary-card">${d.message}（${time}）</div>`;
     });
   }
 }
 
-// 👑 一時介入判定（インデックス必要）
+// 🧑‍💼 一時介入判定（インデックス必要）
 async function checkTemporaryAdmin(uid) {
   const q = query(
     collection(db, "interventionLogs"),
@@ -224,7 +222,7 @@ async function checkTemporaryAdmin(uid) {
     const last = snapshot.docs[0].data();
     const now = Date.now();
     const diff = now - new Date(last.timestamp).getTime();
-        if (diff < 1000 * 60 * 30) {
+    if (diff < 1000 * 60 * 30) {
       sessionStorage.setItem("temporaryAdmin", "true");
       const banner = document.getElementById("adminModeBanner");
       if (banner) banner.style.display = "block";
