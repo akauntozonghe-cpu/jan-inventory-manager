@@ -15,12 +15,24 @@
     <img src="icon-192.png" alt="在庫管理" class="system-icon" />
     <span class="system-title">在庫管理</span>
   </div>
+
   <div class="header-right">
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
     <div class="user-meta">
-      👑 村本悠気（管理者）｜🕒 最終：2025-09-15 14:24｜⏱ 現在：23:25:04
-    </div>
+  <span id="responsibleUser">👑 読み込み中...</span>｜
+  <span id="lastJudgment">🕒 --</span>｜
+  <span id="clock">⏱ --:--:--</span>
+</div>
+    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
   </div>
+
+  <nav id="mainMenu" class="menu-bar" style="display: none;">
+    <button onclick="goToPage('register')" title="商品登録">📥</button>
+    <button onclick="goToPage('list')" title="商品一覧">📦</button>
+    <button onclick="goToPage('market')" title="フリマ">🛒</button>
+    <button onclick="goToPage('report')" title="報告">📊</button>
+    <button onclick="goToPage('admin')" title="管理者">🧑‍💼</button>
+    <button onclick="goToPage('settings')" title="設定">⚙️</button>
+  </nav>
 </header>
 
   <nav id="mainMenu" style="display: none;">
