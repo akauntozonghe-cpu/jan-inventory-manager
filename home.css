@@ -5,7 +5,7 @@ body {
   padding: 0;
 }
 
-/* ヘッダー構成 */
+/* ヘッダー構成（三位一体） */
 header {
   background-color: #1a1a2e;
   color: white;
@@ -13,31 +13,32 @@ header {
 }
 
 .header-top {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5em;
+  gap: 1em;
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 0.5em;
-}
-
-.system-icon {
-  width: 32px;
-  height: 32px;
+.menu-toggle-icon {
+  font-size: 1.6em;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  padding: 0.2em 0.4em;
   border-radius: 6px;
-  background-color: #fff;
-  padding: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.menu-toggle-icon:hover {
+  background-color: rgba(255,255,255,0.1);
 }
 
 .system-title {
   font-size: 1.1em;
   font-weight: bold;
   color: white;
+  text-align: center;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -46,26 +47,17 @@ header {
   opacity: 0.8;
 }
 
-.menu-toggle {
-  font-size: 1.4em;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  margin-left: auto;
-}
-
-/* 秩序メタ情報 */
+/* 資格・判断・現在（右端に一体表示） */
 .user-meta {
   display: flex;
-  gap: 0.8em;
+  flex-direction: column;
+  align-items: flex-end;
   font-size: 0.85em;
   color: #ddd;
-  flex-wrap: wrap;
-  margin-top: 0.5em;
+  gap: 0.3em;
 }
 
-/* メニュー構成（初期非表示） */
+/* メニュー構成（初期非表示・バーなし） */
 #mainMenu {
   display: none;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
@@ -193,37 +185,23 @@ main {
 /* スマホ最適化 */
 @media screen and (max-width: 768px) {
   .header-top {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
+    text-align: center;
   }
 
-  .header-left {
-    justify-content: space-between;
-    width: 100%;
-  }
-
-  .menu-toggle {
-    align-self: flex-end;
-    font-size: 1.6em;
+  .user-meta {
+    align-items: center;
     margin-top: 0.5em;
   }
 
   .system-title {
     font-size: 1em;
-    margin-top: 0.3em;
+    margin: 0.3em 0;
   }
 
-  .user-meta {
-    flex-direction: column;
-    gap: 0.3em;
-    font-size: 0.85em;
-    margin-top: 0.5em;
-    text-align: center;
-  }
-
-  .system-icon {
-    width: 28px;
-    height: 28px;
+  .menu-toggle-icon {
+    font-size: 1.6em;
+    margin-bottom: 0.5em;
   }
 
   #mainMenu {
@@ -253,15 +231,4 @@ main {
     padding: 0.8em;
     font-size: 0.95em;
   }
-}
-.user-meta {
-  background-color: #1a1a2e;
-  padding: 0.6em 1em;
-  border-radius: 6px;
-  color: #ddd;
-  font-size: 0.85em;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8em;
-  margin-top: 0.5em;
 }
