@@ -49,8 +49,8 @@ function startClock() {
     const time = now.toLocaleTimeString("ja-JP", {
       hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
     });
-    const el = document.getElementById("clock");
-    if (el) el.textContent = `⏱ ${date} ${time}`;
+    const el = document.getElementById("currentClock");
+    if (el) el.textContent = `${date} ${time}`;
   }, 1000);
 }
 
