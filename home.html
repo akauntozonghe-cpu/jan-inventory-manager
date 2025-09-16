@@ -17,13 +17,19 @@
       <img src="icon-192.png" class="system-icon" />
       <span class="system-title" onclick="goToPage('home')">在庫管理</span>
     </div>
-    <div class="header-meta">
-      <span id="responsibleUser">👑 村本悠気（管理者）</span>
-      <span id="lastJudgment">🕒 最終判断：--</span>
-      <span id="clock">⏱ --:--:--</span>
-    </div>
-    <button class="menu-toggle" onclick="toggleMenu()">☰</button>
+    <div class="status-block">
+  <div class="status-line">
+    <span class="status-label">👑 村本悠気（管理者）</span>
   </div>
+  <div class="status-line">
+    <span class="status-label">🕒 最終判断：</span>
+    <span id="lastJudgmentTime">2025/09/16(火) 14:57:53</span>
+  </div>
+  <div class="status-line">
+    <span class="status-label">⏱ 現在：</span>
+    <span id="currentClock">--:--:--</span>
+  </div>
+</div>
 </header>
 
   <!-- 🧭 空間の意志 -->
