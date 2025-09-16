@@ -1,49 +1,54 @@
-window.onload = function () {
-  const name = sessionStorage.getItem("userName");
-  const role = sessionStorage.getItem("userRole");
-  const roleMap = { admin: "管理者", manager: "責任者", user: "一般ユーザー" };
-  const roleJp = roleMap[role] || role;
+import { db } from "./firebase.js";
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
 
-  document.getElementById("userInfo").textContent = `${name}（${roleJp}）としてログイン中`;
-  updateTime();
-  setInterval(updateTime, 1000);
-};
-
-function updateTime() {
-  const now = new Date();
-  const days = ["日", "月", "火", "水", "木", "金", "土"];
-  const formatted = `${now.getMonth() + 1}月${now.getDate()}日（${days[now.getDay()]}） ${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-  document.getElementById("currentTime").textContent = `現在日時：${formatted}`;
+function generateAdminCode(jan, lot) {
+  return `${jan}-${lot}`;
 }
-function registerProduct() {
-  const name = document.getElementById("name").value.trim();
-  const jan = document.getElementById("jan").value.trim();
-  const location = document.getElementById("location").value.trim();
-  const quantity = parseInt(document.getElementById("quantity").value);
-  const limit = document.getElementById("limit").value;
 
-  if (!name || !jan || !location) {
-    alert("商品名・JANコード・保管場所は必須です");
-    return;
-  }
+function generateControlId(adminCode, count) {
+  return `${adminCode}-${count + 1}`;
+}
 
-  if (!limit && !confirm("期限が未入力です。登録しますか？")) return;
+async function getExistingCount(adminCode) {
+  const q = query(collection(db, "items"), where("adminCode", "==", adminCode));
+  const snapshot = await getDocs(q);
+  return snapshot.size;
+}
+
+document.getElementById("registerForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const form = e.target;
+
+  const jan = form.jan.value.trim();
+  const lot = form.lot.value.trim();
+  const adminCode = generateAdminCode(jan, lot);
+  const count = await getExistingCount(adminCode);
+  const controlId = generateControlId(adminCode, count);
+
+  form.adminCode.value = adminCode;
+  form.controlId.value = controlId;
 
   const data = {
-    name,
     jan,
-    location,
-    quantity,
-    limit: limit || null,
-    timestamp: new Date().toISOString(),
-    createdBy: sessionStorage.getItem("userName")
+    lot,
+    adminCode,
+    controlId,
+    name: form.name.value.trim(),
+    quantity: parseInt(form.quantity.value),
+    unit: form.unit.value,
+    categoryLarge: form.categoryLarge.value.trim(),
+    categorySmall: form.categorySmall.value.trim(),
+    location: form.location.value.trim(),
+    maker: form.maker.value.trim(),
+    timestamp: serverTimestamp()
   };
 
-  db.collection("products").add(data)
-    .then(() => alert("登録完了"))
-    .catch(err => alert("登録失敗：" + err));
-}
-function onBarcodeScan(janCode) {
-  document.getElementById("jan").value = janCode;
-  fetchProductInfo(janCode); // JANコードから商品名などを補完（任意）
+  await addDoc(collection(db, "items"), data);
+  alert("登録完了：痕跡が記録されました");
+});
+
+// 管理者表示制御（仮）
+const isAdmin = true;
+if (isAdmin) {
+  document.getElementById("adminOnlyField").style.display = "block";
 }
