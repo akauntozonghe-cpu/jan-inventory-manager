@@ -113,9 +113,11 @@ header {
   }
 
   .header-left {
-    justify-content: center;
-    margin-bottom: 0.5em;
-  }
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  min-width: 160px;
+}
 
   .menu-toggle-icon {
     font-size: 1.6em;
@@ -123,14 +125,23 @@ header {
   }
 
   .system-title {
-    font-size: 1em;
-  }
+  font-size: 1.1em;
+  font-weight: bold;
+  color: white;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  letter-spacing: 0.5px;
+}
 
   .user-meta {
-    align-items: center;
-    font-size: 0.85em;
-    gap: 0.3em;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85em;
+  color: #ddd;
+  gap: 0.3em;
+  line-height: 1.4;
+}
 
   #mainMenu {
     grid-template-columns: repeat(2, 1fr);

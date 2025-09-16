@@ -290,11 +290,11 @@ window.goToPage = function (target) {
 
 document.addEventListener("click", function (e) {
   const menu = document.getElementById("mainMenu");
-  const toggle = document.querySelector(".menu-toggle");
+  const toggle = document.querySelector(".menu-toggle-icon");
 
-  if (menu && menu.style.display === "grid") {
+  if (menu && toggle && menu.classList.contains("show")) {
     if (!menu.contains(e.target) && !toggle.contains(e.target)) {
-      menu.style.display = "none";
+      menu.classList.remove("show");
     }
   }
 });
