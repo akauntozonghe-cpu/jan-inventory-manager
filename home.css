@@ -5,7 +5,7 @@ body {
   padding: 0;
 }
 
-/* ヘッダー構成（三位一体） */
+/* ヘッダー構成（左：名と入口、右：資格） */
 header {
   background-color: #1a1a2e;
   color: white;
@@ -13,10 +13,17 @@ header {
 }
 
 .header-top {
-  display: grid;
-  grid-template-columns: auto 1fr auto;
+  display: flex;
+  justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
   gap: 1em;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
 .menu-toggle-icon {
@@ -38,7 +45,6 @@ header {
   font-size: 1.1em;
   font-weight: bold;
   color: white;
-  text-align: center;
   cursor: pointer;
   transition: opacity 0.2s ease;
 }
@@ -47,7 +53,7 @@ header {
   opacity: 0.8;
 }
 
-/* 資格・判断・現在（右端に一体表示） */
+/* 資格・判断・現在（右寄せ） */
 .user-meta {
   display: flex;
   flex-direction: column;
@@ -65,8 +71,6 @@ header {
   background-color: #1a1a2e;
   padding: 1em;
   text-align: center;
-  position: relative;
-  z-index: 10;
   border: none;
   box-shadow: none;
   margin-bottom: 0;
@@ -100,108 +104,32 @@ header {
   background-color: #e0e0e0;
 }
 
-/* メニュー展開領域 */
-#menuDetail {
-  padding: 1em;
-  margin: 1em;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.05);
-  text-align: left;
-  border-left: 4px solid #1a1a2e;
-}
-
-/* メイン */
-main {
-  padding: 2em;
-}
-
-/* サマリー */
-.summary-group {
-  margin-bottom: 2em;
-  padding: 1em;
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 0 6px rgba(0,0,0,0.05);
-}
-
-.summary-group h3 {
-  font-size: 1.2em;
-  color: #1a1a2e;
-  margin-bottom: 0.5em;
-  border-left: 4px solid #1a1a2e;
-  padding-left: 0.5em;
-}
-
-.summary-card {
-  background-color: #f9f9f9;
-  margin: 0.3em 0;
-  padding: 0.6em 1em;
-  border-radius: 6px;
-  font-size: 0.95em;
-  text-align: left;
-  box-shadow: 0 0 3px rgba(0,0,0,0.03);
-}
-
-/* 管理者モード */
-#adminModeBanner {
-  background-color: #f5c518;
-  color: #1a1a2e;
-  padding: 0.5em;
-  font-weight: bold;
-  text-align: center;
-  box-shadow: 0 0 6px rgba(0,0,0,0.2);
-  margin-bottom: 1em;
-  border-radius: 6px;
-}
-
-/* ログアウト */
-.logout-btn {
-  margin-top: 2em;
-  padding: 0.6em 2em;
-  font-size: 1em;
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.logout-btn:hover {
-  background-color: #c9302c;
-}
-
-/* 管理者パネル・設定パネル */
-.admin-only {
-  background-color: #fff;
-  border-left: 4px solid #1a1a2e;
-  padding: 1em;
-  margin-top: 2em;
-  border-radius: 6px;
-  box-shadow: 0 0 4px rgba(0,0,0,0.05);
-}
-
 /* スマホ最適化 */
 @media screen and (max-width: 768px) {
   .header-top {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    align-items: stretch;
     text-align: center;
   }
 
-  .user-meta {
-    align-items: center;
-    margin-top: 0.5em;
-  }
-
-  .system-title {
-    font-size: 1em;
-    margin: 0.3em 0;
+  .header-left {
+    justify-content: center;
+    margin-bottom: 0.5em;
   }
 
   .menu-toggle-icon {
     font-size: 1.6em;
-    margin-bottom: 0.5em;
+    margin-right: 0.5em;
+  }
+
+  .system-title {
+    font-size: 1em;
+  }
+
+  .user-meta {
+    align-items: center;
+    font-size: 0.85em;
+    gap: 0.3em;
   }
 
   #mainMenu {
@@ -216,19 +144,5 @@ main {
 
   #mainMenu button span {
     font-size: 0.85em;
-  }
-
-  .summary-group {
-    padding: 0.8em;
-  }
-
-  .summary-card {
-    font-size: 1em;
-    padding: 0.8em;
-  }
-
-  #menuDetail {
-    padding: 0.8em;
-    font-size: 0.95em;
   }
 }

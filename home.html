@@ -11,25 +11,18 @@
 </head>
 <body>
   <!-- 🧭 空間の顔 -->
-  <header class="system-header">
+ <header class="system-header">
   <div class="header-top">
     <div class="header-left">
-      <img src="icon-192.png" class="system-icon" />
+      <button class="menu-toggle-icon" onclick="toggleMenu()">☰</button>
       <span class="system-title" onclick="goToPage('home')">在庫管理</span>
     </div>
-    <div class="status-block">
-  <div class="status-line">
-    <span class="status-label">👑 村本悠気（管理者）</span>
+    <div class="user-meta">
+      <span id="responsibleUser">👑 村本悠気（管理者）</span>
+      <span id="lastJudgment">🕒 最終判断：2025/09/16(火) 14:57:53</span>
+      <span id="clock">⏱ 現在：2025/09/16(火) 15:45:00</span>
+    </div>
   </div>
-  <div class="status-line">
-    <span class="status-label">🕒 最終判断：</span>
-    <span id="lastJudgmentTime">2025/09/16(火) 14:57:53</span>
-  </div>
-  <div class="status-line">
-    <span class="status-label">⏱ 現在：</span>
-    <span id="currentClock">--:--:--</span>
-  </div>
-</div>
 </header>
 
   <!-- 🧭 空間の意志 -->
