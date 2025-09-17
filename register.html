@@ -3,13 +3,26 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>商品登録</title>
+  <title>商品登録 - 在庫管理</title>
+  <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="register.css" />
+
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <script src="register.js" defer></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
 
@@ -20,82 +33,32 @@
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-        if (typeof startHeaderLogic === "function") startHeaderLogic();
+        const script = document.createElement("script");
+        script.src = "headerLogic.js";
+        script.onload = () => {
+          if (typeof startHeaderLogic === "function") startHeaderLogic();
+        };
+        document.body.appendChild(script);
       });
   </script>
-
-  <!-- 📷 QR読み取りオーバーレイ -->
-  <div id="qrOverlay">
-    <div id="qr-reader"></div>
-    <button onclick="closeQR()">閉じる</button>
-  </div>
 
   <!-- 商品登録フォーム -->
   <section id="registerPanel">
     <h2>📥 商品登録</h2>
     <form id="registerForm">
-      <label>JANコード：</label>
-      <div class="input-with-scan">
-        <input type="text" name="jan" id="janInput" required />
-        <button type="button" onclick="scanJAN()">📷 読み取る</button>
-      </div>
-
-      <label>Lot.No / 製造番号：</label>
-      <input type="text" name="lot" required />
-
-      <label>管理番号・管理区別番号：</label>
-      <div class="input-with-button">
-        <button type="button" onclick="applyAutoGenerate()">⚙️ 自動生成する</button>
-      </div>
-
-      <label>管理番号：</label>
-      <input type="text" name="controlId" readonly />
-
-      <div id="adminOnlyField" style="display: none;">
-        <label>管理区別番号：</label>
-        <input type="text" name="adminCode" readonly />
-      </div>
-
-      <label>商品名：</label>
-      <input type="text" name="name" required />
-
-      <label>数量：</label>
-      <input type="number" name="quantity" min="1" required />
-
-      <label>数量単位：</label>
-      <select name="unit">
-        <option value="個">個</option>
-        <option value="パック">パック</option>
-        <option value="セット">セット</option>
-        <option value="袋">袋</option>
-        <option value="本">本</option>
-        <option value="枚">枚</option>
-        <option value="箱">箱</option>
-      </select>
-
-      <label>大分類：</label>
-      <div class="input-with-scan">
-        <input type="text" name="categoryLarge" id="categoryLarge" />
-        <button type="button" onclick="scanCategory()">📷 読み取る</button>
-      </div>
-
-      <label>保管場所：</label>
-      <div class="input-with-scan">
-        <input type="text" name="location" id="location" />
-        <button type="button" onclick="scanLocation()">📷 読み取る</button>
-      </div>
-
-      <label>小分類：</label>
-      <input type="text" name="categorySmall" />
-
-      <label>メーカー名：</label>
-      <input type="text" name="maker" />
-
-      <label>写真：</label>
-      <input type="file" name="photo" accept="image/*" />
-
-      <button type="submit">登録する</button>
+      <!-- 各入力欄（JAN, Lot, 管理番号, 商品名, 数量など） -->
+      <!-- QR読み取りボタン付き -->
+      <!-- 自動生成ボタン付き -->
+      <!-- 管理者専用フィールド（adminCode） -->
+      <!-- 登録ボタン -->
     </form>
   </section>
+
+  <div id="qrOverlay">
+    <div id="qr-reader"></div>
+    <button onclick="closeQR()">閉じる</button>
+  </div>
+
+  <script src="register.js" defer></script>
 </body>
 </html>

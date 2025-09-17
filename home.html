@@ -33,7 +33,7 @@
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
         const script = document.createElement("script");
-        script.src = "common/headerLogic.js";
+        script.src = "headerLogic.js";
         script.onload = () => {
           if (typeof startHeaderLogic === "function") startHeaderLogic();
         };
