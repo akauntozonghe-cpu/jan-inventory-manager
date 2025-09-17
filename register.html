@@ -98,19 +98,24 @@
 
         <!-- 写真 -->
         <label for="photo">商品写真：</label>
-        <input type="file" name="photo" accept="image/*" />
+        <input type="file" name="photo" id="photoInput" accept="image/*" />
+        <img id="photoPreview" style="margin-top: 8px; max-width: 100%; display: none;" />
 
         <!-- 管理番号自動生成 -->
         <div class="input-with-button">
           <button type="button" onclick="applyAutoGenerate()">🔧 管理番号自動生成</button>
         </div>
 
-        <!-- 管理コード（自動生成） -->
-        <input type="text" name="adminCode" placeholder="管理コード" readonly />
-        <input type="text" name="controlId" placeholder="管理ID" readonly />
+        <!-- 管理区別番号 -->
+        <label for="adminCode">管理区別番号：</label>
+        <input type="text" name="adminCode" id="adminCode" readonly />
 
-        <!-- 登録ボタン -->
-        <button type="submit">✅ 登録（保留）</button>
+        <!-- 管理番号 -->
+        <label for="controlId">管理番号：</label>
+        <input type="text" name="controlId" id="controlId" readonly />
+
+        <!-- 登録ボタン（文言修正） -->
+        <button type="submit">✅ 登録</button>
       </form>
 
       <!-- 管理者専用領域（表示制御） -->

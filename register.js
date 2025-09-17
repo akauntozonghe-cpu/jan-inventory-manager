@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
         details: { status: "保留", name: data.name }
       });
 
-      alert("登録完了：管理者の承認を待っています。");
+      alert("登録完了");
       form.reset();
       document.getElementById("adminCode").value = "";
       document.getElementById("controlId").value = "";
