@@ -1,3 +1,4 @@
+// Firebase初期化（1回だけ宣言）
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -9,7 +10,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+const db = firebase.firestore(); // ← 初期化後に定義
 
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
