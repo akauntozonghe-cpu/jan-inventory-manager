@@ -27,6 +27,23 @@
       });
   </script>
 
+  <!-- 📷 カメラオーバーレイ（読み取り儀式） -->
+  <div id="qrOverlay" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.85);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  ">
+    <div id="qr-reader" style="width: 300px; background: #fff; padding: 1em; border-radius: 8px;"></div>
+    <button onclick="closeQR()" style="margin-top: 1em; padding: 0.5em 1em;">閉じる</button>
+  </div>
+
   <!-- 商品登録フォーム -->
   <section id="registerPanel">
     <h2>📥 商品登録</h2>

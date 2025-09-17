@@ -36,12 +36,28 @@ function startHeaderLogic() {
     .then(snapshot => {
       if (!snapshot.empty) {
         const log = snapshot.docs[0].data();
-        const time = log.timestamp.toDate().toLocaleString("ja-JP", {
-          year: "numeric", month: "2-digit", day: "2-digit",
-          hour: "2-digit", minute: "2-digit", second: "2-digit",
-          weekday: "short"
-        });
-        document.getElementById("lastJudgment").textContent = `🕒 最終判定：${time}`;
+        const raw = log.timestamp;
+        let timeString = "";
+
+        if (raw instanceof firebase.firestore.Timestamp) {
+          timeString = raw.toDate().toLocaleString("ja-JP", {
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            weekday: "short"
+          });
+        } else if (typeof raw === "string") {
+          timeString = raw;
+        } else if (typeof raw === "number") {
+          timeString = new Date(raw).toLocaleString("ja-JP", {
+            year: "numeric", month: "2-digit", day: "2-digit",
+            hour: "2-digit", minute: "2-digit", second: "2-digit",
+            weekday: "short"
+          });
+        } else {
+          timeString = "未取得";
+        }
+
+        document.getElementById("lastJudgment").textContent = `🕒 最終判定：${timeString}`;
       }
     });
 
@@ -139,31 +155,43 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
 });
 
 
-// QR読み取り（html5-qrcode）
-function startScan(targetId) {
-  const readerId = "qr-reader";
-  let readerDiv = document.getElementById(readerId);
-  if (!readerDiv) {
-    readerDiv = document.createElement("div");
-    readerDiv.id = readerId;
-    readerDiv.style.width = "300px";
-    document.body.appendChild(readerDiv);
-  }
-  readerDiv.style.display = "block";
+// 📷 QR読み取り儀式
+let qrReaderInstance = null;
 
-  const qrReader = new Html5Qrcode(readerId);
-  qrReader.start(
+function startScan(targetId) {
+  const overlay = document.getElementById("qrOverlay");
+  overlay.style.display = "flex";
+
+  if (!qrReaderInstance) {
+    qrReaderInstance = new Html5Qrcode("qr-reader");
+  }
+
+  qrReaderInstance.start(
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     (decodedText) => {
       document.getElementById(targetId).value = decodedText;
-      qrReader.stop();
-      readerDiv.style.display = "none";
+      stopScan();
     },
     (errorMessage) => {
       console.warn("読み取り失敗:", errorMessage);
     }
   );
+}
+
+function stopScan() {
+  if (qrReaderInstance) {
+    qrReaderInstance.stop().then(() => {
+      document.getElementById("qrOverlay").style.display = "none";
+    }).catch((err) => {
+      console.error("停止失敗:", err);
+      document.getElementById("qrOverlay").style.display = "none";
+    });
+  }
+}
+
+function closeQR() {
+  stopScan();
 }
 
 function scanJAN() {
