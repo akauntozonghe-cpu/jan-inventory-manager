@@ -18,7 +18,7 @@ body {
 
 /* 登録パネル */
 #registerPanel {
-  max-width: 600px;
+  max-width: 640px;
   margin: 2em auto;
   padding: 2em;
   background-color: #fff;
@@ -29,7 +29,7 @@ body {
 /* 見出し */
 #registerPanel h2 {
   margin-bottom: 1em;
-  font-size: 1.5em;
+  font-size: 1.6em;
   color: #444;
 }
 
@@ -42,6 +42,7 @@ form label {
 
 form input[type="text"],
 form input[type="number"],
+form input[type="date"],
 form input[type="file"],
 form select {
   width: 100%;
@@ -78,7 +79,7 @@ form select {
 
 /* 自動生成ボタン */
 .input-with-button {
-  margin-top: 0.5em;
+  margin-top: 1em;
 }
 
 .input-with-button button {
@@ -113,11 +114,18 @@ form button[type="submit"]:hover {
 
 /* 管理者専用フィールド */
 #adminOnlyField {
-  margin-top: 1em;
+  margin-top: 2em;
   padding: 1em;
   background-color: #f0f8ff;
   border-left: 4px solid #0078d4;
   border-radius: 6px;
+}
+
+/* 登録結果メッセージ */
+#registerMessage {
+  margin-top: 1em;
+  font-size: 0.95em;
+  color: #555;
 }
 
 /* 📷 QR読み取りオーバーレイ */

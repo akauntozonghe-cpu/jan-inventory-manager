@@ -14,7 +14,6 @@ const auth = firebase.auth();
 
 // 🕒 ヘッダー初期化（資格・時刻・判定）
 function startHeaderLogic() {
-  // 現在時刻の更新
   setInterval(() => {
     const now = new Date();
     const formatted = now.toLocaleString("ja-JP", {
@@ -26,7 +25,6 @@ function startHeaderLogic() {
     if (clock) clock.textContent = `⏱ 現在：${formatted}`;
   }, 1000);
 
-  // 最終判定の取得
   const lastJudgment = document.getElementById("lastJudgment");
   if (lastJudgment) {
     db.collection("loginLogs")
@@ -62,7 +60,6 @@ function startHeaderLogic() {
       });
   }
 
-  // 資格表示と管理者判定
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
@@ -116,7 +113,7 @@ async function applyAutoGenerate() {
   alert("自動生成が適用されました");
 }
 
-// 📥 商品登録処理
+// 📥 商品登録処理（保留 → 管理者承認待ち）
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -129,16 +126,28 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     name: form.name.value.trim(),
     quantity: parseInt(form.quantity.value),
     unit: form.unit.value,
+    expiry: form.expiry.value,
+    maker: form.maker.value.trim(),
+    location: form.location.value.trim(),
     categoryLarge: form.categoryLarge.value.trim(),
     categorySmall: form.categorySmall.value.trim(),
-    location: form.location.value.trim(),
-    maker: form.maker.value.trim(),
+    photo: null, // 写真は別途アップロード処理が必要
+    status: "保留",
+    createdBy: auth.currentUser?.uid || "unknown",
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
 
   try {
     await db.collection("items").add(data);
-    alert("登録完了：痕跡が記録されました");
+    await db.collection("history").add({
+      type: "登録",
+      actor: data.createdBy,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      targetItem: data.controlId,
+      details: { status: "保留", name: data.name }
+    });
+
+    alert("登録完了：保留中です。管理者の承認を待っています。");
     form.reset();
     form.adminCode.value = "";
     form.controlId.value = "";
@@ -148,7 +157,7 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-// 📷 QR読み取り儀式
+// 📷 バーコード・QR読み取り儀式
 let qrReaderInstance = null;
 
 function startScan(targetId) {
