@@ -5,33 +5,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>商品登録</title>
   <link rel="stylesheet" href="register.css" />
-  <!-- Firebase CDN互換版（ブラウザ対応） -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+  <!-- QR読み取りライブラリ -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
+  <!-- メインJS -->
   <script src="register.js" defer></script>
 </head>
 <body>
 
-  <!-- 🧭 空間の顔（ホームと同じヘッダー） -->
-  <header class="system-header">
-    <div class="header-top">
-      <div class="header-left">
-        <button class="menu-toggle-icon" onclick="toggleMenu()">☰</button>
-        <span class="system-title" onclick="goToPage('home')">在庫管理</span>
-      </div>
-      <div class="user-meta">
-        <span id="responsibleUser">👑 木本悠気（管理者）</span>
-        <span id="lastJudgment">🕒 最終判定：2025/09/17(水) 13:48:00</span>
-        <span id="clock">⏱ 現在：2025/09/17(水) 13:57:00</span>
-      </div>
-    </div>
-  </header>
+  <!-- ヘッダー（共通化） -->
+  <div id="headerContainer"></div>
+  <script>
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
+        startHeaderLogic(); // ヘッダー初期化
+      });
+  </script>
 
-  <!-- 🧭 商品登録フォーム -->
+  <!-- 商品登録フォーム -->
   <section id="registerPanel">
     <h2>📥 商品登録</h2>
     <form id="registerForm">
-      <!-- 識別 -->
       <label>JANコード：</label>
       <div class="input-with-scan">
         <input type="text" name="jan" id="janInput" required />
@@ -41,7 +40,6 @@
       <label>Lot.No / 製造番号：</label>
       <input type="text" name="lot" required />
 
-      <!-- 自動生成ボタン -->
       <label>管理番号・管理区別番号：</label>
       <div class="input-with-button">
         <button type="button" onclick="applyAutoGenerate()">⚙️ 自動生成する</button>
@@ -55,7 +53,6 @@
         <input type="text" name="adminCode" readonly />
       </div>
 
-      <!-- 商品情報 -->
       <label>商品名：</label>
       <input type="text" name="name" required />
 
@@ -73,20 +70,18 @@
         <option value="箱">箱</option>
       </select>
 
-      <!-- 分類・保管 -->
       <label>大分類：</label>
       <div class="input-with-scan">
-        <input type="text" name="categoryLarge" id="categoryLarge" placeholder="例：医薬品" />
+        <input type="text" name="categoryLarge" id="categoryLarge" />
         <button type="button" onclick="scanCategory()">📷 読み取る</button>
       </div>
 
       <label>保管場所：</label>
       <div class="input-with-scan">
-        <input type="text" name="location" id="location" placeholder="例：薬棚A-3" />
+        <input type="text" name="location" id="location" />
         <button type="button" onclick="scanLocation()">📷 読み取る</button>
       </div>
 
-      <!-- 補足 -->
       <label>小分類：</label>
       <input type="text" name="categorySmall" />
 

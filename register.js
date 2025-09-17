@@ -1,6 +1,8 @@
+// Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
+  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "inventory-app-312ca",
   storageBucket: "inventory-app-312ca.appspot.com",
   messagingSenderId: "245219344089",
@@ -10,7 +12,69 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+const auth = firebase.auth();
 
+
+// ヘッダー初期化処理
+function startHeaderLogic() {
+  // 現在時刻の更新
+  setInterval(() => {
+    const now = new Date();
+    const formatted = now.toLocaleString("ja-JP", {
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", second: "2-digit",
+      weekday: "short"
+    });
+    document.getElementById("clock").textContent = `⏱ 現在：${formatted}`;
+  }, 1000);
+
+  // 最終判定の取得
+  db.collection("loginLogs")
+    .orderBy("timestamp", "desc")
+    .limit(1)
+    .get()
+    .then(snapshot => {
+      if (!snapshot.empty) {
+        const log = snapshot.docs[0].data();
+        const time = log.timestamp.toDate().toLocaleString("ja-JP", {
+          year: "numeric", month: "2-digit", day: "2-digit",
+          hour: "2-digit", minute: "2-digit", second: "2-digit",
+          weekday: "short"
+        });
+        document.getElementById("lastJudgment").textContent = `🕒 最終判定：${time}`;
+      }
+    });
+
+  // ログイン資格の表示と管理者判定
+  auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      try {
+        const userDoc = await db.collection("users").doc(user.uid).get();
+        const userData = userDoc.data();
+        const name = userData?.name || "不明";
+        const role = userData?.role || "未設定";
+
+        document.getElementById("responsibleUser").textContent = `👑 ${name}（${role}）`;
+
+        if (role === "管理者") {
+          document.getElementById("adminOnlyField").style.display = "block";
+        } else {
+          document.getElementById("adminOnlyField").style.display = "none";
+        }
+      } catch (err) {
+        console.error("ユーザー情報取得失敗:", err);
+        document.getElementById("responsibleUser").textContent = "👑 ログイン中：取得失敗";
+        document.getElementById("adminOnlyField").style.display = "none";
+      }
+    } else {
+      document.getElementById("responsibleUser").textContent = "👑 未ログイン";
+      document.getElementById("adminOnlyField").style.display = "none";
+    }
+  });
+}
+
+
+// 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
 }
@@ -41,6 +105,8 @@ async function applyAutoGenerate() {
   alert("自動生成が適用されました");
 }
 
+
+// 商品登録処理
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -72,23 +138,46 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-// 管理者表示制御
-const isAdmin = true;
-if (isAdmin) {
-  document.getElementById("adminOnlyField").style.display = "block";
+
+// QR読み取り（html5-qrcode）
+function startScan(targetId) {
+  const readerId = "qr-reader";
+  let readerDiv = document.getElementById(readerId);
+  if (!readerDiv) {
+    readerDiv = document.createElement("div");
+    readerDiv.id = readerId;
+    readerDiv.style.width = "300px";
+    document.body.appendChild(readerDiv);
+  }
+  readerDiv.style.display = "block";
+
+  const qrReader = new Html5Qrcode(readerId);
+  qrReader.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      document.getElementById(targetId).value = decodedText;
+      qrReader.stop();
+      readerDiv.style.display = "none";
+    },
+    (errorMessage) => {
+      console.warn("読み取り失敗:", errorMessage);
+    }
+  );
 }
 
-// 読み取りボタン（仮）
 function scanJAN() {
-  alert("JANコード読み取り機能は準備中です。手入力も可能です。");
+  startScan("janInput");
 }
 function scanCategory() {
-  alert("大分類のQR読み取り機能は準備中です。手入力をご利用ください。");
+  startScan("categoryLarge");
 }
 function scanLocation() {
-  alert("保管場所のQR読み取り機能は準備中です。手入力をご利用ください。");
+  startScan("location");
 }
 
+
+// メニュー操作（仮）
 function toggleMenu() {
   alert("メニュー機能は準備中です。");
 }
