@@ -14,7 +14,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// ✅ 読み取り儀式（バーコード・QR）
+// ✅ 読み取り儀式（バーコード・QR）＋上書き対応
 let qrReaderInstance = null;
 
 function startScan(targetId) {
@@ -29,7 +29,11 @@ function startScan(targetId) {
     { facingMode: "environment" },
     { fps: 10, qrbox: 250 },
     (decodedText) => {
-      document.getElementById(targetId).value = decodedText;
+      const input = document.getElementById(targetId);
+      if (input) {
+        input.value = decodedText; // ✅ 強制上書き
+        input.dispatchEvent(new Event("input")); // ✅ バインディング通知（必要なら）
+      }
       stopScan();
     },
     (errorMessage) => {
@@ -129,13 +133,33 @@ document.addEventListener("DOMContentLoaded", () => {
         details: { status: "保留", name: data.name }
       });
 
-      alert("登録完了：保留中です。管理者の承認を待っています。");
+      alert("登録完了：管理者の承認を待っています。");
       form.reset();
-      form.adminCode.value = "";
-      form.controlId.value = "";
+      document.getElementById("adminCode").value = "";
+      document.getElementById("controlId").value = "";
+      document.getElementById("photoPreview").style.display = "none";
     } catch (error) {
       console.error("登録エラー:", error);
       alert("登録に失敗しました。もう一度お試しください。");
+    }
+  });
+
+  // ✅ 写真プレビュー
+  const photoInput = document.getElementById("photoInput");
+  const photoPreview = document.getElementById("photoPreview");
+
+  photoInput.addEventListener("change", () => {
+    const file = photoInput.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        photoPreview.src = reader.result;
+        photoPreview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    } else {
+      photoPreview.src = "";
+      photoPreview.style.display = "none";
     }
   });
 
