@@ -5,6 +5,49 @@ body {
   padding: 2em;
 }
 
+.system-header {
+  background-color: #1a1a2e;
+  color: white;
+  padding: 0.8em 1em;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1em;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.menu-toggle-icon {
+  font-size: 1.6em;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.system-title {
+  font-size: 1.1em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.user-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 0.85em;
+  color: #ddd;
+  gap: 0.3em;
+}
+
 #registerPanel {
   background-color: #fff;
   border-left: 4px solid #1a1a2e;
@@ -12,12 +55,7 @@ body {
   border-radius: 8px;
   box-shadow: 0 0 6px rgba(0,0,0,0.05);
   max-width: 600px;
-  margin: auto;
-}
-
-#registerPanel h2 {
-  margin-bottom: 1em;
-  color: #1a1a2e;
+  margin: 2em auto;
 }
 
 form {
@@ -37,7 +75,7 @@ input, select {
   font-size: 1em;
 }
 
-button {
+button[type="submit"] {
   background-color: #1a1a2e;
   color: white;
   padding: 0.8em;
@@ -45,8 +83,63 @@ button {
   border-radius: 6px;
   cursor: pointer;
   font-size: 1em;
+  transition: background-color 0.2s ease;
 }
 
-button:hover {
+button[type="submit"]:hover {
   background-color: #333;
+}
+
+/* QR読み取りボタン（並列配置用） */
+.input-with-scan button {
+  background-color: #1a1a2e;
+  color: white;
+  border: none;
+  padding: 0.6em 0.8em;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+}
+
+.input-with-scan button:hover {
+  background-color: #333;
+}
+
+/* スマホ対応 */
+@media screen and (max-width: 768px) {
+  body {
+    padding: 1em;
+  }
+
+  #registerPanel {
+    padding: 1em;
+    margin: 1em;
+  }
+
+  .header-top {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .header-left {
+    justify-content: center;
+    margin-bottom: 0.5em;
+  }
+
+  .user-meta {
+    align-items: center;
+    font-size: 0.85em;
+    gap: 0.3em;
+  }
+
+  .input-with-scan {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .input-with-scan button {
+    margin-top: 0.4em;
+  }
 }
