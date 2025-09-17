@@ -170,4 +170,47 @@ button[type="submit"]:hover {
     margin-top: 0.4em;
     width: 100%;
   }
+  /* 📷 カメラオーバーレイ全体 */
+#qrOverlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+}
+
+/* 📷 QR読み取り領域 */
+#qr-reader {
+  width: 300px;
+  max-width: 90vw;
+  background-color: #fff;
+  padding: 1em;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
+}
+
+/* 🔘 閉じるボタン */
+#qrOverlay button {
+  margin-top: 1em;
+  padding: 0.5em 1.5em;
+  font-size: 1rem;
+  background-color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+#qrOverlay button:hover {
+  background-color: #f0f0f0;
+}
 }
