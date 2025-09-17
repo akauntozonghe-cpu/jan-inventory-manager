@@ -1,13 +1,11 @@
-// Firebase初期化
+// 📦 Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
-  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "inventory-app-312ca",
   storageBucket: "inventory-app-312ca.appspot.com",
   messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
+  appId: "1:245219344089:web:e46105927c302e6a5788c8"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -15,7 +13,7 @@ const db = firebase.firestore();
 const auth = firebase.auth();
 
 
-// ヘッダー初期化処理
+// 🕒 ヘッダー初期化処理
 function startHeaderLogic() {
   // 現在時刻の更新
   setInterval(() => {
@@ -72,11 +70,8 @@ function startHeaderLogic() {
 
         document.getElementById("responsibleUser").textContent = `👑 ${name}（${role}）`;
 
-        if (role === "管理者") {
-          document.getElementById("adminOnlyField").style.display = "block";
-        } else {
-          document.getElementById("adminOnlyField").style.display = "none";
-        }
+        document.getElementById("adminOnlyField").style.display =
+          role === "管理者" ? "block" : "none";
       } catch (err) {
         console.error("ユーザー情報取得失敗:", err);
         document.getElementById("responsibleUser").textContent = "👑 ログイン中：取得失敗";
@@ -90,7 +85,7 @@ function startHeaderLogic() {
 }
 
 
-// 管理番号生成ロジック
+// 🧮 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
 }
@@ -122,7 +117,7 @@ async function applyAutoGenerate() {
 }
 
 
-// 商品登録処理
+// 📥 商品登録処理
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
@@ -171,7 +166,7 @@ function startScan(targetId) {
     { fps: 10, qrbox: 250 },
     (decodedText) => {
       document.getElementById(targetId).value = decodedText;
-      stopScan();
+      stopScan(); // 読み取り成功 → 自動閉じる
     },
     (errorMessage) => {
       console.warn("読み取り失敗:", errorMessage);
@@ -191,7 +186,7 @@ function stopScan() {
 }
 
 function closeQR() {
-  stopScan();
+  stopScan(); // 手動閉じるボタン対応
 }
 
 function scanJAN() {
@@ -205,7 +200,7 @@ function scanLocation() {
 }
 
 
-// メニュー操作（仮）
+// 🧭 メニュー操作（仮）
 function toggleMenu() {
   alert("メニュー機能は準備中です。");
 }
