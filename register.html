@@ -16,32 +16,21 @@
 </head>
 <body>
 
-  <!-- ヘッダー（共通化） -->
+  <!-- ヘッダー -->
   <div id="headerContainer"></div>
   <script>
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-        startHeaderLogic(); // ヘッダー初期化
+        startHeaderLogic();
       });
   </script>
 
-  <!-- 📷 カメラオーバーレイ（読み取り儀式） -->
-  <div id="qrOverlay" style="
-    display: none;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    background-color: rgba(0,0,0,0.85);
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-  ">
-    <div id="qr-reader" style="width: 300px; background: #fff; padding: 1em; border-radius: 8px;"></div>
-    <button onclick="closeQR()" style="margin-top: 1em; padding: 0.5em 1em;">閉じる</button>
+  <!-- 📷 QR読み取り儀式オーバーレイ -->
+  <div id="qrOverlay">
+    <div id="qr-reader"></div>
+    <button onclick="closeQR()">閉じる</button>
   </div>
 
   <!-- 商品登録フォーム -->
