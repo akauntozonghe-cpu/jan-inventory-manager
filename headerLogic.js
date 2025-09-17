@@ -21,38 +21,6 @@ const lastJudgment = document.getElementById("lastJudgment");
 const clock = document.getElementById("clock");
 const adminMenuItem = document.getElementById("adminMenuItem");
 
-// メニュー開閉
-function toggleMenu() {
-  const menu = document.getElementById("headerMenu");
-  if (menu) {
-    menu.style.display = menu.style.display === "none" ? "block" : "none";
-  }
-}
-
-// メニュー外クリックで閉じる
-function closeMenu(event) {
-  if (event.target.tagName !== "A") {
-    const menu = document.getElementById("headerMenu");
-    if (menu) menu.style.display = "none";
-  }
-}
-
-// ホームに戻る
-function goHome() {
-  window.location.href = "home.html";
-}
-
-// ログアウト処理
-function logout() {
-  signOut(auth).then(() => {
-    alert("ログアウトしました");
-    window.location.href = "index.html";
-  }).catch((error) => {
-    console.error("ログアウト失敗:", error);
-    alert("ログアウトに失敗しました");
-  });
-}
-
 // 現在時刻の更新（〇〇月〇〇日（〇）〇〇:〇〇:〇〇）
 function updateClock() {
   const now = new Date();
@@ -63,12 +31,35 @@ function updateClock() {
   const hour = now.getHours().toString().padStart(2, "0");
   const minute = now.getMinutes().toString().padStart(2, "0");
   const second = now.getSeconds().toString().padStart(2, "0");
-
   const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
   if (clock) clock.textContent = `⏱ 現在：${formatted}`;
 }
 setInterval(updateClock, 1000);
 updateClock();
+
+// メニュー制御
+function toggleMenu() {
+  const menu = document.getElementById("headerMenu");
+  if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none";
+}
+function closeMenu(event) {
+  if (event.target.tagName !== "A") {
+    const menu = document.getElementById("headerMenu");
+    if (menu) menu.style.display = "none";
+  }
+}
+function goHome() {
+  window.location.href = "home.html";
+}
+function logout() {
+  signOut(auth).then(() => {
+    alert("ログアウトしました");
+    window.location.href = "index.html";
+  }).catch((error) => {
+    console.error("ログアウト失敗:", error);
+    alert("ログアウトに失敗しました");
+  });
+}
 
 // 認証状態の監視と責任者表示
 onAuthStateChanged(auth, async (user) => {
@@ -84,11 +75,10 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  let role = ""; // スコープ外でも使えるように宣言
-
+  let role = "";
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
-    if (!userDoc.exists()) {
+    if (!userDoc.exists) {
       console.warn("ユーザードキュメントが存在しません");
       return;
     }
@@ -100,16 +90,13 @@ onAuthStateChanged(auth, async (user) => {
     if (responsibleUser) {
       responsibleUser.textContent = `👑 ${name}（${role}）`;
     }
+    if (role === "管理者" && adminMenuItem) {
+      adminMenuItem.style.display = "block";
+    }
   } catch (err) {
     console.error("責任者情報取得失敗:", err);
   }
 
-  // 管理者メニュー表示
-  if (role === "管理者" && adminMenuItem) {
-    adminMenuItem.style.display = "block";
-  }
-
-  // 最終ログイン取得
   try {
     const q = query(
       collection(db, "loginLogs"),
@@ -135,7 +122,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// 🔓 グローバル登録（HTMLから呼び出す用）
+// グローバル関数登録（HTMLから呼び出す用）
 window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;
