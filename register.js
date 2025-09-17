@@ -145,12 +145,13 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // ✅ 写真プレビュー
+  document.addEventListener("DOMContentLoaded", () => {
   const photoInput = document.getElementById("photoInput");
   const photoPreview = document.getElementById("photoPreview");
 
   photoInput.addEventListener("change", () => {
     const file = photoInput.files[0];
-    if (file) {
+    if (file && file.type.startsWith("image/")) {
       const reader = new FileReader();
       reader.onload = () => {
         photoPreview.src = reader.result;
@@ -162,6 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
       photoPreview.style.display = "none";
     }
   });
+});
 
   // ✅ 管理者表示制御
   const responsibleUser = document.getElementById("responsibleUser");
