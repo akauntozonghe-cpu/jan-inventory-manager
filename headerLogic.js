@@ -53,11 +53,18 @@ function logout() {
   });
 }
 
-// 現在時刻の更新
+// 現在時刻の更新（〇〇月〇〇日（〇）〇〇:〇〇:〇〇）
 function updateClock() {
   const now = new Date();
-  const options = { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" };
-  const formatted = now.toLocaleString("ja-JP", options);
+  const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
+  const weekday = weekdayMap[now.getDay()];
+  const month = now.getMonth() + 1;
+  const day = now.getDate();
+  const hour = now.getHours().toString().padStart(2, "0");
+  const minute = now.getMinutes().toString().padStart(2, "0");
+  const second = now.getSeconds().toString().padStart(2, "0");
+
+  const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
   if (clock) clock.textContent = `⏱ 現在：${formatted}`;
 }
 setInterval(updateClock, 1000);
@@ -72,20 +79,38 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const uid = localStorage.getItem("uid");
-  if (!uid) return;
+  if (!uid) {
+    console.warn("UIDが未保存です");
+    return;
+  }
+
+  let role = ""; // スコープ外でも使えるように宣言
 
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
-    const userData = userDoc.data();
-    const name = userData?.name || "不明";
-    const role = userData?.role || "未設定";
-
-    if (responsibleUser) responsibleUser.textContent = `👑 ${name}（${role}）`;
-
-    if (role === "管理者" && adminMenuItem) {
-      adminMenuItem.style.display = "block";
+    if (!userDoc.exists()) {
+      console.warn("ユーザードキュメントが存在しません");
+      return;
     }
 
+    const userData = userDoc.data();
+    const name = userData?.name || "不明";
+    role = userData?.role || "未設定";
+
+    if (responsibleUser) {
+      responsibleUser.textContent = `👑 ${name}（${role}）`;
+    }
+  } catch (err) {
+    console.error("責任者情報取得失敗:", err);
+  }
+
+  // 管理者メニュー表示
+  if (role === "管理者" && adminMenuItem) {
+    adminMenuItem.style.display = "block";
+  }
+
+  // 最終ログイン取得
+  try {
     const q = query(
       collection(db, "loginLogs"),
       where("uid", "==", uid),
@@ -96,11 +121,17 @@ onAuthStateChanged(auth, async (user) => {
     if (!snapshot.empty) {
       const log = snapshot.docs[0].data();
       const ts = new Date(log.timestamp);
-      const formatted = ts.toLocaleString("ja-JP", { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" });
+      const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
+      const weekday = weekdayMap[ts.getDay()];
+      const month = ts.getMonth() + 1;
+      const day = ts.getDate();
+      const hour = ts.getHours().toString().padStart(2, "0");
+      const minute = ts.getMinutes().toString().padStart(2, "0");
+      const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}`;
       if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
     }
   } catch (err) {
-    console.error("責任者情報取得失敗:", err);
+    console.error("ログイン履歴取得失敗:", err);
   }
 });
 
