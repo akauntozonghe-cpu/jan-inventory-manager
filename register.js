@@ -1,4 +1,3 @@
-// Firebase初期化（1回だけ宣言）
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -10,7 +9,7 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); // ← 初期化後に定義
+const db = firebase.firestore();
 
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
@@ -28,6 +27,10 @@ async function getExistingCount(adminCode) {
 async function applyAutoGenerate() {
   const jan = document.getElementById("janInput").value.trim();
   const lot = document.querySelector("[name='lot']").value.trim();
+  if (!jan || !lot) {
+    alert("JANコードとLot番号は必須です。");
+    return;
+  }
   const adminCode = generateAdminCode(jan, lot);
   const count = await getExistingCount(adminCode);
   const controlId = generateControlId(adminCode, count);
@@ -57,8 +60,16 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
     timestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
 
-  await db.collection("items").add(data);
-  alert("登録完了：痕跡が記録されました");
+  try {
+    await db.collection("items").add(data);
+    alert("登録完了：痕跡が記録されました");
+    form.reset();
+    form.adminCode.value = "";
+    form.controlId.value = "";
+  } catch (error) {
+    console.error("登録エラー:", error);
+    alert("登録に失敗しました。もう一度お試しください。");
+  }
 });
 
 // 管理者表示制御

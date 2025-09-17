@@ -5,50 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>商品登録</title>
   <link rel="stylesheet" href="register.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
+  <!-- Firebase CDN互換版（ブラウザ対応） -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <script src="register.js" defer></script>
 </head>
 <body>
 
   <!-- 🧭 空間の顔（ホームと同じヘッダー） -->
-  <header class="system-header">
-    <div class="header-top">
-      <div class="header-left">
-        <button class="menu-toggle-icon" onclick="toggleMenu()">☰</button>
-        <span class="system-title" onclick="goToPage('home')">在庫管理</span>
-      </div>
-      <div class="user-meta">
-        <span id="responsibleUser">👑 村本悠気（管理者）</span>
-        <span id="lastJudgment">🕒 最終判断：2025/09/17(水) 13:48:00</span>
-        <span id="clock">⏱ 現在：2025/09/17(水) 13:48:00</span>
-      </div>
-    </div>
-  </header>
-
-  <!-- 🧭 商品登録フォーム -->
-  <section id="registerPanel">
-    <h2>📥 商品登録</h2>
-    <form id="registerForm">
-      <!-- 識別 -->
-      <label>JANコード：</label>
-      <div class="input-with-scan">
-        <input type="text" name="jan" id="janInput" required />
-        <button type="button" onclick="scanJAN()">📷 読み取る</button>
-      </div><!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>商品登録</title>
-  <link rel="stylesheet" href="register.css" />
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore.js"></script>
-  <script src="register.js" defer></script>
-</head>
-<body>
-
-  <!-- ヘッダー（ホームと同じ構成） -->
   <header class="system-header">
     <div class="header-top">
       <div class="header-left">
@@ -63,7 +27,7 @@
     </div>
   </header>
 
-  <!-- 商品登録フォーム -->
+  <!-- 🧭 商品登録フォーム -->
   <section id="registerPanel">
     <h2>📥 商品登録</h2>
     <form id="registerForm">
@@ -110,69 +74,6 @@
       </select>
 
       <!-- 分類・保管 -->
-      <label>大分類：</label>
-      <div class="input-with-scan">
-        <input type="text" name="categoryLarge" id="categoryLarge" placeholder="例：医薬品" />
-        <button type="button" onclick="scanCategory()">📷 読み取る</button>
-      </div>
-
-      <label>保管場所：</label>
-      <div class="input-with-scan">
-        <input type="text" name="location" id="location" placeholder="例：薬棚A-3" />
-        <button type="button" onclick="scanLocation()">📷 読み取る</button>
-      </div>
-
-      <label>小分類：</label>
-      <input type="text" name="categorySmall" />
-
-      <label>メーカー名：</label>
-      <input type="text" name="maker" />
-
-      <label>写真：</label>
-      <input type="file" name="photo" accept="image/*" />
-
-      <button type="submit">登録する</button>
-    </form>
-  </section>
-</body>
-</html>
-
-      <label>Lot.No / 製造番号：</label>
-      <input type="text" name="lot" required />
-
-      <!-- 自動生成選択 -->
-      <label>
-        <input type="checkbox" id="autoGenerate" checked />
-        管理番号・管理区別番号を自動生成する
-      </label>
-
-      <label>管理番号：</label>
-      <input type="text" name="controlId" readonly />
-
-      <div id="adminOnlyField" style="display: none;">
-        <label>管理区別番号：</label>
-        <input type="text" name="adminCode" readonly />
-      </div>
-
-      <!-- 商品情報 -->
-      <label>商品名：</label>
-      <input type="text" name="name" required />
-
-      <label>数量：</label>
-      <input type="number" name="quantity" min="1" required />
-
-      <label>数量単位：</label>
-      <select name="unit">
-        <option value="個">個</option>
-        <option value="パック">パック</option>
-        <option value="セット">セット</option>
-        <option value="袋">袋</option>
-        <option value="本">本</option>
-        <option value="枚">枚</option>
-        <option value="箱">箱</option>
-      </select>
-
-      <!-- 分類・保管（QR＋手入力） -->
       <label>大分類：</label>
       <div class="input-with-scan">
         <input type="text" name="categoryLarge" id="categoryLarge" placeholder="例：医薬品" />
