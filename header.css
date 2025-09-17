@@ -1,69 +1,70 @@
-/* 固定ヘッダー全体 */
-.fixed-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  background-color: #2c3e50;
-  color: white;
-  padding: 12px 20px;
+/* ヘッダー全体 */
+#systemHeader {
+  background-color: #222;
+  color: #fff;
+  padding: 1em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  font-size: 0.95rem;
+}
+
+/* タイトルとハンバーガー */
+.headerTop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
 
-/* 左側：タイトル＋ハンバーガー */
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.fixed-header h1 {
+.headerTop h1 {
   margin: 0;
-  font-size: 1.6em;
-  cursor: pointer;
-  color: #ffffff;
-}
-.menu-toggle {
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: white;
-  cursor: pointer;
-  padding: 8px;
-  border-radius: 6px;
-}
-.menu-toggle:hover {
-  background-color: rgba(255,255,255,0.2);
+  font-size: 1.4rem;
 }
 
-/* 右側：現在時刻 */
-.header-right {
-  text-align: right;
-}
-.timestamp {
-  font-size: 1em;
-  font-weight: bold;
-  color: #ffffff;
+#menuToggle {
+  font-size: 1.5rem;
+  cursor: pointer;
+  user-select: none;
+  padding: 0.2em 0.5em;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
 }
 
-/* レスポンシブ対応 */
-@media screen and (max-width: 600px) {
-  .fixed-header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 10px 15px;
-  }
-  .header-right {
-    margin-top: 6px;
-    text-align: left;
-  }
-  .fixed-header h1 {
-    font-size: 1.4em;
-  }
-  .timestamp {
-    font-size: 0.95em;
-  }
+#menuToggle:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* メニュー領域 */
+#headerMenu {
+  margin-top: 1em;
+}
+
+#headerMenu ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+#headerMenu li {
+  margin: 0.5em 0;
+}
+
+#headerMenu a {
+  color: #fff;
+  text-decoration: none;
+  padding: 0.3em 0.5em;
+  display: inline-block;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+#headerMenu a:hover {
+  background-color: rgba(255,255,255,0.1);
+}
+
+/* 資格・判定・時刻の表示 */
+.headerStatus {
+  margin-top: 1em;
+}
+
+.headerStatus div {
+  margin: 0.3em 0;
 }

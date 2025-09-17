@@ -3,70 +3,108 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>在庫管理システム</title>
-  <link rel="icon" href="icon-192.png" type="image/png" />
-  <link rel="manifest" href="manifest.json" />
+  <title>ホーム - 在庫管理</title>
+  <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="home.css" />
-  <script type="module" src="home.js"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+      authDomain: "inventory-app-312ca.firebaseapp.com",
+      projectId: "inventory-app-312ca",
+      storageBucket: "inventory-app-312ca.appspot.com",
+      messagingSenderId: "245219344089",
+      appId: "1:245219344089:web:e46105927c302e6a5788c8"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
-  <!-- 🧭 空間の顔 -->
- <header class="system-header">
-  <div class="header-top">
-    <div class="header-left">
-      <button class="menu-toggle-icon" onclick="toggleMenu()">☰</button>
-      <span class="system-title" onclick="goToPage('home')">在庫管理</span>
-    </div>
-    <div class="user-meta">
-      <span id="responsibleUser">👑 村本悠気（管理者）</span>
-      <span id="lastJudgment">🕒 最終判断：2025/09/16(火) 14:57:53</span>
-      <span id="clock">⏱ 現在：2025/09/16(火) 15:45:00</span>
-    </div>
-  </div>
-</header>
 
-  <!-- 🧭 空間の意志 -->
-  <nav id="mainMenu" style="display: none;">
-  <button onclick="expandMenu('register')">📥<span>商品登録</span></button>
-  <button onclick="expandMenu('list')">📦<span>商品一覧</span></button>
-  <button onclick="expandMenu('market')">🛒<span>フリマ</span></button>
-  <button onclick="expandMenu('report')">📊<span>報告</span></button>
-  <button onclick="expandMenu('admin')">🧑‍💼<span>管理者</span></button>
-  <button onclick="expandMenu('settings')">⚙️<span>設定</span></button>
-</nav>
+  <!-- ヘッダー -->
+  <div id="headerContainer"></div>
+  <script>
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
+        const script = document.createElement("script");
+        script.src = "common/headerLogic.js";
+        script.onload = () => {
+          if (typeof startHeaderLogic === "function") startHeaderLogic();
+        };
+        document.body.appendChild(script);
+      });
+  </script>
 
-  <!-- 🧭 空間の応答 -->
-  <div id="menuDetail"></div>
+  <!-- ホーム本体 -->
+  <main id="homeMain">
+    <h2>🏠 ホーム</h2>
 
-  <!-- 🧭 空間の記憶と判断 -->
-  <main>
-    <div id="adminModeBanner" style="display: none;">
-      👑 管理者モード：一時介入中（操作は記録されます）
-    </div>
-
-    <section id="dashboard">
-      <h2>📊 状況サマリー</h2>
-      <div id="inventoryStatus" class="summary-group"></div>
-      <div id="urgentItems" class="summary-group"></div>
-      <div id="calendarInfo" class="summary-group"></div>
-      <div id="aiSummary" class="summary-group"></div>
-      <div id="aiInventorySuggestions" class="summary-group"></div>
-      <div id="marketInfo" class="summary-group"></div>
-      <div id="aiHistory" class="summary-group"></div>
+    <section>
+      <h3>📊 状況サマリー</h3>
+      <ul>
+        <li>在庫あり：商品C</li>
+        <li>不足：商品A</li>
+        <li>廃棄予定：商品D</li>
+      </ul>
     </section>
 
-    <section id="settingsPanel" class="admin-only" style="display: none;">
-      <h2>⚙️ 設定</h2>
-      <p>バージョン：v1.0.0</p>
-      <p>履歴：ログイン・判断・操作</p>
+    <section>
+      <h3>⏳ 期限の近いもの</h3>
+      <ul>
+        <li>商品B（本日）</li>
+        <li>商品C（あと1日）</li>
+        <li>商品F（あと1日）</li>
+      </ul>
     </section>
 
-    <section id="adminPanel" class="admin-only" style="display: none;">
-      <h2>🧑‍💼 管理者パネル</h2>
-      <p>すべての履歴・機能にアクセス可能</p>
+    <section>
+      <h3>📅 情報カレンダー</h3>
+      <ul>
+        <li>発注日：10/01</li>
+        <li>商品E（16:00）</li>
+        <li>商品F：期限更新（明日）</li>
+        <li>フリマ更新（明日）</li>
+      </ul>
     </section>
 
-    <button class="logout-btn" onclick="logout()">ログアウト</button>
+    <section>
+      <h3>⚠️ 多機能AIの警告</h3>
+      <ul>
+        <li>商品C：「在庫が必要です」</li>
+        <li>商品F：「期限が近いです」</li>
+      </ul>
+    </section>
+
+    <section>
+      <h3>🤖 AI在庫提案</h3>
+      <table>
+        <thead>
+          <tr><th>商品</th><th>状況</th><th>提案</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>商品A</td><td>適期</td><td>出品または値下げ</td></tr>
+          <tr><td>商品B</td><td>在庫少</td><td>出品または値下げ</td></tr>
+          <tr><td>商品C</td><td>在庫なし</td><td>発注または提案</td></tr>
+          <tr><td>商品D</td><td>不足</td><td>提案または発注</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>🛍️ フリマ情報</h3>
+      <ul>
+        <li>商品B：価格改（¥1200）</li>
+        <li>商品C：期限（9/13）</li>
+        <li>商品F：期限（9/13）</li>
+      </ul>
+    </section>
   </main>
+
 </body>
 </html>

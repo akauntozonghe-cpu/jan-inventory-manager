@@ -1,13 +1,25 @@
-<header class="system-header">
-  <div class="header-top">
-    <div class="header-left">
-      <button class="menu-toggle-icon" onclick="toggleMenu()">☰</button>
-      <span class="system-title" onclick="goToPage('home')">在庫管理</span>
-    </div>
-    <div class="user-meta">
-      <span id="responsibleUser">👑 ログイン中：未取得</span>
-      <span id="lastJudgment">🕒 最終判定：未取得</span>
-      <span id="clock">⏱ 現在：--:--:--</span>
-    </div>
+<header id="systemHeader">
+  <div class="headerTop">
+    <h1>📦 在庫管理</h1>
+    <div id="menuToggle" onclick="toggleMenu()">☰</div>
+  </div>
+
+  <nav id="headerMenu" style="display: none;">
+    <ul>
+      <li><a href="home.html">🏠 ホーム</a></li>
+      <li><a href="register.html">📥 商品登録</a></li>
+      <li><a href="list.html">📋 商品一覧</a></li>
+      <li><a href="fleamarket.html">🛍️ フリマ</a></li>
+      <li><a href="report.html">📑 報告</a></li>
+      <li id="adminMenuItem" style="display: none;"><a href="admin.html">🛡️ 管理者</a></li>
+      <li><a href="settings.html">⚙️ 設定</a></li>
+      <li><a href="#" onclick="logout()">🚪 ログアウト</a></li>
+    </ul>
+  </nav>
+
+  <div class="headerStatus">
+    <div id="responsibleUser">👑 ログイン中：未取得</div>
+    <div id="lastJudgment">🕒 最終ログイン：未取得</div>
+    <div id="clock">⏱ 現在：--月--日（--）--:--:--</div>
   </div>
 </header>
