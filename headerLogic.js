@@ -114,7 +114,8 @@ onAuthStateChanged(auth, async (user) => {
       const day = ts.getDate();
       const hour = ts.getHours().toString().padStart(2, "0");
       const minute = ts.getMinutes().toString().padStart(2, "0");
-      const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}`;
+      const second = ts.getSeconds().toString().padStart(2, "0");
+      const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
       if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
     }
   } catch (err) {
