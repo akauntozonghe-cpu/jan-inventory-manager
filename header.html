@@ -1,28 +1,43 @@
-<div id="systemHeader">
-  <div class="headerLeft">
-    <div id="menuToggle" onclick="toggleMenu()">☰</div>
-    <img src="icon-192.png" alt="空間アイコン" class="headerIcon" />
-    <div class="headerTitle" onclick="goHome()">在庫管理</div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>在庫管理システム</title>
+  <link rel="icon" href="icon-192.png" />
+  <link rel="stylesheet" href="header.css" />
+</head>
+<body>
+
+  <!-- ヘッダー -->
+  <div id="systemHeader">
+    <div class="headerLeft">
+      <div id="menuToggle" onclick="toggleMenu()">☰</div>
+      <img src="icon-192.png" alt="空間アイコン" class="headerIcon" />
+      <div class="headerTitle" onclick="goHome()">在庫管理</div>
+    </div>
+
+    <div class="headerRight">
+      <div id="responsibleUser">👑 ログイン中：未取得</div>
+      <div id="lastJudgment">🕒 最終ログイン：未取得</div>
+      <div id="clock">⏱ 現在：--月--日 (--) --:--:--</div>
+    </div>
   </div>
 
-  <div class="headerRight">
-    <div id="responsibleUser">👑 ログイン中：未取得</div>
-    <div id="lastJudgment">🕒 最終ログイン：未取得</div>
-    <div id="clock">⏱ 現在：--月--日 (--) --:--:--</div>
-  </div>
-</div>
+  <!-- メニュー -->
+  <nav id="headerMenu" style="display: none;" onclick="closeMenu(event)">
+    <ul>
+      <li><a href="register.html">📥 商品登録</a></li>
+      <li><a href="list.html">📦 商品一覧</a></li>
+      <li><a href="market.html">🛍️ フリマ</a></li>
+      <li><a href="report.html">📝 報告</a></li>
+      <li id="adminMenuItem" style="display: none;"><a href="admin.html">🛠 管理者</a></li>
+      <li><a href="settings.html">⚙️ 設定</a></li>
+      <li><a href="#" onclick="logout()">🚪 ログアウト</a></li>
+    </ul>
+  </nav>
 
-<nav id="headerMenu" style="display: none;" onclick="closeMenu(event)">
-  <ul>
-    <li><a href="register.html">📥 商品登録</a></li>
-    <li><a href="list.html">📦 商品一覧</a></li>
-    <li><a href="market.html">🛍️ フリマ</a></li>
-    <li><a href="report.html">📝 報告</a></li>
-    <li id="adminMenuItem" style="display: none;"><a href="admin.html">🛠 管理者</a></li>
-    <li><a href="settings.html">⚙️ 設定</a></li>
-    <li><a href="#" onclick="logout()">🚪 ログアウト</a></li>
-  </ul>
-</nav>
-
-<!-- JavaScript読み込み（必ずbodyの末尾） -->
-<script type="module" src="headerLogic.js"></script>
+  <!-- JavaScript読み込み（必ずbodyの末尾） -->
+  <script type="module" src="headerLogic.js"></script>
+</body>
+</html>
