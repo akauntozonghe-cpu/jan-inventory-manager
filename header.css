@@ -68,3 +68,10 @@
 .headerStatus div {
   margin: 0.3em 0;
 }
+
+.headerIcon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 4px;
+}
