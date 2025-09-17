@@ -73,6 +73,8 @@ input, select {
   border-radius: 6px;
   border: 1px solid #ccc;
   font-size: 1em;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 button[type="submit"] {
@@ -90,20 +92,43 @@ button[type="submit"]:hover {
   background-color: #333;
 }
 
-/* QR読み取りボタン（並列配置用） */
-.input-with-scan button {
+/* 読み取り・自動生成ボタンの並列配置 */
+.input-with-scan,
+.input-with-button {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.input-with-scan input,
+.input-with-button input {
+  flex: 1;
+}
+
+.input-with-scan button,
+.input-with-button button {
   background-color: #1a1a2e;
   color: white;
   border: none;
   padding: 0.6em 0.8em;
   border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9em;
+  font-size: 0.95em;
   white-space: nowrap;
 }
 
-.input-with-scan button:hover {
+.input-with-scan button:hover,
+.input-with-button button:hover {
   background-color: #333;
+}
+
+/* 管理者専用フィールドのスタイル */
+#adminOnlyField {
+  margin-top: 0.5em;
+  padding: 0.5em;
+  background-color: #f9f9f9;
+  border-left: 3px solid #999;
+  border-radius: 4px;
 }
 
 /* スマホ対応 */
@@ -134,12 +159,15 @@ button[type="submit"]:hover {
     gap: 0.3em;
   }
 
-  .input-with-scan {
+  .input-with-scan,
+  .input-with-button {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .input-with-scan button {
+  .input-with-scan button,
+  .input-with-button button {
     margin-top: 0.4em;
+    width: 100%;
   }
 }

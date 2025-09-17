@@ -1,3 +1,13 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.appspot.com",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
+};
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
@@ -14,30 +24,28 @@ async function getExistingCount(adminCode) {
   return snapshot.size;
 }
 
+async function applyAutoGenerate() {
+  const jan = document.getElementById("janInput").value.trim();
+  const lot = document.querySelector("[name='lot']").value.trim();
+  const adminCode = generateAdminCode(jan, lot);
+  const count = await getExistingCount(adminCode);
+  const controlId = generateControlId(adminCode, count);
+
+  document.querySelector("[name='adminCode']").value = adminCode;
+  document.querySelector("[name='controlId']").value = controlId;
+
+  alert("自動生成が適用されました");
+}
+
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const form = e.target;
 
-  const jan = form.jan.value.trim();
-  const lot = form.lot.value.trim();
-  const auto = document.getElementById("autoGenerate").checked;
-
-  let adminCode = form.adminCode.value;
-  let controlId = form.controlId.value;
-
-  if (auto) {
-    adminCode = generateAdminCode(jan, lot);
-    const count = await getExistingCount(adminCode);
-    controlId = generateControlId(adminCode, count);
-    form.adminCode.value = adminCode;
-    form.controlId.value = controlId;
-  }
-
   const data = {
-    jan,
-    lot,
-    adminCode,
-    controlId,
+    jan: form.jan.value.trim(),
+    lot: form.lot.value.trim(),
+    adminCode: form.adminCode.value.trim(),
+    controlId: form.controlId.value.trim(),
     name: form.name.value.trim(),
     quantity: parseInt(form.quantity.value),
     unit: form.unit.value,
@@ -58,13 +66,20 @@ if (isAdmin) {
   document.getElementById("adminOnlyField").style.display = "block";
 }
 
-// QR読み取り（仮：実装はライブラリ連携）
+// 読み取りボタン（仮）
 function scanJAN() {
-  alert("JANコード読み取り機能は未実装です（QRライブラリと連携可能）");
+  alert("JANコード読み取り機能は準備中です。手入力も可能です。");
 }
 function scanCategory() {
-  alert("大分類のQR読み取り機能は未実装です");
+  alert("大分類のQR読み取り機能は準備中です。手入力をご利用ください。");
 }
 function scanLocation() {
-  alert("保管場所のQR読み取り機能は未実装です");
+  alert("保管場所のQR読み取り機能は準備中です。手入力をご利用ください。");
+}
+
+function toggleMenu() {
+  alert("メニュー機能は準備中です。");
+}
+function goToPage(page) {
+  alert(`「${page}」ページに移動します（仮）`);
 }
