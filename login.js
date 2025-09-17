@@ -1,3 +1,4 @@
+// ✅ モジュール最上位でインポート宣言
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
@@ -5,14 +6,14 @@ import {
   query,
   where,
   getDocs,
-  addDoc
+  addDoc,
+  Timestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import {
   getAuth,
   signInAnonymously,
   setPersistence,
-  browserLocalPersistence,
-  onAuthStateChanged
+  browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // 🔧 Firebase初期化
@@ -78,7 +79,7 @@ window.addEventListener("DOMContentLoaded", () => {
       loginBtn.dataset.userRole = role;
       loginBtn.dataset.userUid = uid;
 
-      localStorage.setItem("uid", uid); // Firestore側のUIDを保存
+      localStorage.setItem("uid", uid); // ✅ Firestore側のUIDを保存
 
       welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
 
@@ -106,17 +107,16 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // 🔐 Firebase Authentication に匿名ログイン
       await setPersistence(auth, browserLocalPersistence);
       await signInAnonymously(auth);
 
-      // 📝 Firestore にログイン履歴を記録
+      // ✅ ログイン履歴を記録（Firestore Timestamp型）
       const logData = {
         uid,
         id,
         name,
         role,
-        timestamp: new Date().toISOString(),
+        timestamp: Timestamp.now(),
         version: "v1.0.0",
         device: `${navigator.platform} / ${navigator.userAgent}`
       };
