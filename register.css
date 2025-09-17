@@ -1,3 +1,125 @@
+/* 全体レイアウト */
+body {
+  font-family: "Segoe UI", "Helvetica Neue", sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f8f8f8;
+  color: #333;
+}
+
+/* ヘッダー領域（外部読み込み） */
+#headerContainer {
+  width: 100%;
+  background-color: #222;
+  color: #fff;
+  padding: 1em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 登録パネル */
+#registerPanel {
+  max-width: 600px;
+  margin: 2em auto;
+  padding: 2em;
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0,0,0,0.1);
+}
+
+/* 見出し */
+#registerPanel h2 {
+  margin-bottom: 1em;
+  font-size: 1.5em;
+  color: #444;
+}
+
+/* ラベルと入力欄 */
+form label {
+  display: block;
+  margin-top: 1em;
+  font-weight: bold;
+}
+
+form input[type="text"],
+form input[type="number"],
+form input[type="file"],
+form select {
+  width: 100%;
+  padding: 0.5em;
+  margin-top: 0.3em;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* スキャン付き入力欄 */
+.input-with-scan {
+  display: flex;
+  gap: 0.5em;
+  align-items: center;
+}
+
+.input-with-scan input {
+  flex: 1;
+}
+
+.input-with-scan button {
+  padding: 0.5em 1em;
+  background-color: #0078d4;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input-with-scan button:hover {
+  background-color: #005fa1;
+}
+
+/* 自動生成ボタン */
+.input-with-button {
+  margin-top: 0.5em;
+}
+
+.input-with-button button {
+  padding: 0.5em 1em;
+  background-color: #444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input-with-button button:hover {
+  background-color: #222;
+}
+
+/* 登録ボタン */
+form button[type="submit"] {
+  margin-top: 2em;
+  padding: 0.75em 2em;
+  font-size: 1rem;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+form button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+/* 管理者専用フィールド */
+#adminOnlyField {
+  margin-top: 1em;
+  padding: 1em;
+  background-color: #f0f8ff;
+  border-left: 4px solid #0078d4;
+  border-radius: 6px;
+}
+
 /* 📷 QR読み取りオーバーレイ */
 #qrOverlay {
   display: none;
@@ -8,7 +130,6 @@
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.85);
   z-index: 9999;
-  display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -16,7 +137,7 @@
   margin: 0;
 }
 
-/* 📷 QR読み取り領域 */
+/* QR読み取り領域 */
 #qr-reader {
   width: 300px;
   max-width: 90vw;
@@ -26,7 +147,7 @@
   box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
-/* 🔘 閉じるボタン */
+/* 閉じるボタン */
 #qrOverlay button {
   margin-top: 1em;
   padding: 0.5em 1.5em;

@@ -5,13 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>商品登録</title>
   <link rel="stylesheet" href="register.css" />
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
-  <!-- QR読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
-  <!-- メインJS -->
   <script src="register.js" defer></script>
 </head>
 <body>
@@ -23,11 +20,11 @@
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-        startHeaderLogic();
+        if (typeof startHeaderLogic === "function") startHeaderLogic();
       });
   </script>
 
-  <!-- 📷 QR読み取り儀式オーバーレイ -->
+  <!-- 📷 QR読み取りオーバーレイ -->
   <div id="qrOverlay">
     <div id="qr-reader"></div>
     <button onclick="closeQR()">閉じる</button>
