@@ -12,7 +12,6 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-
 // 🕒 ヘッダー初期化（資格・時刻・判定）
 function startHeaderLogic() {
   // 現在時刻の更新
@@ -40,7 +39,7 @@ function startHeaderLogic() {
           const raw = log.timestamp;
           let timeString = "";
 
-          if (raw && typeof raw.toDate === "function") {
+          if (raw?.toDate) {
             timeString = raw.toDate().toLocaleString("ja-JP", {
               year: "numeric", month: "2-digit", day: "2-digit",
               hour: "2-digit", minute: "2-digit", second: "2-digit",
@@ -86,7 +85,6 @@ function startHeaderLogic() {
   });
 }
 
-
 // ⚙️ 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
@@ -102,7 +100,7 @@ async function getExistingCount(adminCode) {
 }
 
 async function applyAutoGenerate() {
-  const jan = document.getElementById("janInput").value.trim();
+  const jan = document.querySelector("[name='jan']").value.trim();
   const lot = document.querySelector("[name='lot']").value.trim();
   if (!jan || !lot) {
     alert("JANコードとLot番号は必須です。");
@@ -117,7 +115,6 @@ async function applyAutoGenerate() {
 
   alert("自動生成が適用されました");
 }
-
 
 // 📥 商品登録処理
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
@@ -151,7 +148,6 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
   }
 });
 
-
 // 📷 QR読み取り儀式
 let qrReaderInstance = null;
 
@@ -168,7 +164,7 @@ function startScan(targetId) {
     { fps: 10, qrbox: 250 },
     (decodedText) => {
       document.getElementById(targetId).value = decodedText;
-      stopScan(); // 読み取り成功 → 自動閉じる
+      stopScan();
     },
     (errorMessage) => {
       console.warn("読み取り失敗:", errorMessage);
@@ -188,7 +184,7 @@ function stopScan() {
 }
 
 function closeQR() {
-  stopScan(); // 手動閉じる
+  stopScan();
 }
 
 function scanJAN() {

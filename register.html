@@ -4,14 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>商品登録 - 在庫管理</title>
+
+  <!-- ✅ 共通CSS -->
   <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="register.css" />
 
-  <!-- Firebase SDK -->
+  <!-- ✅ Firebase SDK（compat版） -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+
+  <!-- ✅ QRコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- ✅ Firebase初期化 -->
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
@@ -25,8 +31,7 @@
   </script>
 </head>
 <body>
-
-  <!-- ヘッダー -->
+  <!-- ✅ 固定ヘッダーコンテナ -->
   <div id="headerContainer"></div>
   <script>
     fetch("header.html")
@@ -42,23 +47,43 @@
       });
   </script>
 
-  <!-- 商品登録フォーム -->
-  <section id="registerPanel">
-    <h2>📥 商品登録</h2>
-    <form id="registerForm">
-      <!-- 各入力欄（JAN, Lot, 管理番号, 商品名, 数量など） -->
-      <!-- QR読み取りボタン付き -->
-      <!-- 自動生成ボタン付き -->
-      <!-- 管理者専用フィールド（adminCode） -->
-      <!-- 登録ボタン -->
-    </form>
-  </section>
+  <!-- ✅ 商品登録フォーム -->
+  <main style="margin-top: 80px; padding: 16px;">
+    <section id="registerPanel">
+      <h2>📥 商品登録</h2>
+      <form id="registerForm">
+        <label for="janCode">JANコード：</label>
+        <input type="text" id="janCode" name="janCode" required /><br /><br />
 
-  <div id="qrOverlay">
+        <label for="lotNumber">ロット番号：</label>
+        <input type="text" id="lotNumber" name="lotNumber" required /><br /><br />
+
+        <label for="itemName">商品名：</label>
+        <input type="text" id="itemName" name="itemName" required /><br /><br />
+
+        <label for="quantity">数量：</label>
+        <input type="number" id="quantity" name="quantity" required /><br /><br />
+
+        <label for="adminCode">管理者コード：</label>
+        <input type="text" id="adminCode" name="adminCode" /><br /><br />
+
+        <button type="button" onclick="startQR()">📷 QR読み取り</button>
+        <button type="button" onclick="generateCode()">🔧 管理番号自動生成</button>
+        <button type="submit">✅ 登録する</button>
+      </form>
+    </section>
+
+    <!-- ✅ 登録結果表示 -->
+    <div id="registerMessage" style="margin-top: 16px;"></div>
+  </main>
+
+  <!-- ✅ QR読み取りオーバーレイ -->
+  <div id="qrOverlay" style="display:none;">
     <div id="qr-reader"></div>
     <button onclick="closeQR()">閉じる</button>
   </div>
 
+  <!-- ✅ ページ固有JS -->
   <script src="register.js" defer></script>
 </body>
 </html>
