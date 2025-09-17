@@ -16,19 +16,6 @@
 
   <!-- ✅ バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
-
-  <!-- ✅ Firebase初期化 -->
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.appspot.com",
-      messagingSenderId: "245219344089",
-      appId: "1:245219344089:web:e46105927c302e6a5788c8"
-    };
-    firebase.initializeApp(firebaseConfig);
-  </script>
 </head>
 <body>
   <!-- ✅ ヘッダー読み込み -->
@@ -138,12 +125,12 @@
   </main>
 
   <!-- QR読み取りオーバーレイ -->
-  <div id="qrOverlay">
+  <div id="qrOverlay" style="display:none;">
     <div id="qr-reader"></div>
     <button onclick="closeQR()">閉じる</button>
   </div>
 
-  <!-- ページ固有JS -->
+  <!-- ✅ ページ固有JS -->
   <script src="register.js" defer></script>
 </body>
 </html>
