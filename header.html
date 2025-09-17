@@ -13,13 +13,16 @@
 </div>
 
 <nav id="headerMenu" style="display: none;" onclick="closeMenu(event)">
+ <nav class="menu">
   <ul>
     <li><a href="register.html">📥 商品登録</a></li>
     <li><a href="list.html">📦 商品一覧</a></li>
-    <li><a href="market.html">🛍️ フリマ</a></li>
-    <li><a href="report.html">📝 報告</a></li>
-    <li id="adminMenuItem" style="display: none;"><a href="admin.html">🛠 管理者</a></li>
+    <li><a href="market.html">🛍 フリマ</a></li>
+    <li><a href="inventory.html">📋 棚卸</a></li>
+    <li><a href="report.html">📊 報告</a></li>
+    <li id="adminMenu" style="display: none;"><a href="admin.html">🛡 管理者</a></li>
     <li><a href="settings.html">⚙️ 設定</a></li>
-    <li><a href="#" onclick="logout()">🚪 ログアウト</a></li>
+    <li><a href="logout.html">🚪 ログアウト</a></li>
+    <li><span id="responsibleUser">👤 ログイン中</span></li>
   </ul>
 </nav>
