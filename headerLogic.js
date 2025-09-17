@@ -16,7 +16,7 @@ function startHeaderLogic() {
     const responsibleUser = document.getElementById("responsibleUser");
     const lastJudgment = document.getElementById("lastJudgment");
     const adminMenuItem = document.getElementById("adminMenuItem");
-
+console.log("ログイン中 UID:", user?.uid);
     if (user) {
       try {
         // ユーザー情報取得
