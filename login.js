@@ -7,8 +7,15 @@ import {
   getDocs,
   addDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getAuth,
+  signInAnonymously,
+  setPersistence,
+  browserLocalPersistence,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// Firebase初期化
+// 🔧 Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -20,6 +27,7 @@ const firebaseConfig = {
 };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // 管理者ID一覧
 const adminIds = ["2488", "1011"];
@@ -35,14 +43,14 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // Enterキー対応
+  // ⌨️ Enterキー対応
   document.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !loginBtn.disabled) {
       loginBtn.click();
     }
   });
 
-  // 入力監視
+  // 🔍 入力監視
   userCodeInput.addEventListener("input", async () => {
     const inputId = userCodeInput.value.trim();
     if (!inputId) {
@@ -70,7 +78,7 @@ window.addEventListener("DOMContentLoaded", () => {
       loginBtn.dataset.userRole = role;
       loginBtn.dataset.userUid = uid;
 
-      localStorage.setItem("uid", uid);
+      localStorage.setItem("uid", uid); // Firestore側のUIDを保存
 
       welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
 
@@ -85,7 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ログイン処理
+  // 🚪 ログイン処理
   loginBtn.addEventListener("click", async () => {
     const id = loginBtn.dataset.userId;
     const name = loginBtn.dataset.userName;
@@ -97,33 +105,38 @@ window.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const logData = {
-      uid,
-      id,
-      name,
-      role,
-      timestamp: new Date().toISOString(),
-      version: "v1.0.0",
-      device: `${navigator.platform} / ${navigator.userAgent}`
-    };
-
     try {
+      // 🔐 Firebase Authentication に匿名ログイン
+      await setPersistence(auth, browserLocalPersistence);
+      await signInAnonymously(auth);
+
+      // 📝 Firestore にログイン履歴を記録
+      const logData = {
+        uid,
+        id,
+        name,
+        role,
+        timestamp: new Date().toISOString(),
+        version: "v1.0.0",
+        device: `${navigator.platform} / ${navigator.userAgent}`
+      };
       await addDoc(collection(db, "loginLogs"), logData);
+
       console.log("✅ ログイン履歴を記録しました");
-      console.log("➡️ home.html へ遷移します");
-      window.location.href = "./home.html"; // 相対パスで明示
+      window.location.href = "./home.html";
     } catch (error) {
-      console.error("❌ Firestoreへの記録失敗:", error);
+      console.error("❌ ログイン処理失敗:", error);
+      alert("ログインに失敗しました");
     }
   });
 
-  // 編集ボタン（管理者のみ）
+  // ⚙️ 編集ボタン（管理者のみ）
   editVersionBtn.addEventListener("click", () => {
     alert("バージョン編集画面へ遷移します（管理者専用）");
     // window.location.href = "version-edit.html";
   });
 
-  // UIリセット
+  // 🔄 UIリセット
   function resetUI() {
     loginBtn.classList.remove("active");
     loginBtn.disabled = true;
