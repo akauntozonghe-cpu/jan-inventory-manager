@@ -76,7 +76,7 @@ function toggleMenu() {
 function logout() {
   firebase.auth().signOut().then(() => {
     alert("ログアウトしました");
-    window.location.href = "login.html"; // 必要に応じて変更
+    window.location.href = "index.html"; // 必要に応じて変更
   }).catch((error) => {
     console.error("ログアウト失敗:", error);
     alert("ログアウトに失敗しました");
