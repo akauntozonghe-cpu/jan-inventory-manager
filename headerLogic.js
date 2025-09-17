@@ -15,21 +15,22 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM要素
+// DOM要素取得
 const responsibleUser = document.getElementById("responsibleUser");
 const lastJudgment = document.getElementById("lastJudgment");
 const clock = document.getElementById("clock");
 const adminMenuItem = document.getElementById("adminMenuItem");
 
 // メニュー開閉
-export function toggleMenu() {
+function toggleMenu() {
   const menu = document.getElementById("headerMenu");
   if (menu) {
     menu.style.display = menu.style.display === "none" ? "block" : "none";
   }
 }
 
-export function closeMenu(event) {
+// メニュー外クリックで閉じる
+function closeMenu(event) {
   if (event.target.tagName !== "A") {
     const menu = document.getElementById("headerMenu");
     if (menu) menu.style.display = "none";
@@ -37,12 +38,12 @@ export function closeMenu(event) {
 }
 
 // ホームに戻る
-export function goHome() {
+function goHome() {
   window.location.href = "home.html";
 }
 
-// ログアウト
-export function logout() {
+// ログアウト処理
+function logout() {
   signOut(auth).then(() => {
     alert("ログアウトしました");
     window.location.href = "index.html";
@@ -57,16 +58,16 @@ function updateClock() {
   const now = new Date();
   const options = { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit", second: "2-digit" };
   const formatted = now.toLocaleString("ja-JP", options);
-  clock.textContent = `⏱ 現在：${formatted}`;
+  if (clock) clock.textContent = `⏱ 現在：${formatted}`;
 }
 setInterval(updateClock, 1000);
 updateClock();
 
-// 認証状態の監視と責任者情報の表示
+// 認証状態の監視と責任者表示
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    responsibleUser.textContent = "👑 ログイン中：未取得";
-    lastJudgment.textContent = "🕒 最終ログイン：未取得";
+    if (responsibleUser) responsibleUser.textContent = "👑 ログイン中：未取得";
+    if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：未取得";
     return;
   }
 
@@ -79,14 +80,12 @@ onAuthStateChanged(auth, async (user) => {
     const name = userData?.name || "不明";
     const role = userData?.role || "未設定";
 
-    responsibleUser.textContent = `👑 ${name}（${role}）`;
+    if (responsibleUser) responsibleUser.textContent = `👑 ${name}（${role}）`;
 
-    // 管理者のみメニュー表示
     if (role === "管理者" && adminMenuItem) {
       adminMenuItem.style.display = "block";
     }
 
-    // 最終ログイン取得
     const q = query(
       collection(db, "loginLogs"),
       where("uid", "==", uid),
@@ -98,9 +97,15 @@ onAuthStateChanged(auth, async (user) => {
       const log = snapshot.docs[0].data();
       const ts = new Date(log.timestamp);
       const formatted = ts.toLocaleString("ja-JP", { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" });
-      lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
+      if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
     }
   } catch (err) {
     console.error("責任者情報取得失敗:", err);
   }
 });
+
+// 🔓 グローバル登録（HTMLから呼び出す用）
+window.toggleMenu = toggleMenu;
+window.closeMenu = closeMenu;
+window.goHome = goHome;
+window.logout = logout;
