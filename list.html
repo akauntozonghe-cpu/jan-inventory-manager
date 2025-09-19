@@ -20,7 +20,13 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, set } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      onValue,
+      push,
+      set
+    } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
@@ -44,6 +50,11 @@
     function renderProducts(products) {
       const list = document.getElementById("productList");
       list.innerHTML = "";
+
+      if (products.length === 0) {
+        list.innerHTML = "<p>表示できる商品がありません。</p>";
+        return;
+      }
 
       products.forEach((item, index) => {
         const div = document.createElement("div");
@@ -107,10 +118,11 @@
       document.getElementById("statusMsg").textContent = "変更申請を送信しました。";
     }
 
-    // 初期読み込み
+    // ✅ 初期読み込み（承認済み商品のみ表示）
     onValue(ref(db, "products"), (snapshot) => {
       const data = snapshot.val();
-      allProducts = Object.values(data || {});
+      const all = Object.values(data || {});
+      allProducts = all.filter(p => p.状態 === "承認済"); // ✅ フィルター追加
       renderProducts(allProducts);
     });
   </script>

@@ -14,7 +14,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// ✅ 読み取り儀式（バーコード・QR）＋強制上書き
+// ✅ 読み取り儀式（バーコード・QR）
 let qrReaderInstance = null;
 
 function startScan(targetId) {
@@ -53,34 +53,22 @@ function stopScan() {
   }
 }
 
-function closeQR() {
-  stopScan();
-}
-
-function scanJAN() {
-  startScan("janInput");
-}
-function scanCategory() {
-  startScan("categoryLarge");
-}
-function scanLocation() {
-  startScan("location");
-}
+function closeQR() { stopScan(); }
+function scanJAN() { startScan("janInput"); }
+function scanCategory() { startScan("categoryLarge"); }
+function scanLocation() { startScan("location"); }
 
 // ✅ 管理番号自動生成
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
 }
-
 function generateControlId(adminCode, count) {
   return `${adminCode}-${count + 1}`;
 }
-
 async function getExistingCount(adminCode) {
   const snapshot = await db.collection("items").where("adminCode", "==", adminCode).get();
   return snapshot.size;
 }
-
 async function applyAutoGenerate() {
   const jan = document.querySelector("[name='jan']").value.trim();
   const lot = document.querySelector("[name='lot']").value.trim();
@@ -100,10 +88,27 @@ async function applyAutoGenerate() {
 
 // ✅ DOM構築後の一括処理
 document.addEventListener("DOMContentLoaded", () => {
-  // 商品登録処理
+  // 商品登録処理（資格による分岐）
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;
+    const user = auth.currentUser;
+    if (!user) {
+      alert("ログインが必要です");
+      return;
+    }
+
+    let role = "未設定";
+    try {
+      const userDoc = await db.collection("users").doc(user.uid).get();
+      if (userDoc.exists) {
+        role = userDoc.data()?.role || "未設定";
+      }
+    } catch (err) {
+      console.warn("資格取得失敗:", err);
+    }
+
+    const isAdmin = role === "管理者";
 
     const data = {
       jan: form.jan.value.trim(),
@@ -118,23 +123,23 @@ document.addEventListener("DOMContentLoaded", () => {
       location: form.location.value.trim(),
       categoryLarge: form.categoryLarge.value.trim(),
       categorySmall: form.categorySmall.value.trim(),
-      photo: null, // 写真アップロードは別途
-      status: "保留",
-      createdBy: auth.currentUser?.uid || "unknown",
+      photo: null,
+      status: isAdmin ? "承認済" : "保留",
+      createdBy: user.uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-      await db.collection("items").add(data);
+      const itemRef = await db.collection("items").add(data);
       await db.collection("history").add({
-        type: "登録",
-        actor: data.createdBy,
+        type: isAdmin ? "登録（即承認）" : "登録（保留）",
+        actor: user.uid,
+        targetItem: itemRef.id,
         timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        targetItem: data.controlId,
-        details: { status: "保留", name: data.name }
+        details: { status: data.status, name: data.name }
       });
 
-      alert("登録完了");
+      alert(isAdmin ? "登録完了（即一覧反映）" : "登録完了（承認待ち）");
       form.reset();
       document.getElementById("adminCode").value = "";
       document.getElementById("controlId").value = "";
@@ -148,7 +153,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // 写真プレビュー
   const photoInput = document.getElementById("photoInput");
   const photoPreview = document.getElementById("photoPreview");
-
   if (photoInput && photoPreview) {
     photoInput.addEventListener("change", () => {
       const file = photoInput.files[0];

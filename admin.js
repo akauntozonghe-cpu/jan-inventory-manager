@@ -1,30 +1,111 @@
-const uid = localStorage.getItem("uid");
-const usersRef = collection(db, "users");
-const snapshot = await getDocs(query(usersRef, where("uid", "==", uid)));
+import {
+  getAuth,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc,
+  serverTimestamp,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-if (snapshot.empty) {
-  alert("ユーザー情報が見つかりません。");
-  window.location.href = "login.html";
-}
+const auth = getAuth();
+const db = getFirestore();
 
-const userData = snapshot.docs[0].data();
-const { role } = userData;
+// ✅ 管理者のみアクセス許可
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("ログインが必要です");
+    window.location.href = "index.html";
+    return;
+  }
 
-if (role !== "管理者") {
-  alert("この画面は管理者専用です。");
-  window.location.href = "home.html";
-}
+  const userDoc = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
+  const role = userDoc.docs[0]?.data()?.role || "未設定";
 
-// 全履歴表示（例：actionLogs）
-const logsRef = collection(db, "actionLogs");
-onSnapshot(logsRef, (snapshot) => {
-  const list = document.getElementById("adminActionList");
-  list.innerHTML = "";
-  snapshot.forEach(doc => {
-    const data = doc.data();
-    const time = data.timestamp.toDate().toLocaleString("ja-JP");
-    const li = document.createElement("li");
-    li.textContent = `🧾 ${data.performedBy} が ${data.action}（${time}）`;
-    list.appendChild(li);
-  });
+  if (role !== "管理者") {
+    alert("管理者のみアクセス可能です");
+    window.location.href = "dashboard.html";
+    return;
+  }
+
+  loadPendingItems(); // ✅ 保留一覧表示
+  loadHistory();      // ✅ 履歴表示
 });
+
+// ✅ 保留一覧表示
+async function loadPendingItems() {
+  const q = query(collection(db, "items"), where("status", "==", "保留"));
+  const snapshot = await getDocs(q);
+  const container = document.getElementById("pendingList");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const item = docSnap.data();
+    const div = document.createElement("div");
+    div.className = "pendingCard";
+    div.innerHTML = `
+      <strong>${item.name}</strong><br>
+      JAN: ${item.jan}<br>
+      数量: ${item.quantity} ${item.unit}<br>
+      登録者: ${item.createdBy}<br>
+      <button onclick="approveItem('${docSnap.id}', '${item.name}')">✅ 承認</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+// ✅ 承認処理
+window.approveItem = async (itemId, itemName) => {
+  const user = auth.currentUser;
+  await updateDoc(doc(db, "items", itemId), {
+    status: "承認済",
+    approvedAt: serverTimestamp(),
+    approvedBy: user.uid
+  });
+
+  await addDoc(collection(db, "history"), {
+    type: "承認",
+    actor: user.uid,
+    targetItem: itemId,
+    timestamp: serverTimestamp(),
+    details: { status: "承認済", name: itemName }
+  });
+
+  alert("承認しました");
+  loadPendingItems();
+  loadHistory();
+};
+
+// ✅ 履歴表示
+async function loadHistory() {
+  const q = query(
+    collection(db, "history"),
+    orderBy("timestamp", "desc"),
+    limit(20)
+  );
+  const snapshot = await getDocs(q);
+  const container = document.getElementById("historyList");
+  container.innerHTML = "";
+
+  snapshot.forEach(docSnap => {
+    const log = docSnap.data();
+    const time = log.timestamp?.toDate().toLocaleString("ja-JP") || "未取得";
+    const div = document.createElement("div");
+    div.className = "historyEntry";
+    div.innerHTML = `
+      <strong>${log.type}</strong><br>
+      対象: ${log.details?.name || "不明"}<br>
+      実行者: ${log.actor}<br>
+      時刻: ${time}
+    `;
+    container.appendChild(div);
+  });
+}
