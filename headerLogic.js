@@ -69,6 +69,12 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    console.log("現在のUID:", user.uid);
+  }
+});
+
   const uid = user.uid;
   const userRef = doc(db, "users", uid);
   const userDoc = await getDoc(userRef);
