@@ -70,28 +70,26 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   const uid = user.uid;
+  const userRef = doc(db, "users", uid);
+  const userDoc = await getDoc(userRef);
 
-  try {
-    const userDoc = await getDoc(doc(db, "users", uid));
-    if (!userDoc.exists()) {
-      console.warn("ユーザードキュメントが存在しません");
-      return;
-    }
-
-    const userData = userDoc.data();
-    const name = userData?.name || "不明";
-    const role = userData?.role || "未設定";
-
-    if (responsibleUser) {
-      responsibleUser.textContent = `👑 ${name}（${role}）`;
-    }
-    if (role === "管理者" && adminMenu) {
-      adminMenu.style.display = "block";
-    }
-  } catch (err) {
-    console.error("責任者情報取得失敗:", err);
+  if (!userDoc.exists()) {
+    console.warn("ユーザードキュメントが存在しません");
+    return;
   }
 
+  const userData = userDoc.data();
+  const name = userData?.name || "不明";
+  const role = userData?.role || "未設定";
+
+  if (responsibleUser) {
+    responsibleUser.textContent = `👑 ${name}（${role}）`;
+  }
+  if (role === "管理者" && adminMenu) {
+    adminMenu.style.display = "block";
+  }
+
+  // ✅ 最終ログイン履歴の取得
   try {
     const q = query(
       collection(db, "loginLogs"),
