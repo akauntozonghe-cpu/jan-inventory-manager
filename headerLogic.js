@@ -2,7 +2,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 
-// Firebase初期化
+// ✅ Firebase初期化
 const firebaseConfig = {
   apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
   authDomain: "inventory-app-312ca.firebaseapp.com",
@@ -15,13 +15,13 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// DOM要素取得
+// ✅ DOM要素取得
 const responsibleUser = document.getElementById("responsibleUser");
 const lastJudgment = document.getElementById("lastJudgment");
 const clock = document.getElementById("clock");
-const adminMenuItem = document.getElementById("adminMenuItem");
+const adminMenu = document.getElementById("adminMenu");
 
-// 現在時刻の更新（〇〇月〇〇日（〇）〇〇:〇〇:〇〇）
+// ✅ 現在時刻の更新（〇〇月〇〇日（〇）〇〇:〇〇:〇〇）
 function updateClock() {
   const now = new Date();
   const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
@@ -37,7 +37,7 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// メニュー制御
+// ✅ メニュー制御
 function toggleMenu() {
   const menu = document.getElementById("headerMenu");
   if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none";
@@ -61,7 +61,7 @@ function logout() {
   });
 }
 
-// 認証状態の監視と責任者表示
+// ✅ 認証状態の監視と責任者表示・管理者メニュー制御
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     if (responsibleUser) responsibleUser.textContent = "👑 ログイン中：未取得";
@@ -69,29 +69,24 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  const uid = localStorage.getItem("uid");
-  if (!uid) {
-    console.warn("UIDが未保存です");
-    return;
-  }
+  const uid = user.uid;
 
-  let role = "";
   try {
     const userDoc = await getDoc(doc(db, "users", uid));
-    if (!userDoc.exists) {
+    if (!userDoc.exists()) {
       console.warn("ユーザードキュメントが存在しません");
       return;
     }
 
     const userData = userDoc.data();
     const name = userData?.name || "不明";
-    role = userData?.role || "未設定";
+    const role = userData?.role || "未設定";
 
     if (responsibleUser) {
       responsibleUser.textContent = `👑 ${name}（${role}）`;
     }
-    if (role === "管理者" && adminMenuItem) {
-      adminMenuItem.style.display = "block";
+    if (role === "管理者" && adminMenu) {
+      adminMenu.style.display = "block";
     }
   } catch (err) {
     console.error("責任者情報取得失敗:", err);
@@ -123,7 +118,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 });
 
-// グローバル関数登録（HTMLから呼び出す用）
+// ✅ グローバル関数登録（HTMLから呼び出す用）
 window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;
