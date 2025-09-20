@@ -60,11 +60,9 @@ function goHome() {
 }
 
 function logout() {
-  // ここは既存のログアウト処理を呼ぶ
-  // recordLogout(uid) → signOut(auth) → localStorage.removeItem("uid")
+  // 既存のログアウト処理
 }
 
-// ✅ DOM構築後にイベントをバインド
 document.addEventListener("DOMContentLoaded", () => {
   const btnMenu = document.getElementById("menuToggle");
   if (btnMenu) btnMenu.addEventListener("click", toggleMenu);
