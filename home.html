@@ -5,30 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ホーム - 在庫管理</title>
 
-  <!-- ✅ 共通スタイル -->
+  <!-- 共通スタイル -->
   <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="home.css" />
 </head>
 <body>
 
-  <!-- ✅ 空間の顔：ヘッダー読み込み先 -->
+  <!-- ヘッダー読み込み先 -->
   <div id="headerContainer"></div>
 
-<script type="module">
-  fetch("header.html")
-    .then(res => res.text())
-    .then(html => {
-      document.getElementById("headerContainer").innerHTML = html;
-      import("./headerLogic.js"); // ✅ ロジック適用
-    })
-    .catch(err => {
-      console.error("ヘッダー読み込み失敗:", err);
-      document.getElementById("headerContainer").innerHTML =
-        "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
-    });
-</script>
+  <!-- ヘッダー読み込みとロジック統合 -->
+  <script type="module">
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
 
-  <!-- ✅ 空間の本体：ホーム画面 -->
+        // ✅ ヘッダー挿入後にロジックを初期化
+        import("./headerLogic.js").then(module => {
+          if (module.initHeader) {
+            module.initHeader();
+          }
+        });
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+      });
+  </script>
+
+  <!-- 本体 -->
   <main id="homeMain" aria-label="在庫管理ホーム画面">
     <h2>🏠 ホーム</h2>
 

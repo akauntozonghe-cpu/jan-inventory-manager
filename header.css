@@ -4,7 +4,7 @@
   align-items: center;
   background: #222;
   color: #fff;
-  padding: 14px 28px;   /* 余裕を持たせた */
+  padding: 14px 28px;
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -57,8 +57,10 @@
   transition: background 0.2s;
 }
 
-#headerMenu ul.menu li a:hover {
-  background: rgba(255, 255, 255, 0.15);
+#headerMenu ul.menu li a:hover,
+#headerMenu ul.menu li a.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
 }
 
 @media (max-width: 600px) {
