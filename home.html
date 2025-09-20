@@ -22,10 +22,10 @@
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
 
-        // ヘッダーロジックをモジュールとして読み込む
+        // ✅ ヘッダーロジックをモジュールとして読み込む
         import("./headerLogic.js").then(module => {
-          // 必要ならここで module.logout などを呼び出せる
-          // 自動的に DOMContentLoaded 内で資格表示が走る
+          // ここで module.logout, module.goHome などを利用可能
+          // toggleMenu などは headerLogic.js 内で addEventListener 済み
         });
       })
       .catch(err => {
