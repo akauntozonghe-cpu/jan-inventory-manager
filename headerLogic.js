@@ -1,6 +1,22 @@
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, collection, query, where, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  orderBy,
+  limit
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signOut
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // ✅ Firebase初期化
 const firebaseConfig = {
@@ -12,8 +28,8 @@ const firebaseConfig = {
   appId: "1:245219344089:web:e46105927c302e6a5788c8"
 };
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 // ✅ DOM要素取得
 const responsibleUser = document.getElementById("responsibleUser");
@@ -21,7 +37,7 @@ const lastJudgment = document.getElementById("lastJudgment");
 const clock = document.getElementById("clock");
 const adminMenu = document.getElementById("adminMenu");
 
-// ✅ 現在時刻の更新（〇〇月〇〇日（〇）〇〇:〇〇:〇〇）
+// ✅ 現在時刻の更新
 function updateClock() {
   const now = new Date();
   const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
@@ -61,41 +77,48 @@ function logout() {
   });
 }
 
-// ✅ 認証状態の監視と責任者表示・管理者メニュー制御
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    if (responsibleUser) responsibleUser.textContent = "👑 ログイン中：未取得";
-    if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：未取得";
-    return;
+// ✅ 責任者番号からUIDを取得
+async function getUidById(id) {
+  const q = query(collection(db, "users"), where("id", "==", id));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
+    throw new Error("責任者番号が見つかりません");
   }
+  return snapshot.docs[0].id; // ドキュメントID = UID
+}
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    console.log("現在のUID:", user.uid);
-  }
-});
-
-  const uid = user.uid;
+// ✅ UIDから責任者情報を取得
+async function getResponsibleInfo(uid) {
   const userRef = doc(db, "users", uid);
   const userDoc = await getDoc(userRef);
-
   if (!userDoc.exists()) {
-    console.warn("ユーザードキュメントが存在しません");
-    return;
+    throw new Error("UIDに紐づく責任者情報が存在しません");
   }
+  return userDoc.data();
+}
 
-  const userData = userDoc.data();
-  const name = userData?.name || "不明";
-  const role = userData?.role || "未設定";
+// ✅ 責任者番号でログイン処理（表示のみ）
+async function loginById(id) {
+  try {
+    const uid = await getUidById(id);
+    const info = await getResponsibleInfo(uid);
 
-  if (responsibleUser) {
-    responsibleUser.textContent = `👑 ${name}（${role}）`;
+    if (responsibleUser) {
+      responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
+    }
+    if (info.role === "管理者" && adminMenu) {
+      adminMenu.style.display = "block";
+    }
+
+    localStorage.setItem("uid", uid); // 後続処理用に保存
+    await loadLastLogin(uid);
+  } catch (err) {
+    alert(err.message);
   }
-  if (role === "管理者" && adminMenu) {
-    adminMenu.style.display = "block";
-  }
+}
 
-  // ✅ 最終ログイン履歴の取得
+// ✅ 最終ログイン履歴の取得
+async function loadLastLogin(uid) {
   try {
     const q = query(
       collection(db, "loginLogs"),
@@ -120,10 +143,11 @@ onAuthStateChanged(auth, (user) => {
   } catch (err) {
     console.error("ログイン履歴取得失敗:", err);
   }
-});
+}
 
 // ✅ グローバル関数登録（HTMLから呼び出す用）
 window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;
 window.logout = logout;
+window.loginById = loginById;
