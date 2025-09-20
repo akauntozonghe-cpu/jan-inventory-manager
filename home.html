@@ -22,6 +22,7 @@
         .then(html => {
           document.getElementById("headerContainer").innerHTML = html;
 
+          // ヘッダーロジックを読み込む
           const script = document.createElement("script");
           script.type = "module";
           script.src = "headerLogic.js";

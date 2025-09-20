@@ -67,6 +67,7 @@ function goHome() {
 function logout() {
   signOut(auth).then(() => {
     alert("ログアウトしました");
+    localStorage.removeItem("uid"); // ← ログアウト時にUIDを消す
     window.location.href = "index.html";
   }).catch((error) => {
     console.error("ログアウト失敗:", error);
@@ -106,8 +107,6 @@ async function loadLastLogin(uid) {
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
       const log = snapshot.docs[0].data();
-
-      // 🔧 Firestore Timestamp対応
       const ts = log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
 
       const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
@@ -127,16 +126,15 @@ async function loadLastLogin(uid) {
   }
 }
 
-// ✅ 責任者番号でログイン処理（表示のみ）
+// ✅ 責任者番号でログイン処理
 async function loginById(id) {
   try {
-    const uid = await getUidById(id.trim()); // ← trimで余分な空白を除去
+    const uid = await getUidById(id.trim());
     const info = await getResponsibleInfo(uid);
 
     if (responsibleUser) {
-      responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
-    } else {
-      console.warn("responsibleUser 要素が見つかりません");
+      // ✅ 番号は表示しない
+      responsibleUser.textContent = `👑 ${info.name}（${info.role}）`;
     }
 
     if (info.role === "管理者" && adminMenu) {
@@ -145,13 +143,35 @@ async function loginById(id) {
 
     localStorage.setItem("uid", uid);
     await loadLastLogin(uid);
+
+    // ✅ ホーム画面へ遷移
+    window.location.href = "home.html";
   } catch (err) {
     console.error("loginByIdエラー:", err);
     alert(err.message);
   }
 }
 
-// ✅ グローバル関数登録（HTMLから呼び出す用）
+// ✅ ホーム画面で自動的に資格を表示
+document.addEventListener("DOMContentLoaded", async () => {
+  const uid = localStorage.getItem("uid");
+  if (uid) {
+    try {
+      const info = await getResponsibleInfo(uid);
+      if (responsibleUser) {
+        responsibleUser.textContent = `👑 ${info.name}（${info.role}）`;
+      }
+      if (info.role === "管理者" && adminMenu) {
+        adminMenu.style.display = "block";
+      }
+      await loadLastLogin(uid);
+    } catch (err) {
+      console.error("自動ログイン情報取得失敗:", err);
+    }
+  }
+});
+
+// ✅ グローバル関数登録
 window.toggleMenu = toggleMenu;
 window.closeMenu = closeMenu;
 window.goHome = goHome;

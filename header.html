@@ -13,22 +13,15 @@
   </div>
 </header>
 
-<!-- ✅ ログイン儀式：責任者番号入力 -->
-<section id="loginSection" style="padding:8px; background:#f9f9f9; border-bottom:1px solid #ccc;">
-  <label for="idInput">責任者番号：</label>
-  <input type="text" id="idInput" placeholder="番号を入力" />
-  <button onclick="loginById(document.getElementById('idInput').value)">ログイン</button>
-</section>
-
 <!-- ✅ 空間の入口：メニュー -->
-<nav id="headerMenu" style="display: none;" onclick="closeMenu(event)" aria-label="メインメニュー">
+<nav id="headerMenu" style="display:none;" onclick="closeMenu(event)" aria-label="メインメニュー">
   <ul class="menu">
     <li><a href="register.html">📥 商品登録</a></li>
     <li><a href="list.html">📦 商品一覧</a></li>
     <li><a href="market.html">🛍 フリマ</a></li>
     <li><a href="inventory.html">📋 棚卸</a></li>
     <li><a href="report.html">📊 報告</a></li>
-    <li id="adminMenu" style="display: none;"><a href="admin.html">🛡 管理者</a></li>
+    <li id="adminMenu" style="display:none;"><a href="admin.html">🛡 管理者</a></li>
     <li><a href="settings.html">⚙️ 設定</a></li>
     <li><a href="#" onclick="logout()">🚪 ログアウト</a></li>
   </ul>
