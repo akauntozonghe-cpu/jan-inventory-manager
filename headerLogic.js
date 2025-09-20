@@ -64,7 +64,10 @@ async function getResponsibleInfo(uid) {
   return userDoc.data();
 }
 
-async function loadLastLogin(uid) {
+/* ===============================
+   最終ログ取得（最新1件を日付＋曜日で表示）
+================================ */
+async function loadLast(uid) {
   const q = query(
     collection(db, "loginLogs"),
     where("uid", "==", uid),
@@ -82,13 +85,12 @@ async function loadLastLogin(uid) {
     const weekday = weekdayMap[ts.getDay()];
     const month = ts.getMonth() + 1;
     const day = ts.getDate();
-    const hour = ts.getHours().toString().padStart(2, "0");
-    const minute = ts.getMinutes().toString().padStart(2, "0");
-    const second = ts.getSeconds().toString().padStart(2, "0");
-    const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
-    el.textContent = `🕒 最終ログイン：${formatted}`;
+
+    // ✅ 日付＋曜日のみ
+    const formatted = `${month}月${day}日（${weekday}）`;
+    el.textContent = `🕒 最終：${formatted}`;
   } else {
-    el.textContent = "🕒 最終ログイン：記録なし";
+    el.textContent = "🕒 最終：記録なし";
   }
 }
 
@@ -106,7 +108,10 @@ async function loginById(id) {
     // 痕跡を残す
     await recordLogin(uid);
 
-    // 表示は home.html 側で initHeader() が行う
+    // ✅ 直後に表示更新
+    await loadLast(uid);
+
+    // ページ遷移
     window.location.href = "home.html";
   } catch (err) {
     console.error("loginByIdエラー:", err);
@@ -116,7 +121,11 @@ async function loginById(id) {
 
 function logout() {
   const uid = localStorage.getItem("uid");
-  if (uid) recordLogout(uid).catch(console.error);
+  if (uid) {
+    recordLogout(uid)
+      .then(() => loadLast(uid)) // ✅ ログアウト直後に更新
+      .catch(console.error);
+  }
 
   signOut(auth)
     .catch(err => {
@@ -142,7 +151,7 @@ function initHeader() {
   const btnMenu = document.getElementById("menuToggle");
   const title = document.querySelector(".headerTitle");
 
-  // 時計
+  // 時計（現在は時刻まで表示）
   function updateClock() {
     const now = new Date();
     const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
@@ -158,7 +167,7 @@ function initHeader() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // ハンバーガー開閉（クロス変形対応）
+  // ハンバーガー開閉
   if (btnMenu) {
     btnMenu.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -197,7 +206,7 @@ function initHeader() {
     if (href && href === currentPath) link.classList.add("active");
   });
 
-  // ログイン済みなら資格と最終ログイン表示、管理者メニュー制御
+  // ログイン済みなら資格と最終表示、管理者メニュー制御
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
 
@@ -213,12 +222,12 @@ function initHeader() {
           adminMenu.style.display = "block";
         }
       })
-      .then(() => loadLastLogin(uid))
-      .catch(err => console.error("資格/最終ログイン表示失敗:", err));
+      .then(() => loadLast(uid))
+      .catch(err => console.error("資格/最終表示失敗:", err));
   } else {
     // 未ログイン時の初期表示
     if (responsibleUser) responsibleUser.textContent = "👑 未ログイン";
-    if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：--";
+    if (lastJudgment) lastJudgment.textContent = "🕒 最終：--";
     if (adminMenu) adminMenu.style.display = "none";
   }
 }
