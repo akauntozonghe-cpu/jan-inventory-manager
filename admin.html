@@ -2,53 +2,70 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <title>🛡 管理画面</title>
-  <link rel="stylesheet" href="styles.css" />
-  <script type="module" src="admin.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>管理画面 - 在庫管理</title>
+
+  <!-- 共通スタイル -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <link rel="stylesheet" href="admin.css" />
 </head>
 <body>
-  <header>
-    <h1>🛡 管理画面</h1>
-    <div id="responsibleUser">👤 ログイン中：未取得</div>
-    <nav>
-      <a href="dashboard.html">🏠 ホーム</a>
-      <a href="logout.html">🚪 ログアウト</a>
-    </nav>
-  </header>
 
-  <main>
+  <!-- 共通ヘッダー読み込み先 -->
+  <div id="headerContainer"></div>
+
+  <!-- ヘッダー読み込みとロジック -->
+  <script type="module">
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
+        import("./headerLogic.js").then(module => {
+          if (module.initHeader) module.initHeader();
+        });
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+      });
+  </script>
+
+  <!-- 管理者専用メイン -->
+  <main id="adminMain" aria-label="管理画面">
+    <h2>⚙ 管理者ダッシュボード</h2>
+
+    <!-- 保留アイテム一覧 -->
+    <section>
+      <h3>📝 保留中のアイテム</h3>
+      <div id="pendingItemsContainer"></div>
+    </section>
+
+    <!-- 履歴 -->
+    <section>
+      <h3>📜 操作履歴</h3>
+      <div id="historyContainer"></div>
+    </section>
+
     <!-- 通知送信フォーム -->
     <section>
-      <h2>🔔 通知送信</h2>
+      <h3>📢 通知送信</h3>
       <form id="sendNotificationForm">
-        <input type="text" id="notifTitle" placeholder="タイトル" required><br>
-        <textarea id="notifBody" placeholder="本文" required></textarea><br>
+        <label>タイトル: <input type="text" id="notifTitle" required /></label><br>
+        <label>本文: <textarea id="notifBody" required></textarea></label><br>
         <label>対象:
           <select id="notifTarget">
             <option value="all">全員</option>
             <option value="admin">管理者のみ</option>
-            <!-- 将来的にユーザー選択も追加可能 -->
+            <option value="uid:sample">特定ユーザー（例: uid:xxxx）</option>
           </select>
         </label><br>
         <button type="submit">送信</button>
       </form>
     </section>
-
-    <!-- 承認待ち商品一覧 -->
-    <section>
-      <h2>📋 承認待ち商品一覧</h2>
-      <div id="pendingItemsContainer">
-        <p>読み込み中...</p>
-      </div>
-    </section>
-
-    <!-- 操作履歴 -->
-    <section>
-      <h2>📜 操作履歴</h2>
-      <div id="historyContainer">
-        <p>読み込み中...</p>
-      </div>
-    </section>
   </main>
+
+  <!-- 管理画面ロジック -->
+  <script type="module" src="admin.js"></script>
 </body>
 </html>
