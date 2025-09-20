@@ -54,15 +54,27 @@ function toggleMenu() {
   const menu = document.getElementById("headerMenu");
   if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none";
 }
-function closeMenu(event) {
-  if (event.target.tagName !== "A") {
-    const menu = document.getElementById("headerMenu");
-    if (menu) menu.style.display = "none";
-  }
-}
+
 function goHome() {
   window.location.href = "home.html";
 }
+
+function logout() {
+  // ここは既存のログアウト処理を呼ぶ
+  // recordLogout(uid) → signOut(auth) → localStorage.removeItem("uid")
+}
+
+// ✅ DOM構築後にイベントをバインド
+document.addEventListener("DOMContentLoaded", () => {
+  const btnMenu = document.getElementById("menuToggle");
+  if (btnMenu) btnMenu.addEventListener("click", toggleMenu);
+
+  const btnHome = document.getElementById("goHomeBtn");
+  if (btnHome) btnHome.addEventListener("click", goHome);
+
+  const btnLogout = document.getElementById("logoutBtn");
+  if (btnLogout) btnLogout.addEventListener("click", logout);
+});
 
 // ✅ ログイン／ログアウト履歴を記録
 async function recordLogin(uid) {
