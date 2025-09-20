@@ -13,6 +13,13 @@
   </div>
 </header>
 
+<!-- ✅ ログイン儀式：責任者番号入力 -->
+<section id="loginSection" style="padding:8px; background:#f9f9f9; border-bottom:1px solid #ccc;">
+  <label for="idInput">責任者番号：</label>
+  <input type="text" id="idInput" placeholder="番号を入力" />
+  <button onclick="loginById(document.getElementById('idInput').value)">ログイン</button>
+</section>
+
 <!-- ✅ 空間の入口：メニュー -->
 <nav id="headerMenu" style="display: none;" onclick="closeMenu(event)" aria-label="メインメニュー">
   <ul class="menu">
