@@ -15,25 +15,24 @@
   <div id="headerContainer"></div>
 
   <!-- ✅ ヘッダー読み込みとロジック統合 -->
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      fetch("header.html")
-        .then(res => res.text())
-        .then(html => {
-          document.getElementById("headerContainer").innerHTML = html;
+  <script type="module">
+    // ヘッダーHTMLを読み込んでから headerLogic.js を適用
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
 
-          // ヘッダーロジックを読み込む
-          const script = document.createElement("script");
-          script.type = "module";
-          script.src = "headerLogic.js";
-          document.body.appendChild(script);
-        })
-        .catch(err => {
-          console.error("ヘッダー読み込み失敗:", err);
-          document.getElementById("headerContainer").innerHTML =
-            "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+        // ヘッダーロジックをモジュールとして読み込む
+        import("./headerLogic.js").then(module => {
+          // 必要ならここで module.logout などを呼び出せる
+          // 自動的に DOMContentLoaded 内で資格表示が走る
         });
-    });
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+      });
   </script>
 
   <!-- ✅ 空間の本体：ホーム画面 -->

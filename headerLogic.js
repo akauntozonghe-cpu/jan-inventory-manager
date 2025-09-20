@@ -204,9 +204,5 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 });
 
-// ✅ グローバル関数登録
-window.toggleMenu = toggleMenu;
-window.closeMenu = closeMenu;
-window.goHome = goHome;
-window.logout = logout;
-window.loginById = loginById;
+// ✅ 必要な関数を export
+export { loginById, logout, toggleMenu, closeMenu, goHome };
