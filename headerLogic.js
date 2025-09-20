@@ -8,12 +8,11 @@ import {
   doc,
   getDoc,
   orderBy,
-  limit
+  limit,
+  addDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import {
-  getAuth,
-  signOut
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // ✅ Firebase初期化
 const firebaseConfig = {
@@ -64,10 +63,42 @@ function closeMenu(event) {
 function goHome() {
   window.location.href = "home.html";
 }
+
+// ✅ ログイン／ログアウト履歴を記録
+async function recordLogin(uid) {
+  try {
+    await addDoc(collection(db, "loginLogs"), {
+      uid: uid,
+      type: "login",
+      timestamp: serverTimestamp()
+    });
+    console.log("ログイン履歴を記録:", uid);
+  } catch (err) {
+    console.error("ログイン履歴記録失敗:", err);
+  }
+}
+async function recordLogout(uid) {
+  try {
+    await addDoc(collection(db, "logoutLogs"), {
+      uid: uid,
+      type: "logout",
+      timestamp: serverTimestamp()
+    });
+    console.log("ログアウト履歴を記録:", uid);
+  } catch (err) {
+    console.error("ログアウト履歴記録失敗:", err);
+  }
+}
+
+// ✅ ログアウト処理
 function logout() {
+  const uid = localStorage.getItem("uid");
+  if (uid) {
+    recordLogout(uid); // 痕跡を残す
+  }
   signOut(auth).then(() => {
     alert("ログアウトしました");
-    localStorage.removeItem("uid"); // ← ログアウト時にUIDを消す
+    localStorage.removeItem("uid");
     window.location.href = "index.html";
   }).catch((error) => {
     console.error("ログアウト失敗:", error);
@@ -133,15 +164,17 @@ async function loginById(id) {
     const info = await getResponsibleInfo(uid);
 
     if (responsibleUser) {
-      // ✅ 番号は表示しない
-      responsibleUser.textContent = `👑 ${info.name}（${info.role}）`;
+      responsibleUser.textContent = `👑 ${info.name}（${info.role}）`; // 番号は表示しない
     }
-
     if (info.role === "管理者" && adminMenu) {
       adminMenu.style.display = "block";
     }
 
     localStorage.setItem("uid", uid);
+
+    // ✅ ログイン履歴を記録
+    await recordLogin(uid);
+
     await loadLastLogin(uid);
 
     // ✅ ホーム画面へ遷移

@@ -12,6 +12,7 @@
     <h1>在庫管理システム</h1>
     <p class="welcome-message">この空間は、あなたの責任と誇りを表現する場です。</p>
 
+    <!-- ✅ 入力欄とボタン -->
     <input type="text" id="userIdInput" placeholder="責任者番号を入力">
     <button id="loginBtn" disabled>ログイン</button>
 
@@ -21,6 +22,25 @@
     </div>
   </div>
 
-  <script type="module" src="login.js"></script>
+  <!-- ✅ ロジック読込 -->
+  <script type="module">
+    import { loginById } from "./headerLogic.js";
+
+    const input = document.getElementById("userIdInput");
+    const btn = document.getElementById("loginBtn");
+
+    // 入力があればボタン有効化
+    input.addEventListener("input", () => {
+      btn.disabled = input.value.trim() === "";
+    });
+
+    // ログイン処理
+    btn.addEventListener("click", async () => {
+      const id = input.value.trim();
+      if (!id) return;
+      await loginById(id); // headerLogic.js 内の処理を呼ぶ
+      // loginById 内で localStorage 保存 & home.html へ遷移
+    });
+  </script>
 </body>
 </html>
