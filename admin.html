@@ -17,6 +17,24 @@
   </header>
 
   <main>
+    <!-- 通知送信フォーム -->
+    <section>
+      <h2>🔔 通知送信</h2>
+      <form id="sendNotificationForm">
+        <input type="text" id="notifTitle" placeholder="タイトル" required><br>
+        <textarea id="notifBody" placeholder="本文" required></textarea><br>
+        <label>対象:
+          <select id="notifTarget">
+            <option value="all">全員</option>
+            <option value="admin">管理者のみ</option>
+            <!-- 将来的にユーザー選択も追加可能 -->
+          </select>
+        </label><br>
+        <button type="submit">送信</button>
+      </form>
+    </section>
+
+    <!-- 承認待ち商品一覧 -->
     <section>
       <h2>📋 承認待ち商品一覧</h2>
       <div id="pendingItemsContainer">
@@ -24,6 +42,7 @@
       </div>
     </section>
 
+    <!-- 操作履歴 -->
     <section>
       <h2>📜 操作履歴</h2>
       <div id="historyContainer">

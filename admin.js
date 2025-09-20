@@ -38,13 +38,14 @@ onAuthStateChanged(auth, async (user) => {
 
   loadPendingItems(); // ✅ 保留一覧表示
   loadHistory();      // ✅ 履歴表示
+  setupNotificationForm(user); // ✅ 通知送信フォーム
 });
 
 // ✅ 保留一覧表示
 async function loadPendingItems() {
   const q = query(collection(db, "items"), where("status", "==", "保留"));
   const snapshot = await getDocs(q);
-  const container = document.getElementById("pendingList");
+  const container = document.getElementById("pendingItemsContainer");
   container.innerHTML = "";
 
   snapshot.forEach(docSnap => {
@@ -92,7 +93,7 @@ async function loadHistory() {
     limit(20)
   );
   const snapshot = await getDocs(q);
-  const container = document.getElementById("historyList");
+  const container = document.getElementById("historyContainer");
   container.innerHTML = "";
 
   snapshot.forEach(docSnap => {
@@ -107,5 +108,29 @@ async function loadHistory() {
       時刻: ${time}
     `;
     container.appendChild(div);
+  });
+}
+
+// ✅ 通知送信フォーム処理
+function setupNotificationForm(user) {
+  const form = document.getElementById("sendNotificationForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const title = document.getElementById("notifTitle").value;
+    const body = document.getElementById("notifBody").value;
+    const target = document.getElementById("notifTarget").value;
+
+    await addDoc(collection(db, "notifications"), {
+      title,
+      body,
+      target,
+      createdAt: serverTimestamp(),
+      createdBy: user.uid
+    });
+
+    alert("通知を送信しました");
+    form.reset();
   });
 }
