@@ -114,7 +114,12 @@ async function loadHistory() {
 // ✅ 通知送信フォーム処理
 function setupNotificationForm(user) {
   const form = document.getElementById("sendNotificationForm");
-  if (!form) return;
+  if (!form) {
+    console.warn("通知フォームが見つかりません");
+    return;
+  }
+
+  console.log("通知フォーム初期化OK");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -122,15 +127,19 @@ function setupNotificationForm(user) {
     const body = document.getElementById("notifBody").value;
     const target = document.getElementById("notifTarget").value;
 
-    await addDoc(collection(db, "notifications"), {
-      title,
-      body,
-      target,
-      createdAt: serverTimestamp(),
-      createdBy: user.uid
-    });
-
-    alert("通知を送信しました");
-    form.reset();
+    try {
+      await addDoc(collection(db, "notificationLogs"), {
+        title,
+        body,
+        target,
+        createdAt: serverTimestamp(),
+        createdBy: user.uid
+      });
+      alert("通知を送信しました");
+      form.reset();
+    } catch (err) {
+      console.error("通知送信エラー:", err);
+      alert("通知送信に失敗しました");
+    }
   });
 }
