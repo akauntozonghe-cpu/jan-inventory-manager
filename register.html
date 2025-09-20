@@ -18,19 +18,17 @@
   <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 <body>
-  <!-- ✅ ヘッダー読み込み -->
+  <!-- ✅ 共通ヘッダー -->
   <div id="headerContainer"></div>
-  <script>
+  <script type="module">
+    import { initHeader } from "./headerLogic.js";
+
+    // header.html を読み込んでから initHeader を実行
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-        const script = document.createElement("script");
-        script.src = "headerLogic.js";
-        script.onload = () => {
-          if (typeof startHeaderLogic === "function") startHeaderLogic();
-        };
-        document.body.appendChild(script);
+        initHeader();
       });
   </script>
 
@@ -114,7 +112,7 @@
         <label for="controlId">管理番号：</label>
         <input type="text" name="controlId" id="controlId" readonly />
 
-        <!-- 登録ボタン（文言修正） -->
+        <!-- 登録ボタン -->
         <button type="submit">✅ 登録</button>
       </form>
 

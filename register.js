@@ -126,11 +126,14 @@ document.addEventListener("DOMContentLoaded", () => {
       photo: null,
       status: isAdmin ? "承認済" : "保留",
       createdBy: user.uid,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(), // ✅ 最終変更日時
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
       const itemRef = await db.collection("items").add(data);
+
+      // ✅ 履歴に残す
       await db.collection("history").add({
         type: isAdmin ? "登録（即承認）" : "登録（保留）",
         actor: user.uid,
@@ -139,7 +142,19 @@ document.addEventListener("DOMContentLoaded", () => {
         details: { status: data.status, name: data.name }
       });
 
-      alert(isAdmin ? "登録完了（即一覧反映）" : "登録完了（承認待ち）");
+      // ✅ 管理者でなければ承認請求通知を送る
+      if (!isAdmin) {
+        await db.collection("notifications").add({
+          type: "承認依頼",
+          from: user.uid,
+          targetItem: itemRef.id,
+          message: `${data.name} の登録承認をお願いします`,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          status: "未読"
+        });
+      }
+
+      alert(isAdmin ? "登録完了（即一覧反映）" : "登録完了（承認待ち・管理者に通知）");
       form.reset();
       document.getElementById("adminCode").value = "";
       document.getElementById("controlId").value = "";
