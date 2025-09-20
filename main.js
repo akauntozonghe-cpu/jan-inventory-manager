@@ -4,16 +4,19 @@ import { collection, query, orderBy, onSnapshot }
 
 let notifications = [];
 
-// 通知受信
+// 通知リスナー初期化
 function initNotificationListener(currentUser) {
-  const q = query(collection(db, "notifications"), orderBy("createdAt", "desc"));
+  const q = query(collection(db, "notificationLogs"), orderBy("createdAt", "desc"));
   onSnapshot(q, snap => {
     snap.docChanges().forEach(change => {
       if (change.type === "added") {
         const data = change.doc.data();
+        console.log("通知受信:", data);
+
         if (isTargetUser(data.target, currentUser)) {
           addToHeaderNotifications(data.title, data.body);
-          // ブラウザ通知も
+
+          // ブラウザ通知
           if ("Notification" in window && Notification.permission === "granted") {
             new Notification(data.title, { body: data.body });
           }
@@ -52,3 +55,6 @@ document.getElementById("notificationBell").addEventListener("click", () => {
   const dropdown = document.getElementById("notificationDropdown");
   dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
 });
+
+// 初期化時に呼び出す
+// initNotificationListener(currentUser);
