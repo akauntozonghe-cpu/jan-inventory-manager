@@ -1,9 +1,9 @@
+// admin.js
+import { auth, db } from "./firebase.js";
 import {
-  getAuth,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
-  getFirestore,
   collection,
   query,
   where,
@@ -15,9 +15,6 @@ import {
   orderBy,
   limit
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-const auth = getAuth();
-const db = getFirestore();
 
 // ✅ 管理者のみアクセス許可
 onAuthStateChanged(auth, async (user) => {
@@ -36,9 +33,9 @@ onAuthStateChanged(auth, async (user) => {
     return;
   }
 
-  loadPendingItems(); // ✅ 保留一覧表示
-  loadHistory();      // ✅ 履歴表示
-  setupNotificationForm(user); // ✅ 通知送信フォーム
+  loadPendingItems();
+  loadHistory();
+  setupNotificationForm(user);
 });
 
 // ✅ 保留一覧表示
@@ -87,11 +84,7 @@ window.approveItem = async (itemId, itemName) => {
 
 // ✅ 履歴表示
 async function loadHistory() {
-  const q = query(
-    collection(db, "history"),
-    orderBy("timestamp", "desc"),
-    limit(20)
-  );
+  const q = query(collection(db, "history"), orderBy("timestamp", "desc"), limit(20));
   const snapshot = await getDocs(q);
   const container = document.getElementById("historyContainer");
   container.innerHTML = "";
@@ -124,13 +117,9 @@ function setupNotificationForm(user) {
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const titleEl = document.getElementById("notifTitle");
-    const bodyEl = document.getElementById("notifBody");
-    const targetEl = document.getElementById("notifTarget");
-
-    const title = titleEl?.value.trim();
-    const body = bodyEl?.value.trim();
-    const target = targetEl?.value;
+    const title = document.getElementById("notifTitle")?.value.trim();
+    const body = document.getElementById("notifBody")?.value.trim();
+    const target = document.getElementById("notifTarget")?.value;
 
     console.log("送信データ確認:", { title, body, target });
 

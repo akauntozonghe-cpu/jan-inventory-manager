@@ -1,7 +1,28 @@
-import { db } from "./firebase.js";
-import { collection, query, orderBy, onSnapshot } 
-  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+// main.js
+import { auth, db } from "./firebase.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
+// ✅ ログイン状態監視
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    window.location.href = "index.html";
+    return;
+  }
+  console.log("ログイン中:", user.uid);
+
+  // 通知リスナー開始
+  initNotificationListener(user);
+});
+
+// ✅ 通知受信処理
 let notifications = [];
 
 function initNotificationListener(currentUser) {
@@ -23,7 +44,7 @@ function initNotificationListener(currentUser) {
 function isTargetUser(target, user) {
   if (target === "all") return true;
   if (target === "admin" && user.role === "管理者") return true;
-  if (target.startsWith("uid:") && target.slice(4) === user.uid) return true;
+  if (target?.startsWith("uid:") && target.slice(4) === user.uid) return true;
   return false;
 }
 
@@ -47,6 +68,3 @@ document.getElementById("notificationBell").addEventListener("click", () => {
   const dropdown = document.getElementById("notificationDropdown");
   dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
 });
-
-// 初期化時に呼び出す
-// initNotificationListener(currentUser);
