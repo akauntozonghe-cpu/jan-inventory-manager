@@ -130,15 +130,15 @@ async function loadLastLogin(uid) {
 // ✅ 責任者番号でログイン処理（表示のみ）
 async function loginById(id) {
   try {
-    console.log("入力された責任者番号:", id);
-    const uid = await getUidById(id);
-    console.log("取得したUID:", uid);
+    const uid = await getUidById(id.trim()); // ← trimで余分な空白を除去
     const info = await getResponsibleInfo(uid);
-    console.log("取得した責任者情報:", info);
 
     if (responsibleUser) {
       responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
+    } else {
+      console.warn("responsibleUser 要素が見つかりません");
     }
+
     if (info.role === "管理者" && adminMenu) {
       adminMenu.style.display = "block";
     }
