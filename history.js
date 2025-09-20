@@ -1,5 +1,6 @@
 import { db } from "./firebase.js";
 import { collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { db } from "./firebase.js";  // 同じ JS フォルダにある場合
 
 // Timestamp 正規化
 function normalizeTimestamp(ts) {
