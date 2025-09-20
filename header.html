@@ -1,16 +1,15 @@
-<!-- 修正版 header.html -->
 <header id="systemHeader">
   <div class="headerLeft">
-    <!-- onclick を削除 -->
     <button id="menuToggle" aria-label="メニューを開閉">☰</button>
-    <img src="icon-192.png" alt="空間アイコン" class="headerIcon" />
-    <div class="headerTitle" id="goHomeBtn">在庫管理</div>
+    <div class="headerTitle">在庫管理</div>
   </div>
 
   <div class="headerRight">
-    <div id="responsibleUser">👑 ログイン中：未取得</div>
-    <div id="lastJudgment">🕒 最終ログイン：未取得</div>
-    <div id="clock">⏱ 現在：--月--日 (--) --:--:--</div>
+    <div class="userBlock">
+      <span id="responsibleUser">👑 未ログイン</span>
+      <span id="lastJudgment">🕒 最終ログイン：--</span>
+      <span id="clock">⏱ 現在：--:--:--</span>
+    </div>
   </div>
 </header>
 

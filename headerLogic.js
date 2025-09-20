@@ -49,55 +49,26 @@ function updateClock() {
 setInterval(updateClock, 1000);
 updateClock();
 
-// ✅ メニュー制御
+// ✅ メニュー開閉
 function toggleMenu() {
   const menu = document.getElementById("headerMenu");
   if (menu) menu.style.display = menu.style.display === "none" ? "block" : "none";
 }
 
-function goHome() {
-  window.location.href = "home.html";
-}
-
-function logout() {
-  // 既存のログアウト処理
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  const btnMenu = document.getElementById("menuToggle");
-  if (btnMenu) btnMenu.addEventListener("click", toggleMenu);
-
-  const btnHome = document.getElementById("goHomeBtn");
-  if (btnHome) btnHome.addEventListener("click", goHome);
-
-  const btnLogout = document.getElementById("logoutBtn");
-  if (btnLogout) btnLogout.addEventListener("click", logout);
-});
-
 // ✅ ログイン／ログアウト履歴を記録
 async function recordLogin(uid) {
-  try {
-    await addDoc(collection(db, "loginLogs"), {
-      uid: uid,
-      type: "login",
-      timestamp: serverTimestamp()
-    });
-    console.log("ログイン履歴を記録:", uid);
-  } catch (err) {
-    console.error("ログイン履歴記録失敗:", err);
-  }
+  await addDoc(collection(db, "loginLogs"), {
+    uid: uid,
+    type: "login",
+    timestamp: serverTimestamp()
+  });
 }
 async function recordLogout(uid) {
-  try {
-    await addDoc(collection(db, "logoutLogs"), {
-      uid: uid,
-      type: "logout",
-      timestamp: serverTimestamp()
-    });
-    console.log("ログアウト履歴を記録:", uid);
-  } catch (err) {
-    console.error("ログアウト履歴記録失敗:", err);
-  }
+  await addDoc(collection(db, "logoutLogs"), {
+    uid: uid,
+    type: "logout",
+    timestamp: serverTimestamp()
+  });
 }
 
 // ✅ ログアウト処理
@@ -138,32 +109,28 @@ async function getResponsibleInfo(uid) {
 
 // ✅ 最終ログイン履歴の取得
 async function loadLastLogin(uid) {
-  try {
-    const q = query(
-      collection(db, "loginLogs"),
-      where("uid", "==", uid),
-      orderBy("timestamp", "desc"),
-      limit(1)
-    );
-    const snapshot = await getDocs(q);
-    if (!snapshot.empty) {
-      const log = snapshot.docs[0].data();
-      const ts = log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+  const q = query(
+    collection(db, "loginLogs"),
+    where("uid", "==", uid),
+    orderBy("timestamp", "desc"),
+    limit(1)
+  );
+  const snapshot = await getDocs(q);
+  if (!snapshot.empty) {
+    const log = snapshot.docs[0].data();
+    const ts = log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
 
-      const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
-      const weekday = weekdayMap[ts.getDay()];
-      const month = ts.getMonth() + 1;
-      const day = ts.getDate();
-      const hour = ts.getHours().toString().padStart(2, "0");
-      const minute = ts.getMinutes().toString().padStart(2, "0");
-      const second = ts.getSeconds().toString().padStart(2, "0");
-      const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
-      if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
-    } else {
-      if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：記録なし";
-    }
-  } catch (err) {
-    console.error("ログイン履歴取得失敗:", err);
+    const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
+    const weekday = weekdayMap[ts.getDay()];
+    const month = ts.getMonth() + 1;
+    const day = ts.getDate();
+    const hour = ts.getHours().toString().padStart(2, "0");
+    const minute = ts.getMinutes().toString().padStart(2, "0");
+    const second = ts.getSeconds().toString().padStart(2, "0");
+    const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
+    if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
+  } else {
+    if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：記録なし";
   }
 }
 
@@ -174,20 +141,18 @@ async function loginById(id) {
     const info = await getResponsibleInfo(uid);
 
     if (responsibleUser) {
-      responsibleUser.textContent = `👑 ${info.name}（${info.role}）`; // 番号は表示しない
+      responsibleUser.textContent = `👑 ${info.name}（${info.role}）`;
     }
     if (info.role === "管理者" && adminMenu) {
       adminMenu.style.display = "block";
     }
 
     localStorage.setItem("uid", uid);
+    localStorage.setItem("role", info.role);
 
-    // ✅ ログイン履歴を記録
-    await recordLogin(uid);
+    await recordLogin(uid);   // ✅ ログイン履歴を残す
+    await loadLastLogin(uid); // ✅ 最終ログインを表示
 
-    await loadLastLogin(uid);
-
-    // ✅ ホーム画面へ遷移
     window.location.href = "home.html";
   } catch (err) {
     console.error("loginByIdエラー:", err);
@@ -212,7 +177,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.error("自動ログイン情報取得失敗:", err);
     }
   }
+
+  // ✅ イベントバインド
+  const btnMenu = document.getElementById("menuToggle");
+  if (btnMenu) btnMenu.addEventListener("click", toggleMenu);
+
+  const btnLogout = document.getElementById("logoutBtn");
+  if (btnLogout) btnLogout.addEventListener("click", logout);
 });
 
 // ✅ 必要な関数を export
-export { loginById, logout, toggleMenu, closeMenu, goHome };
+export { loginById, logout, toggleMenu };
