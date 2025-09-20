@@ -4,7 +4,6 @@ import { collection, query, orderBy, onSnapshot }
 
 let notifications = [];
 
-// 通知リスナー初期化
 function initNotificationListener(currentUser) {
   const q = query(collection(db, "notificationLogs"), orderBy("createdAt", "desc"));
   onSnapshot(q, snap => {
@@ -15,18 +14,12 @@ function initNotificationListener(currentUser) {
 
         if (isTargetUser(data.target, currentUser)) {
           addToHeaderNotifications(data.title, data.body);
-
-          // ブラウザ通知
-          if ("Notification" in window && Notification.permission === "granted") {
-            new Notification(data.title, { body: data.body });
-          }
         }
       }
     });
   });
 }
 
-// 対象判定
 function isTargetUser(target, user) {
   if (target === "all") return true;
   if (target === "admin" && user.role === "管理者") return true;
@@ -34,7 +27,6 @@ function isTargetUser(target, user) {
   return false;
 }
 
-// ヘッダーに反映
 function addToHeaderNotifications(title, body) {
   notifications.unshift({ title, body, time: new Date() });
   if (notifications.length > 20) notifications.pop();
@@ -50,7 +42,7 @@ function addToHeaderNotifications(title, body) {
   ).join("");
 }
 
-// アイコンクリックでドロップダウン開閉
+// 🔔 アイコンクリックで開閉
 document.getElementById("notificationBell").addEventListener("click", () => {
   const dropdown = document.getElementById("notificationDropdown");
   dropdown.style.display = dropdown.style.display === "none" ? "block" : "none";
