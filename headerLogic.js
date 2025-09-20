@@ -106,7 +106,10 @@ async function loadLastLogin(uid) {
     const snapshot = await getDocs(q);
     if (!snapshot.empty) {
       const log = snapshot.docs[0].data();
-      const ts = new Date(log.timestamp);
+
+      // 🔧 Firestore Timestamp対応
+      const ts = log.timestamp.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+
       const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
       const weekday = weekdayMap[ts.getDay()];
       const month = ts.getMonth() + 1;
@@ -127,8 +130,11 @@ async function loadLastLogin(uid) {
 // ✅ 責任者番号でログイン処理（表示のみ）
 async function loginById(id) {
   try {
+    console.log("入力された責任者番号:", id);
     const uid = await getUidById(id);
+    console.log("取得したUID:", uid);
     const info = await getResponsibleInfo(uid);
+    console.log("取得した責任者情報:", info);
 
     if (responsibleUser) {
       responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
@@ -140,6 +146,7 @@ async function loginById(id) {
     localStorage.setItem("uid", uid);
     await loadLastLogin(uid);
   } catch (err) {
+    console.error("loginByIdエラー:", err);
     alert(err.message);
   }
 }
