@@ -131,15 +131,6 @@ function logout() {
 }
 
 /* ===============================
-   メニュー開閉
-================================ */
-function toggleMenu() {
-  const menu = document.getElementById("headerMenu");
-  if (!menu) return;
-  menu.style.display = menu.style.display === "none" ? "block" : "none";
-}
-
-/* ===============================
    ヘッダー初期化（ヘッダー挿入後に必ず呼ぶ）
 ================================ */
 function initHeader() {
@@ -147,6 +138,9 @@ function initHeader() {
   const lastJudgment = document.getElementById("lastJudgment");
   const clock = document.getElementById("clock");
   const adminMenu = document.getElementById("adminMenu");
+  const headerMenu = document.getElementById("headerMenu");
+  const btnMenu = document.getElementById("menuToggle");
+  const title = document.querySelector(".headerTitle");
 
   // 時計
   function updateClock() {
@@ -164,9 +158,32 @@ function initHeader() {
   updateClock();
   setInterval(updateClock, 1000);
 
-  // メニュー開閉
-  const btnMenu = document.getElementById("menuToggle");
-  if (btnMenu) btnMenu.addEventListener("click", toggleMenu);
+  // ハンバーガー開閉（クロス変形対応）
+  if (btnMenu) {
+    btnMenu.addEventListener("click", (e) => {
+      e.stopPropagation();
+      headerMenu.classList.toggle("open");
+      btnMenu.classList.toggle("open");
+    });
+  }
+
+  // メニュー外クリックで閉じる
+  document.addEventListener("click", (e) => {
+    if (headerMenu && headerMenu.classList.contains("open")) {
+      if (!headerMenu.contains(e.target) && !btnMenu.contains(e.target)) {
+        headerMenu.classList.remove("open");
+        btnMenu.classList.remove("open");
+      }
+    }
+  });
+
+  // タイトルクリックでホームへ
+  if (title) {
+    title.style.cursor = "pointer";
+    title.addEventListener("click", () => {
+      window.location.href = "home.html";
+    });
+  }
 
   // ログアウト
   const btnLogout = document.getElementById("logoutBtn");
@@ -209,4 +226,4 @@ function initHeader() {
 /* ===============================
    エクスポート
 ================================ */
-export { initHeader, loginById, logout, toggleMenu };
+export { initHeader, loginById, logout };

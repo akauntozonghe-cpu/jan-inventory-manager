@@ -1,7 +1,13 @@
 <header id="systemHeader">
   <div class="headerLeft">
-    <button id="menuToggle" aria-label="メニューを開閉">☰</button>
+    <!-- ハンバーガーアイコン（3本線 → ✕ 変形） -->
+    <button id="menuToggle" aria-label="メニューを開閉">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
     <img src="icon-192.png" alt="システムアイコン" class="headerIcon">
+    <!-- タイトルクリックでホームへ -->
     <div class="headerTitle">在庫管理</div>
   </div>
 
@@ -14,7 +20,7 @@
   </div>
 </header>
 
-<nav id="headerMenu" style="display:none;" aria-label="メインメニュー">
+<nav id="headerMenu" aria-label="メインメニュー">
   <ul class="menu">
     <li><a href="home.html">🏠 ホーム</a></li>
     <li><a href="register.html">📥 商品登録</a></li>

@@ -1,3 +1,4 @@
+/* ヘッダー全体 */
 #systemHeader {
   display: flex;
   justify-content: space-between;
@@ -8,37 +9,81 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  transition: padding 0.3s ease, background 0.3s ease;
 }
 
+/* 左側（ハンバーガー＋アイコン＋タイトル） */
 .headerLeft {
   display: flex;
   align-items: center;
   gap: 14px;
 }
 
+/* アイコン */
 .headerIcon {
   width: 28px;
   height: 28px;
+  transition: transform 0.3s ease;
 }
 
+/* タイトル */
 .headerTitle {
   font-size: 1.3rem;
   font-weight: bold;
+  cursor: pointer;
+  transition: font-size 0.3s ease;
 }
 
+/* ハンバーガーアイコン */
+#menuToggle {
+  position: relative;
+  width: 30px;
+  height: 22px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: transform 0.3s ease;
+}
+#menuToggle span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+#menuToggle span:nth-child(1) { top: 0; }
+#menuToggle span:nth-child(2) { top: 9px; }
+#menuToggle span:nth-child(3) { top: 18px; }
+
+/* クロス変形 */
+#menuToggle.open span:nth-child(1) {
+  transform: rotate(45deg);
+  top: 9px;
+}
+#menuToggle.open span:nth-child(2) { opacity: 0; }
+#menuToggle.open span:nth-child(3) {
+  transform: rotate(-45deg);
+  top: 9px;
+}
+
+/* 右側（ユーザー情報） */
 .headerRight .userBlock {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
   font-size: 0.95rem;
   text-align: right;
+  transition: font-size 0.3s ease;
 }
 
+/* メニュー */
 #headerMenu {
   background: #333;
   padding: 12px 24px;
+  transition: padding 0.3s ease;
 }
-
 #headerMenu ul.menu {
   list-style: none;
   margin: 0;
@@ -47,22 +92,49 @@
   flex-wrap: wrap;
   gap: 20px;
 }
-
 #headerMenu ul.menu li a {
   text-decoration: none;
   color: #fff;
   font-weight: 500;
   padding: 8px 12px;
   border-radius: 4px;
-  transition: background 0.2s;
+  transition: background 0.2s, padding 0.3s ease, font-size 0.3s ease;
 }
-
 #headerMenu ul.menu li a:hover,
 #headerMenu ul.menu li a.active {
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
 }
 
+/* スクロール時の縮小 */
+#systemHeader.shrink {
+  padding: 6px 20px;
+  background: #111;
+}
+#systemHeader.shrink .headerTitle {
+  font-size: 1.05rem;
+}
+#systemHeader.shrink .headerIcon {
+  transform: scale(0.85);
+}
+#systemHeader.shrink #menuToggle {
+  transform: scale(0.85);
+}
+#systemHeader.shrink .userBlock {
+  font-size: 0.85rem;
+}
+#systemHeader.shrink ~ #headerMenu {
+  padding: 8px 16px;
+}
+#systemHeader.shrink ~ #headerMenu ul.menu {
+  gap: 14px;
+}
+#systemHeader.shrink ~ #headerMenu ul.menu li a {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+/* スマホ表示 */
 @media (max-width: 600px) {
   .headerRight .userBlock {
     flex-direction: column;
