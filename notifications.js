@@ -7,7 +7,8 @@ import {
   doc,
   updateDoc,
   serverTimestamp,
-  addDoc
+  addDoc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
@@ -16,10 +17,7 @@ const auth = getAuth();
 
 async function approveItem(itemId, notifId, name) {
   const user = auth.currentUser;
-  if (!user) {
-    alert("ログインが必要です");
-    return;
-  }
+  if (!user) return;
 
   // items 更新
   await updateDoc(doc(db, "items", itemId), {
@@ -27,9 +25,10 @@ async function approveItem(itemId, notifId, name) {
     updatedAt: serverTimestamp()
   });
 
-  // 通知を既読に
+  // 通知を更新
   await updateDoc(doc(db, "notifications", notifId), {
-    status: "既読"
+    status: "既読",
+    result: "承認"
   });
 
   // 履歴に残す
@@ -40,11 +39,9 @@ async function approveItem(itemId, notifId, name) {
     timestamp: serverTimestamp(),
     details: { name }
   });
-
-  alert("承認しました");
 }
 
-function renderNotifications(notifs, isAdmin) {
+function renderNotifications(notifs, role) {
   const container = document.getElementById("notificationList");
   container.innerHTML = "";
 
@@ -58,10 +55,11 @@ function renderNotifications(notifs, isAdmin) {
     div.className = "notificationCard";
     div.innerHTML = `
       <p>${n.message}</p>
-      <small>${n.status}</small>
+      <small>状態: ${n.result || "未処理"}</small>
     `;
 
-    if (isAdmin && n.status === "未読") {
+    // 管理者だけ承認ボタンを表示
+    if (role === "管理者" && n.result !== "承認") {
       const btn = document.createElement("button");
       btn.textContent = "承認する";
       btn.onclick = () => approveItem(n.targetItem, n.id, n.message);
@@ -76,14 +74,18 @@ document.addEventListener("DOMContentLoaded", () => {
   auth.onAuthStateChanged(async (user) => {
     if (!user) return;
 
-    // 管理者かどうか確認
+    // ユーザーの役割を取得
     const userDoc = await getDoc(doc(db, "users", user.uid));
-    const isAdmin = userDoc.exists() && userDoc.data().role === "管理者";
+    const role = userDoc.exists() ? userDoc.data().role : "未設定";
 
-    const q = query(collection(db, "notifications"));
+    // 管理者は全通知、責任者以下は自分の通知のみ
+    const q = role === "管理者"
+      ? query(collection(db, "notifications"))
+      : query(collection(db, "notifications"), where("from", "==", user.uid));
+
     onSnapshot(q, (snapshot) => {
       const notifs = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderNotifications(notifs, isAdmin);
+      renderNotifications(notifs, role);
     });
   });
 });
