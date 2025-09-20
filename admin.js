@@ -123,9 +123,21 @@ function setupNotificationForm(user) {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    const title = document.getElementById("notifTitle").value;
-    const body = document.getElementById("notifBody").value;
-    const target = document.getElementById("notifTarget").value;
+
+    const titleEl = document.getElementById("notifTitle");
+    const bodyEl = document.getElementById("notifBody");
+    const targetEl = document.getElementById("notifTarget");
+
+    const title = titleEl?.value.trim();
+    const body = bodyEl?.value.trim();
+    const target = targetEl?.value;
+
+    console.log("送信データ確認:", { title, body, target });
+
+    if (!title || !body) {
+      alert("タイトルと本文を入力してください");
+      return;
+    }
 
     try {
       await addDoc(collection(db, "notificationLogs"), {
@@ -135,6 +147,7 @@ function setupNotificationForm(user) {
         createdAt: serverTimestamp(),
         createdBy: user.uid
       });
+      console.log("Firestore 書き込み成功");
       alert("通知を送信しました");
       form.reset();
     } catch (err) {
