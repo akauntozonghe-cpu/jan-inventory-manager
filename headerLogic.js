@@ -7,14 +7,11 @@ import {
   getDocs,
   doc,
   getDoc,
-  serverTimestamp,
-  setDoc,
   orderBy,
   limit
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import {
   getAuth,
-  onAuthStateChanged,
   signOut
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
@@ -97,26 +94,6 @@ async function getResponsibleInfo(uid) {
   return userDoc.data();
 }
 
-// ✅ 責任者番号でログイン処理（表示のみ）
-async function loginById(id) {
-  try {
-    const uid = await getUidById(id);
-    const info = await getResponsibleInfo(uid);
-
-    if (responsibleUser) {
-      responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
-    }
-    if (info.role === "管理者" && adminMenu) {
-      adminMenu.style.display = "block";
-    }
-
-    localStorage.setItem("uid", uid); // 後続処理用に保存
-    await loadLastLogin(uid);
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
 // ✅ 最終ログイン履歴の取得
 async function loadLastLogin(uid) {
   try {
@@ -139,9 +116,31 @@ async function loadLastLogin(uid) {
       const second = ts.getSeconds().toString().padStart(2, "0");
       const formatted = `${month}月${day}日（${weekday}）${hour}:${minute}:${second}`;
       if (lastJudgment) lastJudgment.textContent = `🕒 最終ログイン：${formatted}`;
+    } else {
+      if (lastJudgment) lastJudgment.textContent = "🕒 最終ログイン：記録なし";
     }
   } catch (err) {
     console.error("ログイン履歴取得失敗:", err);
+  }
+}
+
+// ✅ 責任者番号でログイン処理（表示のみ）
+async function loginById(id) {
+  try {
+    const uid = await getUidById(id);
+    const info = await getResponsibleInfo(uid);
+
+    if (responsibleUser) {
+      responsibleUser.textContent = `👑 ${info.name}（${info.role}）｜責任者番号：${info.id}`;
+    }
+    if (info.role === "管理者" && adminMenu) {
+      adminMenu.style.display = "block";
+    }
+
+    localStorage.setItem("uid", uid);
+    await loadLastLogin(uid);
+  } catch (err) {
+    alert(err.message);
   }
 }
 
