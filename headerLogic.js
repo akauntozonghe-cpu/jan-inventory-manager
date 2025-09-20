@@ -65,6 +65,23 @@ async function getResponsibleInfo(uid) {
 }
 
 /* ===============================
+   Timestamp 正規化関数
+================================ */
+function normalizeTimestamp(ts) {
+  if (!ts) return null;
+  if (typeof ts.toDate === "function") {
+    return ts.toDate(); // Firestore Timestamp
+  }
+  if (ts instanceof Date) {
+    return ts; // JS Date
+  }
+  if (typeof ts === "string") {
+    return new Date(ts); // ISO文字列など
+  }
+  return null;
+}
+
+/* ===============================
    最終ログ取得（ログイン／ログアウト両方を照合）
 ================================ */
 async function loadLast(uid) {
@@ -86,8 +103,8 @@ async function loadLast(uid) {
     getDocs(logoutQ)
   ]);
 
-  const loginTs = !loginSnap.empty ? loginSnap.docs[0].data().timestamp?.toDate() : null;
-  const logoutTs = !logoutSnap.empty ? logoutSnap.docs[0].data().timestamp?.toDate() : null;
+  const loginTs = !loginSnap.empty ? normalizeTimestamp(loginSnap.docs[0].data().timestamp) : null;
+  const logoutTs = !logoutSnap.empty ? normalizeTimestamp(logoutSnap.docs[0].data().timestamp) : null;
 
   let latest = null;
   if (loginTs && logoutTs) {
@@ -234,13 +251,13 @@ function initHeader() {
           const roleText = info.role || role || "一般";
           responsibleUser.textContent = `👑 ${name}（${roleText}）`;
         }
-        if ((info.role === "管理者" || role === "管理者") && adminMenu) {
+                if ((info.role === "管理者" || role === "管理者") && adminMenu) {
           adminMenu.style.display = "block";
         }
       })
       .then(() => loadLast(uid))
       .catch(err => console.error("資格/最終表示失敗:", err));
-    } else {
+  } else {
     // 未ログイン時の初期表示
     if (responsibleUser) responsibleUser.textContent = "👑 未ログイン";
     if (lastJudgment) lastJudgment.textContent = "🕒 最終：--";
