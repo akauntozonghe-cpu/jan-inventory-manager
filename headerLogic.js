@@ -65,30 +65,46 @@ async function getResponsibleInfo(uid) {
 }
 
 /* ===============================
-   最終ログ取得（最新1件を日付＋曜日で表示）
+   最終ログ取得（ログイン／ログアウト両方を照合）
 ================================ */
 async function loadLast(uid) {
-  const q = query(
+  const loginQ = query(
     collection(db, "loginLogs"),
     where("uid", "==", uid),
     orderBy("timestamp", "desc"),
     limit(1)
   );
-  const snapshot = await getDocs(q);
+  const logoutQ = query(
+    collection(db, "logoutLogs"),
+    where("uid", "==", uid),
+    orderBy("timestamp", "desc"),
+    limit(1)
+  );
+
+  const [loginSnap, logoutSnap] = await Promise.all([
+    getDocs(loginQ),
+    getDocs(logoutQ)
+  ]);
+
+  const loginTs = !loginSnap.empty ? loginSnap.docs[0].data().timestamp?.toDate() : null;
+  const logoutTs = !logoutSnap.empty ? logoutSnap.docs[0].data().timestamp?.toDate() : null;
+
+  let latest = null;
+  if (loginTs && logoutTs) {
+    latest = loginTs > logoutTs ? loginTs : logoutTs;
+  } else {
+    latest = loginTs || logoutTs;
+  }
+
   const el = document.getElementById("lastJudgment");
   if (!el) return;
 
-  if (!snapshot.empty) {
-    const log = snapshot.docs[0].data();
-    const ts = log.timestamp?.toDate ? log.timestamp.toDate() : new Date(log.timestamp);
+  if (latest) {
     const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
-    const weekday = weekdayMap[ts.getDay()];
-    const month = ts.getMonth() + 1;
-    const day = ts.getDate();
-
-    // ✅ 日付＋曜日のみ
-    const formatted = `${month}月${day}日（${weekday}）`;
-    el.textContent = `🕒 最終：${formatted}`;
+    const weekday = weekdayMap[latest.getDay()];
+    const month = latest.getMonth() + 1;
+    const day = latest.getDate();
+    el.textContent = `🕒 最終：${month}月${day}日（${weekday}）`;
   } else {
     el.textContent = "🕒 最終：記録なし";
   }
@@ -224,7 +240,7 @@ function initHeader() {
       })
       .then(() => loadLast(uid))
       .catch(err => console.error("資格/最終表示失敗:", err));
-  } else {
+    } else {
     // 未ログイン時の初期表示
     if (responsibleUser) responsibleUser.textContent = "👑 未ログイン";
     if (lastJudgment) lastJudgment.textContent = "🕒 最終：--";
