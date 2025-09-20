@@ -10,7 +10,8 @@ import {
   orderBy,
   limit,
   addDoc,
-  serverTimestamp
+  serverTimestamp,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
@@ -54,9 +55,8 @@ async function getUidById(id) {
   const q = query(collection(db, "users"), where("id", "==", id));
   const snapshot = await getDocs(q);
   if (snapshot.empty) throw new Error("責任者番号が見つかりません");
-  return snapshot.docs[0].id; // ドキュメントID = UID
+  return snapshot.docs[0].id;
 }
-
 async function getResponsibleInfo(uid) {
   const userRef = doc(db, "users", uid);
   const userDoc = await getDoc(userRef);
@@ -65,24 +65,18 @@ async function getResponsibleInfo(uid) {
 }
 
 /* ===============================
-   Timestamp 正規化関数
+   Timestamp 正規化
 ================================ */
 function normalizeTimestamp(ts) {
   if (!ts) return null;
-  if (typeof ts.toDate === "function") {
-    return ts.toDate(); // Firestore Timestamp
-  }
-  if (ts instanceof Date) {
-    return ts; // JS Date
-  }
-  if (typeof ts === "string") {
-    return new Date(ts); // ISO文字列など
-  }
+  if (typeof ts.toDate === "function") return ts.toDate();
+  if (ts instanceof Date) return ts;
+  if (typeof ts === "string") return new Date(ts);
   return null;
 }
 
 /* ===============================
-   最終ログ取得（ログイン／ログアウト両方を照合）
+   最終ログイン／ログアウト取得
 ================================ */
 async function loadLast(uid) {
   const loginQ = query(
@@ -106,12 +100,7 @@ async function loadLast(uid) {
   const loginTs = !loginSnap.empty ? normalizeTimestamp(loginSnap.docs[0].data().timestamp) : null;
   const logoutTs = !logoutSnap.empty ? normalizeTimestamp(logoutSnap.docs[0].data().timestamp) : null;
 
-  let latest = null;
-  if (loginTs && logoutTs) {
-    latest = loginTs > logoutTs ? loginTs : logoutTs;
-  } else {
-    latest = loginTs || logoutTs;
-  }
+  let latest = loginTs && logoutTs ? (loginTs > logoutTs ? loginTs : logoutTs) : (loginTs || logoutTs);
 
   const el = document.getElementById("lastJudgment");
   if (!el) return;
@@ -138,32 +127,22 @@ async function loginById(id) {
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", info.role || "");
 
-    // 痕跡を残す
     await recordLogin(uid);
-
-    // ✅ 直後に表示更新
     await loadLast(uid);
 
-    // ページ遷移
     window.location.href = "home.html";
   } catch (err) {
     console.error("loginByIdエラー:", err);
     alert(err.message);
   }
 }
-
 function logout() {
   const uid = localStorage.getItem("uid");
   if (uid) {
-    recordLogout(uid)
-      .then(() => loadLast(uid)) // ✅ ログアウト直後に更新
-      .catch(console.error);
+    recordLogout(uid).then(() => loadLast(uid)).catch(console.error);
   }
-
   signOut(auth)
-    .catch(err => {
-      console.warn("Authサインアウト警告:", err);
-    })
+    .catch(err => console.warn("Authサインアウト警告:", err))
     .finally(() => {
       localStorage.removeItem("uid");
       localStorage.removeItem("role");
@@ -173,7 +152,47 @@ function logout() {
 }
 
 /* ===============================
-   ヘッダー初期化（ヘッダー挿入後に必ず呼ぶ）
+   通知購読
+================================ */
+function initNotifications(uid, role) {
+  const bell = document.getElementById("notificationBell");
+  const countEl = document.getElementById("notificationCount");
+  const listEl = document.getElementById("notificationList");
+  const dropdown = document.getElementById("notificationDropdown");
+
+  let notifications = [];
+
+  if (bell) {
+    bell.addEventListener("click", () => {
+      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+    });
+  }
+
+  const q = query(collection(db, "notificationLogs"), orderBy("createdAt", "desc"), limit(20));
+  onSnapshot(q, snap => {
+    notifications = [];
+    snap.forEach(doc => {
+      const data = doc.data();
+      if (data.target === "all" || (data.target === "admin" && role === "管理者") || data.target === `uid:${uid}`) {
+        notifications.push(data);
+      }
+    });
+
+    if (countEl) countEl.textContent = notifications.length;
+    if (listEl) {
+      listEl.innerHTML = notifications.map(n => `
+        <li>
+          <strong>${n.title}</strong><br>
+          ${n.body}<br>
+          <small>${n.createdAt?.toDate().toLocaleString("ja-JP") || ""}</small>
+        </li>
+      `).join("");
+    }
+  });
+}
+
+/* ===============================
+   ヘッダー初期化
 ================================ */
 function initHeader() {
   const responsibleUser = document.getElementById("responsibleUser");
@@ -184,7 +203,7 @@ function initHeader() {
   const btnMenu = document.getElementById("menuToggle");
   const title = document.querySelector(".headerTitle");
 
-  // 時計（現在は時刻まで表示）
+  // 時計
   function updateClock() {
     const now = new Date();
     const weekdayMap = ["日", "月", "火", "水", "木", "金", "土"];
@@ -208,8 +227,6 @@ function initHeader() {
       btnMenu.classList.toggle("open");
     });
   }
-
-  // メニュー外クリックで閉じる
   document.addEventListener("click", (e) => {
     if (headerMenu && headerMenu.classList.contains("open")) {
       if (!headerMenu.contains(e.target) && !btnMenu.contains(e.target)) {
@@ -227,16 +244,20 @@ function initHeader() {
     });
   }
 
-  // ログアウト
+    // ログアウト
   const btnLogout = document.getElementById("logoutBtn");
-  if (btnLogout) btnLogout.addEventListener("click", logout);
+  if (btnLogout) {
+    btnLogout.addEventListener("click", logout);
+  }
 
-  // 現在ページハイライト
+  // 現在ページのメニューリンクをハイライト
   const currentPath = window.location.pathname.split("/").pop();
   const menuLinks = document.querySelectorAll("#headerMenu ul.menu li a");
   menuLinks.forEach(link => {
     const href = link.getAttribute("href");
-    if (href && href === currentPath) link.classList.add("active");
+    if (href && href === currentPath) {
+      link.classList.add("active");
+    }
   });
 
   // ログイン済みなら資格と最終表示、管理者メニュー制御
@@ -251,11 +272,12 @@ function initHeader() {
           const roleText = info.role || role || "一般";
           responsibleUser.textContent = `👑 ${name}（${roleText}）`;
         }
-                if ((info.role === "管理者" || role === "管理者") && adminMenu) {
+        if ((info.role === "管理者" || role === "管理者") && adminMenu) {
           adminMenu.style.display = "block";
         }
       })
       .then(() => loadLast(uid))
+      .then(() => initNotifications(uid, role))
       .catch(err => console.error("資格/最終表示失敗:", err));
   } else {
     // 未ログイン時の初期表示
