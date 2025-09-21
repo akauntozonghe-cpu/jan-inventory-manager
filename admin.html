@@ -8,20 +8,6 @@
   <!-- 共通スタイル -->
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="admin.css" />
-
-  <!-- ログインチェック -->
-  <script type="module">
-    const uid = localStorage.getItem("uid");
-    const role = localStorage.getItem("role");
-
-    if (!uid) {
-      // 未ログインならログイン画面へ
-      window.location.href = "index.html";
-    } else if (role !== "管理者") {
-      // 管理者以外ならホームへ
-      window.location.href = "home.html";
-    }
-  </script>
 </head>
 <body>
 
@@ -81,5 +67,19 @@
 
   <!-- 管理画面ロジック -->
   <script type="module" src="admin.js"></script>
+
+  <!-- ログインチェック（DOMContentLoaded後に実行） -->
+  <script type="module">
+    document.addEventListener("DOMContentLoaded", () => {
+      const uid = localStorage.getItem("uid");
+      const role = localStorage.getItem("role");
+
+      if (!uid) {
+        window.location.href = "index.html"; // 未ログインならログイン画面へ
+      } else if (role !== "管理者") {
+        window.location.href = "home.html"; // 管理者以外ならホームへ
+      }
+    });
+  </script>
 </body>
 </html>
