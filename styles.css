@@ -1,0 +1,23 @@
+/* 例：stule.css の中身（style.css 完全版と同一） */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #f4f6f8;
+  color: #333;
+}
+
+/* 固定ヘッダー */
+.fixed-header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  background: #2c3e50;
+  color: white;
+  padding: 12px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* 以下略：style.css 完全版と同じ構成でOK */
