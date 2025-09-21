@@ -30,9 +30,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// 管理者ID一覧
-const adminIds = ["2488", "1011"];
-
 window.addEventListener("DOMContentLoaded", () => {
   const userCodeInput = document.getElementById("userIdInput");
   const loginBtn = document.getElementById("loginBtn");
@@ -81,12 +78,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
       // ✅ localStorage に保存（後続画面で利用）
       localStorage.setItem("uid", uid);
-      localStorage.setItem("role", role);
+      localStorage.setItem("role", role);   // Firestoreのroleをそのまま保存
       localStorage.setItem("name", name);
 
       welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
 
-      if (adminIds.includes(id)) {
+      // 管理者のみ編集ボタン表示
+      if (role === "管理者") {
         editVersionBtn.classList.remove("hidden");
       } else {
         editVersionBtn.classList.add("hidden");
