@@ -8,6 +8,20 @@
   <!-- 共通スタイル -->
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="admin.css" />
+
+  <!-- ログインチェック -->
+  <script type="module">
+    const uid = localStorage.getItem("uid");
+    const role = localStorage.getItem("role");
+
+    if (!uid) {
+      // 未ログインならログイン画面へ
+      window.location.href = "index.html";
+    } else if (role !== "管理者") {
+      // 管理者以外ならホームへ
+      window.location.href = "home.html";
+    }
+  </script>
 </head>
 <body>
 
