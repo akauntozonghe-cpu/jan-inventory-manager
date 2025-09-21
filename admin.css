@@ -121,3 +121,193 @@ h3 {
 #sendNotificationForm button:hover {
   background: #cf711c;
 }
+
+/* ===============================
+   通知ドロップダウン
+================================ */
+#notificationDropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 30px;
+  background: #fff;
+  border: 1px solid #ccc;
+  width: 320px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  border-radius: 6px;
+}
+
+.notificationItem {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+.notificationItem:last-child {
+  border-bottom: none;
+}
+.notificationItem.unread {
+  background: #f0f8ff;
+  font-weight: bold;
+}
+.notificationItem.read {
+  background: #f9f9f9;
+  color: #777;
+  font-weight: normal;
+  opacity: 0.7;
+}
+.notifTitle { font-size: 14px; margin-bottom: 4px; }
+.notifBody  { font-size: 13px; color: #555; margin-bottom: 4px; }
+.notifTime  { font-size: 11px; color: #999; text-align: right; }
+
+/* 種類ごとの色分け */
+.notificationItem.warning .notifTitle { color: #e74c3c; }
+.notificationItem.info .notifTitle    { color: #2980b9; }
+.notificationItem.approval .notifTitle{ color: #27ae60; }
+
+/* ===============================
+   ヘッダー強化版スタイル
+================================ */
+#systemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #222;
+  color: #fff;
+  padding: 14px 28px;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  transition: padding 0.3s ease, background 0.3s ease;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.headerIcon {
+  width: 28px;
+  height: 28px;
+  transition: transform 0.3s ease;
+}
+
+.headerTitle {
+  font-size: 1.3rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: font-size 0.3s ease;
+}
+
+#menuToggle {
+  position: relative;
+  width: 30px;
+  height: 22px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  transition: transform 0.3s ease;
+}
+#menuToggle span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+#menuToggle span:nth-child(1) { top: 0; }
+#menuToggle span:nth-child(2) { top: 9px; }
+#menuToggle span:nth-child(3) { top: 18px; }
+#menuToggle.open span:nth-child(1) { transform: rotate(45deg); top: 9px; }
+#menuToggle.open span:nth-child(2) { opacity: 0; }
+#menuToggle.open span:nth-child(3) { transform: rotate(-45deg); top: 9px; }
+
+.headerRight .userBlock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.95rem;
+  text-align: right;
+  transition: font-size 0.3s ease;
+}
+
+/* メニュー */
+#headerMenu {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  background: #333;
+  transition: max-height 0.4s ease, opacity 0.4s ease, padding 0.3s ease;
+  padding: 0 24px;
+}
+#headerMenu.open {
+  max-height: 500px;
+  opacity: 1;
+  padding: 12px 24px;
+}
+#headerMenu ul.menu {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+#headerMenu ul.menu li {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+#headerMenu.open ul.menu li {
+  animation: fadeSlideIn 0.4s forwards;
+}
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+#headerMenu ul.menu li a {
+  text-decoration: none;
+  color: #fff;
+  font-weight: 500;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.2s, padding 0.3s ease, font-size 0.3s ease;
+}
+#headerMenu ul.menu li a:hover,
+#headerMenu ul.menu li a.active {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+/* スクロール時の縮小 */
+#systemHeader.shrink {
+  padding: 6px 20px;
+  background: #111;
+}
+#systemHeader.shrink .headerTitle { font-size: 1.05rem; }
+#systemHeader.shrink .headerIcon { transform: scale(0.85); }
+#systemHeader.shrink #menuToggle { transform: scale(0.85); }
+#systemHeader.shrink .userBlock { font-size: 0.85rem; }
+#systemHeader.shrink ~ #headerMenu { padding: 8px 16px; }
+#systemHeader.shrink ~ #headerMenu ul.menu { gap: 14px; }
+#systemHeader.shrink ~ #headerMenu ul.menu li a {
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+/* スマホ表示 */
+@media (max-width: 600px) {
+  .headerRight .userBlock {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+  #headerMenu ul.menu {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

@@ -130,6 +130,7 @@ function setupNotificationForm(uid) {
     const title = document.getElementById("notifTitle")?.value.trim();
     const body = document.getElementById("notifBody")?.value.trim();
     const target = document.getElementById("notifTarget")?.value;
+    const type = document.getElementById("notifType")?.value || "info"; // ← 種類選択を追加
 
     if (!title || !body) {
       alert("タイトルと本文を入力してください");
@@ -141,6 +142,7 @@ function setupNotificationForm(uid) {
         title,
         body,
         target,
+        type,
         createdAt: serverTimestamp(),
         createdBy: uid
       });

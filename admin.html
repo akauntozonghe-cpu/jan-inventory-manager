@@ -48,22 +48,28 @@
     </section>
 
     <!-- 通知送信フォーム -->
-    <section>
-      <h3>📢 通知送信</h3>
-      <form id="sendNotificationForm">
-        <label>タイトル: <input type="text" id="notifTitle" required /></label><br>
-        <label>本文: <textarea id="notifBody" required></textarea></label><br>
-        <label>対象:
-          <select id="notifTarget">
-            <option value="all">全員</option>
-            <option value="admin">管理者のみ</option>
-            <option value="uid:sample">特定ユーザー（例: uid:xxxx）</option>
-          </select>
-        </label><br>
-        <button type="submit">送信</button>
-      </form>
-    </section>
-  </main>
+<section>
+  <h3>📢 通知送信</h3>
+  <form id="sendNotificationForm">
+    <label>タイトル: <input type="text" id="notifTitle" required /></label><br>
+    <label>本文: <textarea id="notifBody" required></textarea></label><br>
+    <label>対象:
+      <select id="notifTarget">
+        <option value="all">全員</option>
+        <option value="admin">管理者のみ</option>
+        <option value="uid:sample">特定ユーザー（例: uid:xxxx）</option>
+      </select>
+    </label><br>
+    <label>種類:
+      <select id="notifType">
+        <option value="info">📢 お知らせ</option>
+        <option value="warning">⚠ 警告</option>
+        <option value="approval">✅ 承認</option>
+      </select>
+    </label><br>
+    <button type="submit">送信</button>
+  </form>
+</section>
 
   <!-- 管理画面ロジック -->
   <script type="module" src="admin.js"></script>
