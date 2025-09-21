@@ -1,6 +1,6 @@
 <header id="systemHeader">
   <div class="headerLeft">
-    <!-- ハンバーガーアイコン（3本線 → ✕ 変形） -->
+    <!-- ハンバーガーアイコン -->
     <button id="menuToggle" aria-label="メニューを開閉">
       <span></span>
       <span></span>
@@ -18,8 +18,12 @@
     <!-- 通知ブロック -->
     <div id="notificationBlock" style="position:relative; margin-right:15px; cursor:pointer;">
       <span id="notificationBell">🔔</span>
-      <span id="notificationCount" style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:12px; position:absolute; top:-5px; right:-5px;">0</span>
-      <div id="notificationDropdown" style="display:none; position:absolute; right:0; top:30px; background:#fff; border:1px solid #ccc; width:300px; max-height:400px; overflow-y:auto; z-index:1000;">
+      <span id="notificationCount"
+            style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:12px;
+                   position:absolute; top:-5px; right:-5px;">0</span>
+      <div id="notificationDropdown"
+           style="display:none; position:absolute; right:0; top:30px; background:#fff; border:1px solid #ccc;
+                  width:300px; max-height:400px; overflow-y:auto; z-index:1000;">
         <ul id="notificationList" style="list-style:none; margin:0; padding:10px;"></ul>
       </div>
     </div>
@@ -27,7 +31,7 @@
     <!-- ユーザー情報 -->
     <div class="userBlock">
       <span id="responsibleUser">👑 未ログイン</span>
-      <span id="lastJudgment">🕒 最終ログイン：--</span>
+      <span id="lastJudgment">🕒 最終：--</span>
       <span id="clock">⏱ 現在：--:--:--</span>
     </div>
   </div>
