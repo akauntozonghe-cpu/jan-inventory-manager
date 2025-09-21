@@ -1,8 +1,4 @@
-// admin.js
-import { auth, db } from "./firebase.js";
-import {
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { db } from "./firebase.js";
 import {
   collection,
   query,
@@ -16,29 +12,33 @@ import {
   limit
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-// ✅ 管理者のみアクセス許可
-onAuthStateChanged(auth, async (user) => {
-  if (!user) {
+/* ===============================
+   管理者のみアクセス許可（localStorageベース）
+================================ */
+(async () => {
+  const uid = localStorage.getItem("uid");
+  const role = localStorage.getItem("role");
+
+  if (!uid) {
     alert("ログインが必要です");
     window.location.href = "index.html";
     return;
   }
-
-  const userDoc = await getDocs(query(collection(db, "users"), where("uid", "==", user.uid)));
-  const role = userDoc.docs[0]?.data()?.role || "未設定";
-
   if (role !== "管理者") {
     alert("管理者のみアクセス可能です");
-    window.location.href = "dashboard.html";
+    window.location.href = "home.html";
     return;
   }
 
-  loadPendingItems();
-  loadHistory();
-  setupNotificationForm(user);
-});
+  // 認証OKならデータ読み込み開始
+  await loadPendingItems();
+  await loadHistory();
+  setupNotificationForm(uid);
+})();
 
-// ✅ 保留一覧表示
+/* ===============================
+   保留一覧表示
+================================ */
 async function loadPendingItems() {
   const q = query(collection(db, "items"), where("status", "==", "保留"));
   const snapshot = await getDocs(q);
@@ -60,18 +60,21 @@ async function loadPendingItems() {
   });
 }
 
-// ✅ 承認処理
+/* ===============================
+   承認処理
+================================ */
 window.approveItem = async (itemId, itemName) => {
-  const user = auth.currentUser;
+  const uid = localStorage.getItem("uid");
+
   await updateDoc(doc(db, "items", itemId), {
     status: "承認済",
     approvedAt: serverTimestamp(),
-    approvedBy: user.uid
+    approvedBy: uid
   });
 
   await addDoc(collection(db, "history"), {
     type: "承認",
-    actor: user.uid,
+    actor: uid,
     targetItem: itemId,
     timestamp: serverTimestamp(),
     details: { status: "承認済", name: itemName }
@@ -82,7 +85,9 @@ window.approveItem = async (itemId, itemName) => {
   loadHistory();
 };
 
-// ✅ 履歴表示
+/* ===============================
+   履歴表示
+================================ */
 async function loadHistory() {
   const q = query(collection(db, "history"), orderBy("timestamp", "desc"), limit(20));
   const snapshot = await getDocs(q);
@@ -104,15 +109,15 @@ async function loadHistory() {
   });
 }
 
-// ✅ 通知送信フォーム処理
-function setupNotificationForm(user) {
+/* ===============================
+   通知送信フォーム処理
+================================ */
+function setupNotificationForm(uid) {
   const form = document.getElementById("sendNotificationForm");
   if (!form) {
     console.warn("通知フォームが見つかりません");
     return;
   }
-
-  console.log("通知フォーム初期化OK");
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -120,8 +125,6 @@ function setupNotificationForm(user) {
     const title = document.getElementById("notifTitle")?.value.trim();
     const body = document.getElementById("notifBody")?.value.trim();
     const target = document.getElementById("notifTarget")?.value;
-
-    console.log("送信データ確認:", { title, body, target });
 
     if (!title || !body) {
       alert("タイトルと本文を入力してください");
@@ -134,9 +137,8 @@ function setupNotificationForm(user) {
         body,
         target,
         createdAt: serverTimestamp(),
-        createdBy: user.uid
+        createdBy: uid
       });
-      console.log("Firestore 書き込み成功");
       alert("通知を送信しました");
       form.reset();
     } catch (err) {
