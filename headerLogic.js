@@ -1,6 +1,8 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+// headerLogic.js
+
+// Firebase 初期化は firebase.js に集約済み
+import { db, auth } from "./firebase.js";
 import {
-  getFirestore,
   collection,
   query,
   where,
@@ -13,22 +15,7 @@ import {
   serverTimestamp,
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-
-/* ===============================
-   Firebase 初期化
-================================ */
-const firebaseConfig = {
-  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.appspot.com",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8"
-};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
+import { signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 /* ===============================
    Firestore ログ記録
@@ -244,7 +231,7 @@ function initHeader() {
     });
   }
 
-    // ログアウト
+  // ログアウト
   const btnLogout = document.getElementById("logoutBtn");
   if (btnLogout) {
     btnLogout.addEventListener("click", logout);
@@ -261,7 +248,7 @@ function initHeader() {
   });
 
   // ログイン済みなら資格と最終表示、管理者メニュー制御
-  const uid = localStorage.getItem("uid");
+    const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
 
   if (uid) {
