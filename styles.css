@@ -21,3 +21,42 @@ body {
 }
 
 /* 以下略：style.css 完全版と同じ構成でOK */
+
+/* ヘッダー全体を横並びに */
+#systemHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f8f8;
+  padding: 5px 15px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* 左側の要素を横並びに */
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* アイコンを小さく固定 */
+.headerIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* 右側の要素を横並びに */
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ユーザー情報を縦積み */
+.userBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  font-size: 14px;
+}
