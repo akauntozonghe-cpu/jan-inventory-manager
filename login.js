@@ -41,14 +41,14 @@ window.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // ⌨️ Enterキー対応
-  document.addEventListener("keydown", (event) => {
+  // ⌨️ Enterキー対応（入力欄に限定）
+  userCodeInput.addEventListener("keydown", (event) => {
     if (event.key === "Enter" && !loginBtn.disabled) {
       loginBtn.click();
     }
   });
 
-  // 🔍 入力監視
+  // 🔍 入力監視（入力時にFirestore照合）
   userCodeInput.addEventListener("input", async () => {
     const inputId = userCodeInput.value.trim();
     if (!inputId) {
@@ -91,23 +91,33 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 🚪 ログイン処理
+  // 🚪 ログイン処理（クリック時にも再照合）
   loginBtn.addEventListener("click", async () => {
-    const id = loginBtn.dataset.userId;
-    const name = loginBtn.dataset.userName;
-    const role = loginBtn.dataset.userRole;
-    const uid = loginBtn.dataset.userUid;
-
-    if (!id || !name || !role || !uid) {
-      console.error("❌ ログイン情報が不完全です。");
-      return;
-    }
+    const inputId = userCodeInput.value.trim();
+    if (!inputId) return;
 
     try {
+      const q = query(collection(db, "users"), where("id", "==", inputId));
+      const snapshot = await getDocs(q);
+
+      if (snapshot.empty) {
+        alert("⚠️ 責任者番号が認識されません。");
+        return;
+      }
+
+      const data = snapshot.docs[0].data();
+      const { id, name, role, uid } = data;
+
+      // localStorage 保存
+      localStorage.setItem("uid", uid);
+      localStorage.setItem("role", role);
+      localStorage.setItem("name", name);
+
+      // Firebase認証
       await setPersistence(auth, browserLocalPersistence);
       await signInAnonymously(auth);
 
-      // ✅ ログイン履歴を記録
+      // Firestoreにログイン履歴を記録
       const logData = {
         uid,
         id,
