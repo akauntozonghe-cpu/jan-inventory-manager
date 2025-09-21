@@ -66,23 +66,28 @@ async function loadPendingItems() {
 window.approveItem = async (itemId, itemName) => {
   const uid = localStorage.getItem("uid");
 
-  await updateDoc(doc(db, "items", itemId), {
-    status: "承認済",
-    approvedAt: serverTimestamp(),
-    approvedBy: uid
-  });
+  try {
+    await updateDoc(doc(db, "items", itemId), {
+      status: "承認済",
+      approvedAt: serverTimestamp(),
+      approvedBy: uid
+    });
 
-  await addDoc(collection(db, "history"), {
-    type: "承認",
-    actor: uid,
-    targetItem: itemId,
-    timestamp: serverTimestamp(),
-    details: { status: "承認済", name: itemName }
-  });
+    await addDoc(collection(db, "history"), {
+      type: "承認",
+      actor: uid,
+      targetItem: itemId,
+      timestamp: serverTimestamp(),
+      details: { status: "承認済", name: itemName }
+    });
 
-  alert("承認しました");
-  loadPendingItems();
-  loadHistory();
+    alert("承認しました");
+    loadPendingItems();
+    loadHistory();
+  } catch (err) {
+    console.error("承認処理エラー:", err);
+    alert("承認に失敗しました");
+  }
 };
 
 /* ===============================

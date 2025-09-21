@@ -16,7 +16,7 @@
 
   <!-- ヘッダー読み込みとロジック -->
   <script type="module">
-    fetch("header.html")
+    fetch("./header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
@@ -68,22 +68,22 @@
   <!-- 管理画面ロジック -->
   <script type="module" src="admin.js"></script>
 
-  <!-- ログインチェック（DOMContentLoaded後に実行） -->
+  <!-- ログインチェック -->
   <script type="module">
-  document.addEventListener("DOMContentLoaded", () => {
-    const uid = localStorage.getItem("uid");
-    const role = localStorage.getItem("role");
+    document.addEventListener("DOMContentLoaded", () => {
+      const uid = localStorage.getItem("uid");
+      const role = localStorage.getItem("role");
 
-    console.log("admin.html ログインチェック:", { uid, role });
+      console.log("admin.html ログインチェック:", { uid, role });
 
-    if (!uid) {
-      alert("未ログインです。ログイン画面に戻ります。");
-      window.location.href = "index.html";
-    } else if (role !== "管理者") {
-      alert("管理者権限が必要です。ホームに戻ります。");
-      window.location.href = "home.html";
-    }
-  });
-</script>
+      if (!uid) {
+        alert("未ログインです。ログイン画面に戻ります。");
+        window.location.href = "index.html";
+      } else if (role !== "管理者") {
+        alert("管理者権限が必要です。ホームに戻ります。");
+        window.location.href = "home.html";
+      }
+    });
+  </script>
 </body>
 </html>
