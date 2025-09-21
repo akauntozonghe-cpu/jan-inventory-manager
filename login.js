@@ -1,4 +1,4 @@
-// ✅ モジュール最上位でインポート宣言
+// ✅ Firebaseモジュール最上位でインポート
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
@@ -31,7 +31,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 window.addEventListener("DOMContentLoaded", () => {
-  const userCodeInput = document.getElementById("userIdInput");
+  const userCodeInput = document.getElementById("userCodeInput"); // ✅ HTMLと一致
   const loginBtn = document.getElementById("loginBtn");
   const editVersionBtn = document.getElementById("editVersionBtn");
   const welcomeMessage = document.querySelector(".welcome-message");
@@ -76,19 +76,15 @@ window.addEventListener("DOMContentLoaded", () => {
       loginBtn.dataset.userRole = role;
       loginBtn.dataset.userUid = uid;
 
-      // ✅ localStorage に保存（後続画面で利用）
+      // ✅ localStorage に保存
       localStorage.setItem("uid", uid);
-      localStorage.setItem("role", role);   // Firestoreのroleをそのまま保存
+      localStorage.setItem("role", role);
       localStorage.setItem("name", name);
 
       welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
 
       // 管理者のみ編集ボタン表示
-      if (role === "管理者") {
-        editVersionBtn.classList.remove("hidden");
-      } else {
-        editVersionBtn.classList.add("hidden");
-      }
+      editVersionBtn.classList.toggle("hidden", role !== "管理者");
     } catch (error) {
       console.error("❌ Firestore照合エラー:", error);
       resetUI();
@@ -111,7 +107,6 @@ window.addEventListener("DOMContentLoaded", () => {
       await setPersistence(auth, browserLocalPersistence);
       await signInAnonymously(auth);
 
-      // ✅ ログイン履歴を記録
       const logData = {
         uid,
         id,
@@ -146,5 +141,6 @@ window.addEventListener("DOMContentLoaded", () => {
     loginBtn.dataset.userRole = "";
     loginBtn.dataset.userUid = "";
     editVersionBtn.classList.add("hidden");
+    welcomeMessage.textContent = "この空間は、あなたの責任と誇りを表現する場です。";
   }
 });
