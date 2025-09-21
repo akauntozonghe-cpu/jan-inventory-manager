@@ -70,16 +70,20 @@
 
   <!-- ログインチェック（DOMContentLoaded後に実行） -->
   <script type="module">
-    document.addEventListener("DOMContentLoaded", () => {
-      const uid = localStorage.getItem("uid");
-      const role = localStorage.getItem("role");
+  document.addEventListener("DOMContentLoaded", () => {
+    const uid = localStorage.getItem("uid");
+    const role = localStorage.getItem("role");
 
-      if (!uid) {
-        window.location.href = "index.html"; // 未ログインならログイン画面へ
-      } else if (role !== "管理者") {
-        window.location.href = "home.html"; // 管理者以外ならホームへ
-      }
-    });
-  </script>
+    console.log("admin.html ログインチェック:", { uid, role });
+
+    if (!uid) {
+      alert("未ログインです。ログイン画面に戻ります。");
+      window.location.href = "index.html";
+    } else if (role !== "管理者") {
+      alert("管理者権限が必要です。ホームに戻ります。");
+      window.location.href = "home.html";
+    }
+  });
+</script>
 </body>
 </html>
