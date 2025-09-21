@@ -76,7 +76,7 @@ window.addEventListener("DOMContentLoaded", () => {
       loginBtn.dataset.userRole = role;
       loginBtn.dataset.userUid = uid;
 
-      // ✅ localStorage に保存
+      // ✅ localStorage に保存（後続画面で利用）
       localStorage.setItem("uid", uid);
       localStorage.setItem("role", role);
       localStorage.setItem("name", name);
@@ -107,6 +107,7 @@ window.addEventListener("DOMContentLoaded", () => {
       await setPersistence(auth, browserLocalPersistence);
       await signInAnonymously(auth);
 
+      // ✅ ログイン履歴を記録
       const logData = {
         uid,
         id,
