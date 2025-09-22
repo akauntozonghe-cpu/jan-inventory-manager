@@ -58,7 +58,6 @@ async function initNotifications(uid, role) {
         const li = document.createElement("li");
         li.dataset.notifId = notifId;
 
-        // 種類クラス付与
         li.classList.add("notificationItem");
         if (notif.type) li.classList.add(notif.type);
 
@@ -112,6 +111,55 @@ async function initNotifications(uid, role) {
 export function initHeader() {
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
+  const name = localStorage.getItem("name");
+  const lastLogin = localStorage.getItem("lastLogin");
+
+  // ヘッダー要素
+  const responsibleUser = document.getElementById("responsibleUser");
+  const lastJudgment = document.getElementById("lastJudgment");
+  const clock = document.getElementById("clock");
+  const adminMenu = document.getElementById("adminMenu");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  // ユーザー表示
+  if (name && role) {
+    responsibleUser.textContent = `👑 ${name} さん（${role}）`;
+  } else {
+    responsibleUser.textContent = "👑 未ログイン";
+  }
+
+  // 最終ログイン表示
+  if (lastLogin) {
+    const d = new Date(lastLogin);
+    lastJudgment.textContent = `🕒 最終：${d.toLocaleString("ja-JP")}`;
+  } else {
+    lastJudgment.textContent = "🕒 最終：--";
+  }
+
+  // 現在時刻をリアルタイム更新
+  function updateClock() {
+    const now = new Date();
+    clock.textContent = `⏱ 現在：${now.toLocaleTimeString("ja-JP")}`;
+  }
+  updateClock();
+  setInterval(updateClock, 1000);
+
+  // 管理者メニュー表示制御
+  if (role === "管理者") {
+    adminMenu.style.display = "block";
+  } else {
+    adminMenu.style.display = "none";
+  }
+
+  // ログアウト処理
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.clear();
+      alert("ログアウトしました");
+      window.location.href = "login.html";
+    });
+  }
 
   // ハンバーガーメニュー開閉
   const menuToggle = document.getElementById("menuToggle");

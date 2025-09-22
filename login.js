@@ -70,6 +70,7 @@ btn.addEventListener("click", async () => {
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", role);
     localStorage.setItem("name", name);
+    localStorage.setItem("lastLogin", new Date().toISOString()); // ✅ 追加
 
     // Firebase 認証
     await setPersistence(auth, browserLocalPersistence);
