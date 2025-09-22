@@ -157,7 +157,7 @@ export function initHeader() {
       e.preventDefault();
       localStorage.clear();
       alert("ログアウトしました");
-      window.location.href = "login.html";
+      window.location.href = "index.html";
     });
   }
 
