@@ -14,50 +14,6 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// ✅ 読み取り儀式（バーコード・QR）
-let qrReaderInstance = null;
-
-function startScan(targetId) {
-  const overlay = document.getElementById("qrOverlay");
-  overlay.style.display = "flex";
-
-  if (!qrReaderInstance) {
-    qrReaderInstance = new Html5Qrcode("qr-reader");
-  }
-
-  qrReaderInstance.start(
-    { facingMode: "environment" },
-    { fps: 10, qrbox: 250 },
-    (decodedText) => {
-      const input = document.getElementById(targetId);
-      if (input) {
-        input.value = decodedText;
-        input.dispatchEvent(new Event("input"));
-      }
-      stopScan();
-    },
-    (errorMessage) => {
-      console.warn("読み取り失敗:", errorMessage);
-    }
-  );
-}
-
-function stopScan() {
-  if (qrReaderInstance) {
-    qrReaderInstance.stop().then(() => {
-      document.getElementById("qrOverlay").style.display = "none";
-    }).catch((err) => {
-      console.error("停止失敗:", err);
-      document.getElementById("qrOverlay").style.display = "none";
-    });
-  }
-}
-
-function closeQR() { stopScan(); }
-function scanJAN() { startScan("janInput"); }
-function scanCategory() { startScan("categoryLarge"); }
-function scanLocation() { startScan("location"); }
-
 // ✅ 管理番号自動生成
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
@@ -99,10 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     let role = "未設定";
+    let name = "不明";
     try {
       const userDoc = await db.collection("users").doc(user.uid).get();
       if (userDoc.exists) {
         role = userDoc.data()?.role || "未設定";
+        name = userDoc.data()?.name || "不明";
       }
     } catch (err) {
       console.warn("資格取得失敗:", err);
@@ -126,35 +84,50 @@ document.addEventListener("DOMContentLoaded", () => {
       photo: null,
       status: isAdmin ? "承認済" : "保留",
       createdBy: user.uid,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(), // ✅ 最終変更日時
+      createdByName: name,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
 
     try {
-      const itemRef = await db.collection("items").add(data);
+      if (isAdmin) {
+        // ✅ 管理者は items に即登録
+        const itemRef = await db.collection("items").add(data);
 
-      // ✅ 履歴に残す
-      await db.collection("history").add({
-        type: isAdmin ? "登録（即承認）" : "登録（保留）",
-        actor: user.uid,
-        targetItem: itemRef.id,
-        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-        details: { status: data.status, name: data.name }
-      });
-
-      // ✅ 管理者でなければ承認請求通知を送る
-      if (!isAdmin) {
-        await db.collection("notifications").add({
-          type: "承認依頼",
-          from: user.uid,
+        await db.collection("history").add({
+          type: "登録（即承認）",
+          actor: user.uid,
           targetItem: itemRef.id,
-          message: `${data.name} の登録承認をお願いします`,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          status: "未読"
+          details: { status: data.status, name: data.name }
         });
+
+        alert("登録完了（即一覧反映）");
+      } else {
+        // ✅ 責任者は pendingItems に保存
+        const pendingRef = await db.collection("pendingItems").add(data);
+
+        await db.collection("history").add({
+          type: "登録（保留）",
+          actor: user.uid,
+          targetItem: pendingRef.id,
+          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+          details: { status: data.status, name: data.name }
+        });
+
+        // ✅ 管理者に承認依頼通知を送信
+        await db.collection("notificationLogs").add({
+          title: "承認依頼",
+          body: `${name} さんが ${data.name} を登録しました`,
+          type: "approval",
+          target: "admin",
+          pendingId: pendingRef.id,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        alert("登録完了（承認待ち・管理者に通知）");
       }
 
-      alert(isAdmin ? "登録完了（即一覧反映）" : "登録完了（承認待ち・管理者に通知）");
       form.reset();
       document.getElementById("adminCode").value = "";
       document.getElementById("controlId").value = "";

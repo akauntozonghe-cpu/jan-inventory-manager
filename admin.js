@@ -13,7 +13,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 /* ===============================
-   管理者のみアクセス許可（localStorageベース）
+   管理者のみアクセス許可
 ================================ */
 (async () => {
   const uid = localStorage.getItem("uid");
@@ -30,7 +30,7 @@ import {
     return;
   }
 
-  // 認証OKならデータ読み込み開始
+  // 初期表示
   await loadPendingItems();
   await loadHistory();
   setupNotificationForm(uid);
@@ -49,6 +49,7 @@ async function loadPendingItems() {
     const item = docSnap.data();
     const div = document.createElement("div");
     div.className = "pendingCard";
+    div.dataset.id = docSnap.id;
     div.innerHTML = `
       <strong>${item.name}</strong><br>
       JAN: ${item.jan}<br>
@@ -65,6 +66,11 @@ async function loadPendingItems() {
 ================================ */
 window.approveItem = async (itemId, itemName) => {
   const uid = localStorage.getItem("uid");
+  const card = document.querySelector(`[data-id="${itemId}"]`);
+  if (card) {
+    card.classList.add("fade-out");
+    card.addEventListener("animationend", () => card.remove());
+  }
 
   try {
     await updateDoc(doc(db, "items", itemId), {
@@ -80,10 +86,6 @@ window.approveItem = async (itemId, itemName) => {
       timestamp: serverTimestamp(),
       details: { status: "承認済", name: itemName }
     });
-
-    alert("承認しました");
-    loadPendingItems();
-    loadHistory();
   } catch (err) {
     console.error("承認処理エラー:", err);
     alert("承認に失敗しました");
@@ -91,10 +93,19 @@ window.approveItem = async (itemId, itemName) => {
 };
 
 /* ===============================
-   履歴表示
+   履歴表示（タブ切替対応）
 ================================ */
-async function loadHistory() {
-  const q = query(collection(db, "history"), orderBy("timestamp", "desc"), limit(20));
+async function loadHistory(filterType = null) {
+  let q = query(collection(db, "history"), orderBy("timestamp", "desc"), limit(20));
+  if (filterType) {
+    q = query(
+      collection(db, "history"),
+      where("type", "==", filterType),
+      orderBy("timestamp", "desc"),
+      limit(20)
+    );
+  }
+
   const snapshot = await getDocs(q);
   const container = document.getElementById("historyContainer");
   container.innerHTML = "";
@@ -119,10 +130,7 @@ async function loadHistory() {
 ================================ */
 function setupNotificationForm(uid) {
   const form = document.getElementById("sendNotificationForm");
-  if (!form) {
-    console.warn("通知フォームが見つかりません");
-    return;
-  }
+  if (!form) return;
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -130,7 +138,7 @@ function setupNotificationForm(uid) {
     const title = document.getElementById("notifTitle")?.value.trim();
     const body = document.getElementById("notifBody")?.value.trim();
     const target = document.getElementById("notifTarget")?.value;
-    const type = document.getElementById("notifType")?.value || "info"; // ← 種類選択を追加
+    const type = document.getElementById("notifType")?.value || "info";
 
     if (!title || !body) {
       alert("タイトルと本文を入力してください");
