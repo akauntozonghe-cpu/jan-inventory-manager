@@ -22,32 +22,7 @@
     </div>
   </div>
 
-  <!-- ✅ ロジック -->
-  <script type="module">
-    const input = document.getElementById("userCodeInput");
-    const roleSelect = document.getElementById("roleSelect");
-    const btn = document.getElementById("loginBtn");
-
-    // 入力があればボタン有効化
-    input.addEventListener("input", () => {
-      btn.disabled = input.value.trim() === "";
-    });
-
-    // ログイン処理
-    btn.addEventListener("click", () => {
-      const id = input.value.trim();
-      const role = roleSelect.value;
-      if (!id) return;
-
-      // localStorage に保存
-      localStorage.setItem("uid", id);
-      localStorage.setItem("role", role);
-
-      // ログインログを残したい場合は Firestore に addDoc してもOK
-      // ここでは簡略化して遷移のみ
-      alert(`ログインしました: ${id} (${role})`);
-      window.location.href = "home.html";
-    });
-  </script>
+  <!-- ✅ 外部JSを読み込み -->
+  <script type="module" src="login.js"></script>
 </body>
 </html>
