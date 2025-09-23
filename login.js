@@ -7,8 +7,18 @@ import {
   getAuth, signInAnonymously, setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// Firebase 初期化
-const firebaseConfig = { /* ← 既存の設定をそのまま */ };
+// Firebase 初期化（必ず projectId と storageBucket を含める）
+const firebaseConfig = {
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.appspot.com", // ← 修正済み
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8",
+  measurementId: "G-TRH31MJCE3"
+};
+
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -73,6 +83,11 @@ btn.addEventListener("click", async () => {
     const data = snapshot.docs[0].data();
     const { id, name, role, uid } = data;
 
+    if (!uid) {
+      alert("⚠️ ユーザー情報に UID がありません。管理者に確認してください。");
+      return;
+    }
+
     // localStorage 保存
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", role);
@@ -96,6 +111,6 @@ btn.addEventListener("click", async () => {
     window.location.href = "home.html";
   } catch (error) {
     console.error("❌ ログイン処理失敗:", error);
-    alert("ログインに失敗しました");
+    alert("ログインに失敗しました。詳細はコンソールを確認してください。");
   }
 });

@@ -19,11 +19,12 @@
     <p class="welcome-message">この空間は、あなたの責任と誇りを表現する場です。</p>
 
     <!-- ✅ 入力欄とボタン -->
-    <input type="text" id="userCodeInput" placeholder="責任者番号登録">
-    <button id="loginBtn" disabled>ログイン</button>
+    <label for="userCodeInput" class="sr-only">責任者番号</label>
+    <input type="text" id="userCodeInput" placeholder="責任者番号登録" autocomplete="off">
+    <button id="loginBtn" disabled aria-disabled="true">ログイン</button>
 
     <div class="version-label">
-      バージョン：v1.0.0
+      バージョン：<span id="appVersion">v1.0.0</span>
       <!-- 初期状態は必ず非表示 -->
       <span id="editVersionBtn" class="hidden">編集</span>
     </div>
