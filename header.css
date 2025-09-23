@@ -1,4 +1,6 @@
-/* ヘッダー全体（背景色を統一） */
+/* ===============================
+   ヘッダー全体
+================================ */
 #systemHeader {
   display: flex;
   justify-content: space-between;
@@ -10,13 +12,6 @@
   top: 0;
   z-index: 1000;
   transition: padding 0.3s ease, background 0.3s ease;
-}
-
-/* 役割ごとのテーマ色 → 廃止（全員同じ） */
-#systemHeader.admin,
-#systemHeader.responsible,
-#systemHeader.user {
-  background: #222;
 }
 
 /* 左側（ハンバーガー＋アイコン＋タイトル） */
@@ -82,11 +77,11 @@
   gap: 10px;
   font-size: 0.95rem;
   text-align: right;
-  white-space: nowrap; /* 折り返し防止 */
+  white-space: nowrap;
   transition: font-size 0.3s ease;
 }
 
-/* 役割バッジ（色ではなく枠線で表現） */
+/* 役割バッジ（枠線で表現） */
 .role-badge {
   font-size: 0.75rem;
   font-weight: bold;
@@ -127,11 +122,23 @@
   max-height: 400px;
   overflow-y: auto;
   z-index: 1000;
+  border-radius: 6px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 .notification-dropdown ul {
   list-style: none;
   margin: 0;
   padding: 10px;
+}
+
+/* 未読があるときベルを光らせる */
+#notificationBlock.has-unread {
+  animation: bellGlow 1.2s ease-in-out infinite alternate;
+  color: #ffcc00;
+}
+@keyframes bellGlow {
+  from { text-shadow: 0 0 4px #ffcc00; }
+  to   { text-shadow: 0 0 12px #ffcc00; }
 }
 
 /* メニュー（閉じた状態） */
@@ -161,7 +168,7 @@
   gap: 20px;
 }
 
-/* メニュー項目の初期状態（非表示） */
+/* メニュー項目の初期状態 */
 #headerMenu ul.menu li {
   opacity: 0;
   transform: translateY(-10px);
@@ -194,10 +201,14 @@
   border-radius: 4px;
   transition: background 0.2s, padding 0.3s ease, font-size 0.3s ease;
 }
+
+/* ホバーと現在ページのハイライト */
 #headerMenu ul.menu li a:hover,
 #headerMenu ul.menu li a.active {
   background: rgba(255, 255, 255, 0.25);
   color: #fff;
+  font-weight: bold;
+  border-bottom: 2px solid #ffcc00;
 }
 
 /* スクロール時の縮小 */
