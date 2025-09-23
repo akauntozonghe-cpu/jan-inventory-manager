@@ -1,31 +1,14 @@
 // Firebase モジュールをインポート
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
-  getFirestore,
-  collection,
-  query,
-  where,
-  getDocs,
-  addDoc,
-  Timestamp
+  getFirestore, collection, query, where, getDocs, addDoc, Timestamp
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import {
-  getAuth,
-  signInAnonymously,
-  setPersistence,
-  browserLocalPersistence
+  getAuth, signInAnonymously, setPersistence, browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // Firebase 初期化
-const firebaseConfig = {
-  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-  authDomain: "inventory-app-312ca.firebaseapp.com",
-  projectId: "inventory-app-312ca",
-  storageBucket: "inventory-app-312ca.appspot.com",
-  messagingSenderId: "245219344089",
-  appId: "1:245219344089:web:e46105927c302e6a5788c8",
-  measurementId: "G-TRH31MJCE3"
-};
+const firebaseConfig = { /* ← 既存の設定をそのまま */ };
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
@@ -33,7 +16,6 @@ const auth = getAuth(app);
 // DOM 要素
 const input = document.getElementById("userCodeInput");
 const btn = document.getElementById("loginBtn");
-const editVersionBtn = document.getElementById("editVersionBtn");
 const welcomeMessage = document.querySelector(".welcome-message");
 
 // 🔍 入力時に即 Firestore 照合してメッセージ表示
@@ -103,22 +85,14 @@ btn.addEventListener("click", async () => {
 
     // Firestore にログイン履歴を記録
     const logData = {
-      uid,
-      id,
-      name,
-      role,
+      uid, id, name, role,
       timestamp: Timestamp.now(),
       version: "v1.0.0",
       device: `${navigator.platform} / ${navigator.userAgent}`
     };
     await addDoc(collection(db, "loginLogs"), logData);
 
-    // 管理者なら編集ボタン表示
-    if (role === "管理者") {
-      editVersionBtn.classList.remove("hidden");
-    }
-
-    // 遷移
+    // 🚪 遷移（編集ボタンの表示制御は home.js 側で行う）
     window.location.href = "home.html";
   } catch (error) {
     console.error("❌ ログイン処理失敗:", error);
