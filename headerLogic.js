@@ -1,149 +1,3 @@
-import { db } from "./firebase.js";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  doc,
-  setDoc,
-  getDocs,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-
-/* ===============================
-   トースト通知関数
-================================ */
-function showToast(message, type = "info") {
-  const toast = document.getElementById("toast");
-  if (!toast) return;
-
-  toast.textContent = message;
-  toast.className = `toast ${type} show`;
-
-  setTimeout(() => {
-    toast.className = "toast";
-  }, 3000);
-}
-
-/* ===============================
-   通知アイコン判定
-================================ */
-function getNotifIcon(type) {
-  switch (type) {
-    case "warning": return "⚠️";
-    case "info": return "📢";
-    case "approval": return "✅";
-    default: return "🔔";
-  }
-}
-
-/* ===============================
-   日時フォーマット関数
-   → 〇月〇日（〇）hh:mm:ss
-================================ */
-function formatDateTime(date) {
-  const days = ["日","月","火","水","木","金","土"];
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-  const weekday = days[date.getDay()];
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  const ss = String(date.getSeconds()).padStart(2, "0");
-  return `${month}月${day}日（${weekday}）${hh}:${mm}:${ss}`;
-}
-
-/* ===============================
-   通知購読＆既読管理
-================================ */
-async function initNotifications(uid, role) {
-  const notifList = document.getElementById("notificationList");
-  const notifCount = document.getElementById("notificationCount");
-
-  // 既読情報を事前に取得
-  const readSnapshot = await getDocs(query(collection(db, "userNotifications")));
-  const readMap = {};
-  readSnapshot.forEach(docSnap => {
-    const data = docSnap.data();
-    if (data.uid === uid && data.read) {
-      readMap[data.notifId] = true;
-    }
-  });
-
-  // 通知ログをリアルタイム購読
-  const q = query(collection(db, "notificationLogs"), orderBy("createdAt", "desc"));
-  onSnapshot(q, (snapshot) => {
-    notifList.innerHTML = "";
-    let unreadCount = 0;
-    let count = 0;
-
-    snapshot.forEach(docSnap => {
-      if (count >= 10) return; // 最新10件だけ表示
-      const notif = docSnap.data();
-      const notifId = docSnap.id;
-
-      if (
-        notif.target === "all" ||
-        (notif.target === "admin" && role === "管理者") ||
-        notif.target === `uid:${uid}`
-      ) {
-        const li = document.createElement("li");
-        li.dataset.notifId = notifId;
-        li.classList.add("notificationItem");
-        if (notif.type) li.classList.add(notif.type);
-
-        if (readMap[notifId]) {
-          li.classList.add("read");
-        } else {
-          li.classList.add("unread");
-          unreadCount++;
-        }
-
-        li.innerHTML = `
-          <div class="notifTitle">${getNotifIcon(notif.type)} ${notif.title}</div>
-          <div class="notifBody">${notif.body}</div>
-          <div class="notifTime">${notif.createdAt ? formatDateTime(notif.createdAt.toDate()) : ""}</div>
-        `;
-
-        notifList.appendChild(li);
-        count++;
-      }
-    });
-
-    // 「もっと見る」リンク
-    if (snapshot.size > 10) {
-      const moreLi = document.createElement("li");
-      moreLi.classList.add("notificationItem", "more-link");
-      moreLi.innerHTML = `<a href="notifications.html">📜 もっと見る</a>`;
-      notifList.appendChild(moreLi);
-    }
-
-    notifCount.textContent = unreadCount;
-  });
-
-  // クリックで既読化
-  notifList.addEventListener("click", async (e) => {
-    const item = e.target.closest(".notificationItem");
-    if (item && item.classList.contains("unread")) {
-      item.classList.remove("unread");
-      item.classList.add("read");
-
-      let count = parseInt(notifCount.textContent, 10);
-      if (count > 0) notifCount.textContent = count - 1;
-
-      const notifId = item.dataset.notifId;
-      await setDoc(doc(db, "userNotifications", `${uid}_${notifId}`), {
-        uid,
-        notifId,
-        read: true,
-        readAt: serverTimestamp()
-      });
-    }
-  });
-}
-
-/* ===============================
-   ヘッダー初期化
-================================ */
 export function initHeader() {
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
@@ -155,6 +9,9 @@ export function initHeader() {
   const clock = document.getElementById("clock");
   const adminMenu = document.getElementById("adminMenu");
   const logoutBtn = document.getElementById("logoutBtn");
+
+  // ✅ グローバルに保持（register.js から参照可能にする）
+  window.currentUserInfo = { uid, role, name, lastLogin };
 
   // ユーザー表示（役割バッジ付き）
   if (name && role) {
@@ -194,6 +51,7 @@ export function initHeader() {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
       localStorage.clear();
+      window.currentUserInfo = null; // ✅ グローバル情報もクリア
       showToast("🚪 ログアウトしました", "info");
       setTimeout(() => {
         window.location.href = "index.html";
