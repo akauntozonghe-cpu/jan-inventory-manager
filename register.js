@@ -85,18 +85,9 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ユーザー情報取得
-    let role = "未設定";
-    let name = "不明";
-    try {
-      const userDoc = await db.collection("users").doc(user.uid).get();
-      if (userDoc.exists) {
-        role = (userDoc.data()?.role || "未設定").trim();
-        name = (userDoc.data()?.name || "不明").trim();
-      }
-    } catch (err) {
-      console.warn("資格取得失敗:", err);
-    }
+    // ✅ ヘッダーで取得済みのユーザー情報を利用
+    const role = window.currentUserInfo?.role || "未設定";
+    const name = window.currentUserInfo?.name || "不明";
     const isAdmin = role === "管理者";
 
     // 管理番号が未入力なら自動生成
@@ -210,37 +201,21 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-    // 管理者表示制御
+    // 管理者表示制御（ヘッダーの情報を利用）
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
-  auth.onAuthStateChanged(async (user) => {
+  auth.onAuthStateChanged((user) => {
     if (user && adminOnlyField) {
-      try {
-        const userDoc = await db.collection("users").doc(user.uid).get();
-        const userData = userDoc.data();
-        const name = (userData?.name || "不明").trim();
-        const role = (userData?.role || "未設定").trim();
+      const role = window.currentUserInfo?.role || "未設定";
+      const name = window.currentUserInfo?.name || "不明";
 
-        console.log("ログインユーザー:", name, "role:", role); // デバッグ出力
+      console.log("ログインユーザー:", name, "role:", role);
 
-        if (responsibleUser) {
-          responsibleUser.textContent = `👑 ${name}（${role}）`;
-        }
-
-        // 管理者だけに専用領域を表示
-        if (role === "管理者") {
-          adminOnlyField.style.display = "block";
-        } else {
-          adminOnlyField.style.display = "none";
-        }
-      } catch (err) {
-        console.error("ユーザー情報取得失敗:", err);
-        if (responsibleUser) {
-          responsibleUser.textContent = "👑 ログイン中：取得失敗";
-        }
-        adminOnlyField.style.display = "none";
+      if (responsibleUser) {
+        responsibleUser.textContent = `👑 ${name}（${role}）`;
       }
+      adminOnlyField.style.display = role === "管理者" ? "block" : "none";
     } else if (adminOnlyField) {
       adminOnlyField.style.display = "none";
     }
