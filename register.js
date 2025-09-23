@@ -27,19 +27,21 @@ async function getExistingCount(adminCode) {
 }
 async function applyAutoGenerate() {
   const msgBox = document.getElementById("registerMessage");
-  const jan = document.querySelector("[name='jan']").value.trim();
-  const lot = document.querySelector("[name='lot']").value.trim();
+  const jan = document.getElementById("janInput").value.trim();
+  const lot = document.getElementById("lotInput").value.trim();
+
   if (!jan || !lot) {
     msgBox.textContent = "⚠️ JANコードとLot番号は必須です。";
     msgBox.style.color = "red";
     return;
   }
+
   const adminCode = generateAdminCode(jan, lot);
   const count = await getExistingCount(adminCode);
   const controlId = generateControlId(adminCode, count);
 
-  document.querySelector("[name='adminCode']").value = adminCode;
-  document.querySelector("[name='controlId']").value = controlId;
+  document.getElementById("adminCode").value = adminCode;
+  document.getElementById("controlId").value = controlId;
 
   msgBox.textContent = "✅ 管理番号を自動生成しました";
   msgBox.style.color = "green";
@@ -84,7 +86,9 @@ document.addEventListener("DOMContentLoaded", () => {
     let adminCode = form.adminCode.value.trim();
     let controlId = form.controlId.value.trim();
     if (!adminCode || !controlId) {
-      adminCode = generateAdminCode(form.jan.value.trim(), form.lot.value.trim());
+      const jan = form.jan.value.trim();
+      const lot = form.lot.value.trim();
+      adminCode = generateAdminCode(jan, lot);
       const count = await getExistingCount(adminCode);
       controlId = generateControlId(adminCode, count);
     }
@@ -178,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-    // 管理者表示制御
+  // 管理者表示制御
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
