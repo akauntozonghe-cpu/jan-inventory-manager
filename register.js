@@ -11,8 +11,11 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
+// ✅ Firestore / Auth をグローバルに定義
 const db = firebase.firestore();
-const auth = firebase.auth(); // ← これで auth が必ず定義される
+const auth = firebase.auth();
+window.db = db;
+window.auth = auth; // ← これで他のファイルからも参照可能
 
 // ✅ 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
@@ -201,7 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 管理者表示制御（ヘッダーの情報を利用）
+   // 管理者表示制御（ヘッダーの情報を利用）
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
