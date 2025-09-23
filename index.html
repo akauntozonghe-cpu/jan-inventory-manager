@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>在庫管理システム</title>
   <link rel="stylesheet" href="login.css" />
+  <style>
+    /* 管理者以外は非表示 */
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <div class="login-container">
@@ -18,6 +24,7 @@
 
     <div class="version-label">
       バージョン：v1.0.0
+      <!-- 初期状態は必ず非表示 -->
       <span id="editVersionBtn" class="hidden">編集</span>
     </div>
   </div>
