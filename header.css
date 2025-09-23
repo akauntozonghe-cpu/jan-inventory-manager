@@ -1,8 +1,9 @@
-/* ヘッダー全体 */
+/* ヘッダー全体（背景色を統一） */
 #systemHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #222; /* 全員共通の落ち着いた色 */
   color: #fff;
   padding: 14px 28px;
   position: sticky;
@@ -11,15 +12,11 @@
   transition: padding 0.3s ease, background 0.3s ease;
 }
 
-/* 役割ごとのテーマ色 */
-#systemHeader.admin {
-  background: linear-gradient(90deg, #c0392b, #e74c3c); /* 管理者：赤系 */
-}
-#systemHeader.responsible {
-  background: linear-gradient(90deg, #2980b9, #3498db); /* 責任者：青系 */
-}
+/* 役割ごとのテーマ色 → 廃止 */
+#systemHeader.admin,
+#systemHeader.responsible,
 #systemHeader.user {
-  background: linear-gradient(90deg, #7f8c8d, #95a5a6); /* 一般：グレー系 */
+  background: #222; /* 全員同じ */
 }
 
 /* 左側（ハンバーガー＋アイコン＋タイトル） */
@@ -87,6 +84,17 @@
   text-align: right;
   white-space: nowrap; /* 折り返し防止 */
   transition: font-size 0.3s ease;
+}
+
+/* 役割バッジ（色ではなく枠線で表現） */
+.role-badge {
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin-left: 6px;
+  padding: 2px 6px;
+  border: 1px solid #fff;
+  border-radius: 4px;
+  background: transparent;
 }
 
 /* 通知ブロック */
