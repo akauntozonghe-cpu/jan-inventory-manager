@@ -1,3 +1,18 @@
+/* ===============================
+   日時フォーマット関数
+   → 〇月〇日（〇）hh:mm:ss
+================================ */
+function formatDateTime(date) {
+  const days = ["日","月","火","水","木","金","土"];
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const weekday = days[date.getDay()];
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+  return `${month}月${day}日（${weekday}）${hh}:${mm}:${ss}`;
+}
+
 export function initHeader() {
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
