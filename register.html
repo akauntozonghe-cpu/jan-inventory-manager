@@ -5,19 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>商品登録 - 在庫管理</title>
 
-  <!-- ✅ 共通CSS -->
+  <!-- 共通CSS -->
   <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="register.css" />
 
-  <!-- ✅ Firebase SDK -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 
-  <!-- ✅ バーコード読み取りライブラリ -->
+  <!-- バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
-  <!-- ✅ トースト通知用CSS -->
+  <!-- トースト通知用CSS -->
   <style>
     .toast {
       position: fixed;
@@ -34,21 +34,17 @@
       transform: translateY(20px);
       z-index: 2000;
     }
-    .toast.show {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    .toast.success { background: #28a745; }   /* 緑 */
-    .toast.warning { background: #ff9800; }   /* オレンジ */
-    .toast.error   { background: #f44336; }   /* 赤 */
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: #28a745; }
+    .toast.warning { background: #ff9800; }
+    .toast.error   { background: #f44336; }
   </style>
 </head>
 <body>
-  <!-- ✅ 共通ヘッダー -->
+  <!-- 共通ヘッダー -->
   <div id="headerContainer"></div>
   <script type="module">
     import { initHeader } from "./headerLogic.js";
-
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
@@ -62,21 +58,21 @@
       });
   </script>
 
-  <!-- ✅ 商品登録フォーム -->
+  <!-- 商品登録フォーム -->
   <main aria-label="商品登録画面" style="margin-top: 80px; padding: 16px;">
     <section id="registerPanel">
       <h2>📥 商品登録</h2>
       <form id="registerForm">
-        <!-- JANコード（バーコード読み取り） -->
+        <!-- JANコード -->
         <label for="jan">JANコード：</label>
         <div class="input-with-scan">
           <input type="text" name="jan" id="janInput" required />
           <button type="button" id="scanJanBtn">📷 読み取り</button>
         </div>
 
-        <!-- Lot番号・製造番号 -->
+        <!-- Lot番号 -->
         <label for="lot">Lot番号 / 製造番号：</label>
-        <input type="text" name="lot" required />
+        <input type="text" name="lot" id="lotInput" required />
 
         <!-- 商品名 -->
         <label for="name">商品名：</label>
@@ -86,7 +82,7 @@
         <label for="quantity">数量：</label>
         <input type="number" name="quantity" required />
 
-        <!-- 数量単位 -->
+        <!-- 単位 -->
         <label for="unit">数量単位：</label>
         <select name="unit" required>
           <option value="個">個</option>
@@ -102,18 +98,18 @@
         <label for="expiry">期限：</label>
         <input type="date" name="expiry" />
 
-        <!-- メーカー名 -->
+        <!-- メーカー -->
         <label for="maker">メーカー名：</label>
         <input type="text" name="maker" />
 
-        <!-- 保管場所（QR読み取り） -->
+        <!-- 保管場所 -->
         <label for="location">保管場所：</label>
         <div class="input-with-scan">
           <input type="text" name="location" id="location" />
           <button type="button" id="scanLocationBtn">📷 読み取り</button>
         </div>
 
-        <!-- 大分類（QR読み取り） -->
+        <!-- 大分類 -->
         <label for="categoryLarge">大分類：</label>
         <div class="input-with-scan">
           <input type="text" name="categoryLarge" id="categoryLarge" />
@@ -136,24 +132,24 @@
 
         <!-- 管理区別番号 -->
         <label for="adminCode">管理区別番号：</label>
-        <input type="text" name="adminCode" id="adminCode" readonly />
+        <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
 
         <!-- 管理番号 -->
         <label for="controlId">管理番号：</label>
-        <input type="text" name="controlId" id="controlId" readonly />
+        <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
 
         <!-- 登録ボタン -->
         <button type="submit">✅ 登録</button>
       </form>
 
-      <!-- 管理者専用領域（表示制御） -->
-      <div id="adminOnlyField" style="display:none;">
+      <!-- 管理者専用領域 -->
+      <div id="adminOnlyField" data-role="admin" style="display:none;">
         <h4>🛡 管理者専用設定</h4>
-        <!-- 項目追加・削除・変更など -->
+        <p>ここに承認済み登録や特別設定を追加可能</p>
       </div>
     </section>
 
-    <!-- 登録結果表示（固定メッセージ欄） -->
+    <!-- 登録結果表示 -->
     <div id="registerMessage" style="margin-top: 16px;"></div>
   </main>
 
@@ -163,10 +159,10 @@
     <button id="closeQrBtn">閉じる</button>
   </div>
 
-  <!-- ✅ トースト通知エリア -->
+  <!-- トースト通知エリア -->
   <div id="toast" class="toast"></div>
 
-  <!-- ✅ ページ固有JS -->
+  <!-- ページ固有JS -->
   <script src="register.js" defer></script>
 </body>
 </html>

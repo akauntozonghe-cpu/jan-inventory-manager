@@ -14,7 +14,7 @@ if (!firebase.apps.length) {
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// ✅ 管理番号自動生成
+// ✅ 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
 }
@@ -45,11 +45,17 @@ async function applyAutoGenerate() {
   msgBox.style.color = "green";
 }
 
-// ✅ DOM構築後の一括処理
+// ✅ DOM構築後の処理
 document.addEventListener("DOMContentLoaded", () => {
   const msgBox = document.getElementById("registerMessage");
 
-  // 商品登録処理（資格による分岐）
+  // 管理番号自動生成ボタン
+  const autoBtn = document.getElementById("autoGenerateBtn");
+  if (autoBtn) {
+    autoBtn.addEventListener("click", applyAutoGenerate);
+  }
+
+  // 商品登録処理
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -60,6 +66,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    // ユーザー情報取得
     let role = "未設定";
     let name = "不明";
     try {
@@ -71,14 +78,22 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (err) {
       console.warn("資格取得失敗:", err);
     }
-
     const isAdmin = role === "管理者";
+
+    // 管理番号が未入力なら自動生成
+    let adminCode = form.adminCode.value.trim();
+    let controlId = form.controlId.value.trim();
+    if (!adminCode || !controlId) {
+      adminCode = generateAdminCode(form.jan.value.trim(), form.lot.value.trim());
+      const count = await getExistingCount(adminCode);
+      controlId = generateControlId(adminCode, count);
+    }
 
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
-      adminCode: form.adminCode.value.trim(),
-      controlId: form.controlId.value.trim(),
+      adminCode,
+      controlId,
       name: form.name.value.trim(),
       quantity: parseInt(form.quantity.value),
       unit: form.unit.value,
@@ -97,32 +112,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       if (isAdmin) {
-        // ✅ 管理者は items に即登録
+        // 管理者は items に即登録
         const itemRef = await db.collection("items").add(data);
-
         await db.collection("history").add({
           type: "登録（即承認）",
           actor: user.uid,
           targetItem: itemRef.id,
+          controlId,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           details: { status: data.status, name: data.name }
         });
-
         msgBox.textContent = "✅ 登録完了（即一覧反映）";
         msgBox.style.color = "green";
       } else {
-        // ✅ 責任者は pendingItems に保存
+        // 責任者以下は pendingItems に保存
         const pendingRef = await db.collection("pendingItems").add(data);
-
         await db.collection("history").add({
           type: "登録（保留）",
           actor: user.uid,
           targetItem: pendingRef.id,
+          controlId,
           timestamp: firebase.firestore.FieldValue.serverTimestamp(),
           details: { status: data.status, name: data.name }
         });
-
-        // ✅ 管理者に承認依頼通知を送信
         await db.collection("notificationLogs").add({
           title: "承認依頼",
           body: `${name} さんが ${data.name} を登録しました`,
@@ -131,7 +143,6 @@ document.addEventListener("DOMContentLoaded", () => {
           pendingId: pendingRef.id,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
-
         msgBox.textContent = "✅ 登録完了（承認待ち・管理者に通知）";
         msgBox.style.color = "orange";
       }
@@ -167,23 +178,27 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 管理者表示制御
+    // 管理者表示制御
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
   auth.onAuthStateChanged(async (user) => {
-    if (user && responsibleUser && adminOnlyField) {
+    if (user && adminOnlyField) {
       try {
         const userDoc = await db.collection("users").doc(user.uid).get();
         const userData = userDoc.data();
         const name = userData?.name || "不明";
         const role = userData?.role || "未設定";
 
-        responsibleUser.textContent = `👑 ${name}（${role}）`;
+        if (responsibleUser) {
+          responsibleUser.textContent = `👑 ${name}（${role}）`;
+        }
         adminOnlyField.style.display = role === "管理者" ? "block" : "none";
       } catch (err) {
         console.error("ユーザー情報取得失敗:", err);
-        responsibleUser.textContent = "👑 ログイン中：取得失敗";
+        if (responsibleUser) {
+          responsibleUser.textContent = "👑 ログイン中：取得失敗";
+        }
         adminOnlyField.style.display = "none";
       }
     } else if (adminOnlyField) {
