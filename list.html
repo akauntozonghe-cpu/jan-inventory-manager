@@ -8,23 +8,23 @@
   <!-- 共通スタイル -->
   <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="style.css" />
+  <style>
+    .filterBar { margin: 10px 0; }
+    .filterBtn { margin-right: 8px; padding: 6px 12px; cursor: pointer; }
+    .itemCard { border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+    .controls { margin-top: 8px; }
+  </style>
 </head>
 <body>
-  <!-- ヘッダー読み込み先 -->
+  <!-- ヘッダー -->
   <div id="headerContainer"></div>
-
-  <!-- ヘッダー読み込みとロジック統合 -->
   <script type="module">
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-
-        // ✅ ヘッダー挿入後にロジックを初期化
         import("./headerLogic.js").then(module => {
-          if (module.initHeader) {
-            module.initHeader();
-          }
+          if (module.initHeader) module.initHeader();
         });
       })
       .catch(err => {
@@ -39,129 +39,36 @@
     <h1>商品一覧</h1>
     <div class="user-info" id="userInfo"></div>
 
-    <input type="text" id="searchInput" placeholder="JANコードまたは商品名で検索" />
-    <button id="searchBtn">検索</button>
+    <!-- 検索 -->
+    <div>
+      <input type="text" id="searchInput" placeholder="JANコードまたは商品名で検索" />
+      <button id="searchBtn">検索</button>
+    </div>
 
-    <div id="productList"></div>
+    <!-- フィルタタブ -->
+    <div class="filterBar">
+      <button class="filterBtn" data-filter="承認済">承認済</button>
+      <button class="filterBtn" data-filter="保留">保留</button>
+      <button class="filterBtn" data-filter="却下">却下</button>
+      <button class="filterBtn" data-filter="アーカイブ">アーカイブ</button>
+    </div>
+
+    <!-- ソート -->
+    <div>
+      <label for="sortSelect">並び替え:</label>
+      <select id="sortSelect">
+        <option value="createdAt">登録日順</option>
+        <option value="expiry">期限が近い順</option>
+        <option value="quantity">数量が少ない順</option>
+      </select>
+    </div>
+
+    <!-- 商品一覧 -->
+    <div id="itemListContainer"></div>
     <p id="statusMsg"></p>
   </main>
 
-  <!-- Firebase & 商品一覧ロジック -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
-    import {
-      getDatabase,
-      ref,
-      onValue,
-      push,
-      set
-    } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-      authDomain: "inventory-app-312ca.firebaseapp.com",
-      databaseURL: "https://inventory-app-312ca-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inventory-app-312ca",
-      storageBucket: "inventory-app-312ca.appspot.com",
-      messagingSenderId: "245219344089",
-      appId: "1:245219344089:web:e46105927c302e6a5788c8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    const userName = sessionStorage.getItem("userName");
-    const userRole = sessionStorage.getItem("userRole");
-    document.getElementById("userInfo").textContent = `${userName}（${userRole}）として操作中`;
-
-    let allProducts = [];
-
-    function renderProducts(products) {
-      const list = document.getElementById("productList");
-      list.innerHTML = "";
-
-      if (products.length === 0) {
-        list.innerHTML = "<p>表示できる商品がありません。</p>";
-        return;
-      }
-
-      products.forEach((item, index) => {
-        const div = document.createElement("div");
-        div.classList.add("product-card");
-
-        div.innerHTML = `
-          <strong>${item.商品名}</strong><br>
-          JANコード：${item.JANコード}<br>
-          数量：${item.数量} ${item.単位}<br>
-          保管場所：${item.保管場所}<br>
-          分類：${item.大分類} / ${item.小分類}<br>
-          登録者：${item.登録者}（${item.権限}）<br>
-          登録日時：${new Date(item.登録日時).toLocaleString("ja-JP")}
-          <br><br>
-          <label>数量変更：</label><input type="number" id="qty_${index}" value="${item.数量}" />
-          <label>保管場所変更：</label><input type="text" id="loc_${index}" value="${item.保管場所}" />
-          <button data-index="${index}" class="changeBtn">変更申請</button>
-        `;
-
-        list.appendChild(div);
-      });
-
-      // ボタンイベントをまとめて付与
-      document.querySelectorAll(".changeBtn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const index = btn.dataset.index;
-          submitChange(index);
-        });
-      });
-    }
-
-    function searchProducts() {
-      const keyword = document.getElementById("searchInput").value.trim();
-      const filtered = allProducts.filter(p =>
-        p.JANコード.includes(keyword) || p.商品名.includes(keyword)
-      );
-      renderProducts(filtered);
-    }
-
-    document.getElementById("searchBtn").addEventListener("click", searchProducts);
-
-    function submitChange(index) {
-      const item = allProducts[index];
-      const newQty = document.getElementById(`qty_${index}`).value;
-      const newLoc = document.getElementById(`loc_${index}`).value;
-
-      if (newQty == item.数量 && newLoc == item.保管場所) {
-        document.getElementById("statusMsg").textContent = "変更がありません。";
-        return;
-      }
-
-      const changeRef = push(ref(db, "changeRequests"));
-      set(changeRef, {
-        商品ID: item.JANコード,
-        申請者: userName,
-        権限: userRole,
-        変更前: {
-          数量: item.数量,
-          保管場所: item.保管場所
-        },
-        変更後: {
-          数量: newQty,
-          保管場所: newLoc
-        },
-        申請日時: new Date().toISOString(),
-        状態: "承認待ち"
-      });
-
-      document.getElementById("statusMsg").textContent = "変更申請を送信しました。";
-    }
-
-    // ✅ 初期読み込み（承認済み商品のみ表示）
-    onValue(ref(db, "products"), (snapshot) => {
-      const data = snapshot.val();
-      const all = Object.values(data || {});
-      allProducts = all.filter(p => p.状態 === "承認済");
-      renderProducts(allProducts);
-    });
-  </script>
+  <!-- 商品一覧ロジック -->
+  <script type="module" src="list.js"></script>
 </body>
 </html>

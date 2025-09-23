@@ -5,8 +5,10 @@ import {
   where,
   getDocs,
   doc,
+  getDoc,
   updateDoc,
   addDoc,
+  deleteDoc,
   serverTimestamp,
   orderBy,
   limit
@@ -40,7 +42,7 @@ import {
    保留一覧表示
 ================================ */
 async function loadPendingItems() {
-  const q = query(collection(db, "items"), where("status", "==", "保留"));
+  const q = query(collection(db, "pendingItems"), where("status", "==", "保留"));
   const snapshot = await getDocs(q);
   const container = document.getElementById("pendingItemsContainer");
   container.innerHTML = "";
@@ -51,38 +53,61 @@ async function loadPendingItems() {
     div.className = "pendingCard";
     div.dataset.id = docSnap.id;
     div.innerHTML = `
-      <strong>${item.name}</strong><br>
-      JAN: ${item.jan}<br>
-      数量: ${item.quantity} ${item.unit}<br>
-      登録者: ${item.createdBy}<br>
+      <label>
+        <input type="checkbox" class="pending-check" value="${docSnap.id}">
+        <strong>${item.name}</strong>
+      </label><br>
+      JAN: ${item.jan || "-"}<br>
+      数量: ${item.quantity || 0} ${item.unit || ""}<br>
+      登録者: ${item.createdByName || item.createdBy}<br>
       <button onclick="approveItem('${docSnap.id}', '${item.name}')">✅ 承認</button>
+      <button onclick="rejectItem('${docSnap.id}', '${item.name}')">❌ 却下</button>
     `;
     container.appendChild(div);
   });
+
+  // 一括承認ボタン
+  if (snapshot.size > 0) {
+    const bulkBtn = document.createElement("button");
+    bulkBtn.textContent = "まとめて承認";
+    bulkBtn.onclick = approveSelected;
+    container.appendChild(bulkBtn);
+  }
 }
 
 /* ===============================
-   承認処理
+   承認処理（個別）
 ================================ */
-window.approveItem = async (itemId, itemName) => {
+window.approveItem = async (pendingId, itemName) => {
   const uid = localStorage.getItem("uid");
-  const card = document.querySelector(`[data-id="${itemId}"]`);
+  const card = document.querySelector(`[data-id="${pendingId}"]`);
   if (card) {
     card.classList.add("fade-out");
     card.addEventListener("animationend", () => card.remove());
   }
 
   try {
-    await updateDoc(doc(db, "items", itemId), {
+    const pendingRef = doc(db, "pendingItems", pendingId);
+    const pendingSnap = await getDoc(pendingRef);
+    if (!pendingSnap.exists()) return;
+    const data = pendingSnap.data();
+
+    // items に移動
+    const newRef = await addDoc(collection(db, "items"), {
+      ...data,
       status: "承認済",
       approvedAt: serverTimestamp(),
       approvedBy: uid
     });
 
+    // pendingItems から削除
+    await deleteDoc(pendingRef);
+
+    // 履歴
     await addDoc(collection(db, "history"), {
       type: "承認",
       actor: uid,
-      targetItem: itemId,
+      targetItem: newRef.id,
       timestamp: serverTimestamp(),
       details: { status: "承認済", name: itemName }
     });
@@ -91,6 +116,56 @@ window.approveItem = async (itemId, itemName) => {
     alert("承認に失敗しました");
   }
 };
+
+/* ===============================
+   却下処理
+================================ */
+window.rejectItem = async (pendingId, itemName) => {
+  const uid = localStorage.getItem("uid");
+  const card = document.querySelector(`[data-id="${pendingId}"]`);
+  if (card) {
+    card.classList.add("fade-out");
+    card.addEventListener("animationend", () => card.remove());
+  }
+
+  try {
+    const pendingRef = doc(db, "pendingItems", pendingId);
+
+    await updateDoc(pendingRef, {
+      status: "却下",
+      rejectedAt: serverTimestamp(),
+      rejectedBy: uid
+    });
+
+    await addDoc(collection(db, "history"), {
+      type: "却下",
+      actor: uid,
+      targetItem: pendingId,
+      timestamp: serverTimestamp(),
+      details: { status: "却下", name: itemName }
+    });
+  } catch (err) {
+    console.error("却下処理エラー:", err);
+    alert("却下に失敗しました");
+  }
+};
+
+/* ===============================
+   一括承認処理
+================================ */
+async function approveSelected() {
+  const uid = localStorage.getItem("uid");
+  const checks = document.querySelectorAll(".pending-check:checked");
+  if (checks.length === 0) {
+    alert("承認するアイテムを選択してください");
+    return;
+  }
+
+  for (const c of checks) {
+    await window.approveItem(c.value, "まとめ承認");
+  }
+  alert(`${checks.length}件を承認しました`);
+}
 
 /* ===============================
    履歴表示（タブ切替対応）
