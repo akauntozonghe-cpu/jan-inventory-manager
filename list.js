@@ -1,3 +1,4 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import {
   getFirestore,
   collection,
@@ -13,8 +14,20 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { getAuth } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-const db = getFirestore();
-const auth = getAuth();
+// ✅ Firebase設定
+const firebaseConfig = {
+  apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
+  authDomain: "inventory-app-312ca.firebaseapp.com",
+  projectId: "inventory-app-312ca",
+  storageBucket: "inventory-app-312ca.appspot.com",
+  messagingSenderId: "245219344089",
+  appId: "1:245219344089:web:e46105927c302e6a5788c8"
+};
+
+// ✅ 初期化
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 let allItems = [];
 let currentFilter = "承認済";
@@ -214,8 +227,14 @@ document.addEventListener("DOMContentLoaded", () => {
       applyFilters();
     });
 
-    // 検索
+       // 検索
     document.getElementById("searchBtn")?.addEventListener("click", applyFilters);
+
+    // Enterキーでも検索できるようにする
+    document.getElementById("searchInput")?.addEventListener("keypress", (e) => {
+      if (e.key === "Enter") {
+        applyFilters();
+      }
+    });
   });
 });
-``
