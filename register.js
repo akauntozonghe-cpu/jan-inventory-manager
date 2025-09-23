@@ -57,6 +57,23 @@ document.addEventListener("DOMContentLoaded", () => {
     autoBtn.addEventListener("click", applyAutoGenerate);
   }
 
+  // 管理者専用：項目追加UI
+  const addFieldBtn = document.getElementById("addFieldBtn");
+  const extraFields = document.getElementById("extraFields");
+  if (addFieldBtn && extraFields) {
+    addFieldBtn.addEventListener("click", () => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "extraField";
+      wrapper.innerHTML = `
+        <input type="text" class="extraKey" placeholder="フィールド名" />
+        <input type="text" class="extraValue" placeholder="値" />
+        <button type="button" class="delBtn">削除</button>
+      `;
+      wrapper.querySelector(".delBtn").onclick = () => wrapper.remove();
+      extraFields.appendChild(wrapper);
+    });
+  }
+
   // 商品登録処理
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -93,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
       controlId = generateControlId(adminCode, count);
     }
 
+    // 基本データ
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
@@ -113,6 +131,15 @@ document.addEventListener("DOMContentLoaded", () => {
       updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
+
+    // 管理者なら追加項目も収集
+    if (isAdmin && extraFields) {
+      extraFields.querySelectorAll(".extraField").forEach(f => {
+        const key = f.querySelector(".extraKey").value.trim();
+        const val = f.querySelector(".extraValue").value.trim();
+        if (key) data[key] = val;
+      });
+    }
 
     try {
       if (isAdmin) {
@@ -155,6 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("adminCode").value = "";
       document.getElementById("controlId").value = "";
       document.getElementById("photoPreview").style.display = "none";
+      if (extraFields) extraFields.innerHTML = "";
     } catch (error) {
       console.error("登録エラー:", error);
       msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";
@@ -182,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 管理者表示制御
+    // 管理者表示制御
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
@@ -197,6 +225,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (responsibleUser) {
           responsibleUser.textContent = `👑 ${name}（${role}）`;
         }
+        // 管理者だけに専用領域を表示
         adminOnlyField.style.display = role === "管理者" ? "block" : "none";
       } catch (err) {
         console.error("ユーザー情報取得失敗:", err);

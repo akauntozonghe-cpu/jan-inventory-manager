@@ -130,23 +130,24 @@
           <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
         </div>
 
-        <!-- 管理区別番号 -->
-        <label for="adminCode">管理区別番号：</label>
-        <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
-
-        <!-- 管理番号 -->
+        <!-- 管理番号（全員表示） -->
         <label for="controlId">管理番号：</label>
         <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
+
+        <!-- 管理者専用：管理区別番号 -->
+        <div id="adminOnlyField" style="display:none;">
+          <label for="adminCode">管理区別番号：</label>
+          <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
+
+          <!-- 管理者専用：項目追加UI -->
+          <h4>🛡 管理者専用設定</h4>
+          <div id="extraFields"></div>
+          <button type="button" id="addFieldBtn">＋ 項目追加</button>
+        </div>
 
         <!-- 登録ボタン -->
         <button type="submit">✅ 登録</button>
       </form>
-
-      <!-- 管理者専用領域 -->
-      <div id="adminOnlyField" data-role="admin" style="display:none;">
-        <h4>🛡 管理者専用設定</h4>
-        <p>ここに承認済み登録や特別設定を追加可能</p>
-      </div>
     </section>
 
     <!-- 登録結果表示 -->
