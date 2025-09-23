@@ -36,19 +36,44 @@ const btn = document.getElementById("loginBtn");
 const editVersionBtn = document.getElementById("editVersionBtn");
 const welcomeMessage = document.querySelector(".welcome-message");
 
-// 入力があればボタン有効化
-input.addEventListener("input", () => {
-  btn.disabled = input.value.trim() === "";
+// 🔍 入力時に即 Firestore 照合してメッセージ表示
+input.addEventListener("input", async () => {
+  const inputId = input.value.trim();
+  btn.disabled = inputId === "";
+
+  if (!inputId) {
+    welcomeMessage.textContent = "この空間は、あなたの責任と誇りを表現する場です。";
+    return;
+  }
+
+  try {
+    const q = query(collection(db, "users"), where("id", "==", inputId));
+    const snapshot = await getDocs(q);
+
+    if (snapshot.empty) {
+      welcomeMessage.textContent = "⚠️ 責任者番号が認識されません。";
+      return;
+    }
+
+    const data = snapshot.docs[0].data();
+    const { name, role } = data;
+
+    // 入力時点で即メッセージ更新
+    welcomeMessage.textContent = `🛡️ ${name} さん（${role}）としてログイン可能です。`;
+  } catch (err) {
+    console.error("番号照合エラー:", err);
+    welcomeMessage.textContent = "⚠️ 照合中にエラーが発生しました";
+  }
 });
 
-// ⌨️ Enterキー対応（入力欄に限定）
+// ⌨️ Enterキー対応
 input.addEventListener("keydown", (event) => {
   if (event.key === "Enter" && !btn.disabled) {
     btn.click();
   }
 });
 
-// 🚪 ログイン処理
+// 🚪 ログイン処理（実際の認証＋遷移）
 btn.addEventListener("click", async () => {
   const inputId = input.value.trim();
   if (!inputId) return;
@@ -70,7 +95,7 @@ btn.addEventListener("click", async () => {
     localStorage.setItem("uid", uid);
     localStorage.setItem("role", role);
     localStorage.setItem("name", name);
-    localStorage.setItem("lastLogin", new Date().toISOString()); // ✅ 追加
+    localStorage.setItem("lastLogin", new Date().toISOString());
 
     // Firebase 認証
     await setPersistence(auth, browserLocalPersistence);
@@ -88,8 +113,7 @@ btn.addEventListener("click", async () => {
     };
     await addDoc(collection(db, "loginLogs"), logData);
 
-    // UI 更新
-    welcomeMessage.textContent = `🛡️ ようこそ、${name} さん（${role}）──この空間はあなたの判断で動きます。`;
+    // 管理者なら編集ボタン表示
     if (role === "管理者") {
       editVersionBtn.classList.remove("hidden");
     }
