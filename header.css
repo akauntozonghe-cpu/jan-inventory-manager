@@ -12,11 +12,11 @@
   transition: padding 0.3s ease, background 0.3s ease;
 }
 
-/* 役割ごとのテーマ色 → 廃止 */
+/* 役割ごとのテーマ色 → 廃止（全員同じ） */
 #systemHeader.admin,
 #systemHeader.responsible,
 #systemHeader.user {
-  background: #222; /* 全員同じ */
+  background: #222;
 }
 
 /* 左側（ハンバーガー＋アイコン＋タイトル） */
@@ -95,6 +95,9 @@
   border: 1px solid #fff;
   border-radius: 4px;
   background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* 通知ブロック */

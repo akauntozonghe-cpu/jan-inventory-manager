@@ -16,6 +16,32 @@
 
   <!-- ✅ バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
+
+  <!-- ✅ トースト通知用CSS -->
+  <style>
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      min-width: 220px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateY(20px);
+      z-index: 2000;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success { background: #28a745; }   /* 緑 */
+    .toast.warning { background: #ff9800; }   /* オレンジ */
+    .toast.error   { background: #f44336; }   /* 赤 */
+  </style>
 </head>
 <body>
   <!-- ✅ 共通ヘッダー -->
@@ -23,17 +49,21 @@
   <script type="module">
     import { initHeader } from "./headerLogic.js";
 
-    // header.html を読み込んでから initHeader を実行
     fetch("header.html")
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
         initHeader();
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
       });
   </script>
 
   <!-- ✅ 商品登録フォーム -->
-  <main style="margin-top: 80px; padding: 16px;">
+  <main aria-label="商品登録画面" style="margin-top: 80px; padding: 16px;">
     <section id="registerPanel">
       <h2>📥 商品登録</h2>
       <form id="registerForm">
@@ -41,7 +71,7 @@
         <label for="jan">JANコード：</label>
         <div class="input-with-scan">
           <input type="text" name="jan" id="janInput" required />
-          <button type="button" onclick="scanJAN()">📷 読み取り</button>
+          <button type="button" id="scanJanBtn">📷 読み取り</button>
         </div>
 
         <!-- Lot番号・製造番号 -->
@@ -80,14 +110,14 @@
         <label for="location">保管場所：</label>
         <div class="input-with-scan">
           <input type="text" name="location" id="location" />
-          <button type="button" onclick="scanLocation()">📷 読み取り</button>
+          <button type="button" id="scanLocationBtn">📷 読み取り</button>
         </div>
 
         <!-- 大分類（QR読み取り） -->
         <label for="categoryLarge">大分類：</label>
         <div class="input-with-scan">
           <input type="text" name="categoryLarge" id="categoryLarge" />
-          <button type="button" onclick="scanCategory()">📷 読み取り</button>
+          <button type="button" id="scanCategoryBtn">📷 読み取り</button>
         </div>
 
         <!-- 小分類 -->
@@ -101,7 +131,7 @@
 
         <!-- 管理番号自動生成 -->
         <div class="input-with-button">
-          <button type="button" onclick="applyAutoGenerate()">🔧 管理番号自動生成</button>
+          <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
         </div>
 
         <!-- 管理区別番号 -->
@@ -123,15 +153,18 @@
       </div>
     </section>
 
-    <!-- 登録結果表示 -->
+    <!-- 登録結果表示（固定メッセージ欄） -->
     <div id="registerMessage" style="margin-top: 16px;"></div>
   </main>
 
   <!-- QR読み取りオーバーレイ -->
   <div id="qrOverlay" style="display:none;">
     <div id="qr-reader"></div>
-    <button onclick="closeQR()">閉じる</button>
+    <button id="closeQrBtn">閉じる</button>
   </div>
+
+  <!-- ✅ トースト通知エリア -->
+  <div id="toast" class="toast"></div>
 
   <!-- ✅ ページ固有JS -->
   <script src="register.js" defer></script>

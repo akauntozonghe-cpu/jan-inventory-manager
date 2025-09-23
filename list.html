@@ -3,21 +3,50 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>商品一覧</title>
+  <title>商品一覧 - 在庫管理</title>
+
+  <!-- 共通スタイル -->
+  <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="dashboard">
+  <!-- ヘッダー読み込み先 -->
+  <div id="headerContainer"></div>
+
+  <!-- ヘッダー読み込みとロジック統合 -->
+  <script type="module">
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
+
+        // ✅ ヘッダー挿入後にロジックを初期化
+        import("./headerLogic.js").then(module => {
+          if (module.initHeader) {
+            module.initHeader();
+          }
+        });
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+      });
+  </script>
+
+  <!-- 本体 -->
+  <main class="dashboard" aria-label="商品一覧画面">
     <h1>商品一覧</h1>
     <div class="user-info" id="userInfo"></div>
 
     <input type="text" id="searchInput" placeholder="JANコードまたは商品名で検索" />
-    <button onclick="searchProducts()">検索</button>
+    <button id="searchBtn">検索</button>
 
     <div id="productList"></div>
     <p id="statusMsg"></p>
-  </div>
+  </main>
 
+  <!-- Firebase & 商品一覧ロジック -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js";
     import {
@@ -58,9 +87,7 @@
 
       products.forEach((item, index) => {
         const div = document.createElement("div");
-        div.style.border = "1px solid #ccc";
-        div.style.padding = "10px";
-        div.style.marginTop = "10px";
+        div.classList.add("product-card");
 
         div.innerHTML = `
           <strong>${item.商品名}</strong><br>
@@ -73,10 +100,18 @@
           <br><br>
           <label>数量変更：</label><input type="number" id="qty_${index}" value="${item.数量}" />
           <label>保管場所変更：</label><input type="text" id="loc_${index}" value="${item.保管場所}" />
-          <button onclick="submitChange(${index})">変更申請</button>
+          <button data-index="${index}" class="changeBtn">変更申請</button>
         `;
 
         list.appendChild(div);
+      });
+
+      // ボタンイベントをまとめて付与
+      document.querySelectorAll(".changeBtn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const index = btn.dataset.index;
+          submitChange(index);
+        });
       });
     }
 
@@ -87,6 +122,8 @@
       );
       renderProducts(filtered);
     }
+
+    document.getElementById("searchBtn").addEventListener("click", searchProducts);
 
     function submitChange(index) {
       const item = allProducts[index];
@@ -122,7 +159,7 @@
     onValue(ref(db, "products"), (snapshot) => {
       const data = snapshot.val();
       const all = Object.values(data || {});
-      allProducts = all.filter(p => p.状態 === "承認済"); // ✅ フィルター追加
+      allProducts = all.filter(p => p.状態 === "承認済");
       renderProducts(allProducts);
     });
   </script>

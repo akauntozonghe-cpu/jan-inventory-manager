@@ -26,10 +26,12 @@ async function getExistingCount(adminCode) {
   return snapshot.size;
 }
 async function applyAutoGenerate() {
+  const msgBox = document.getElementById("registerMessage");
   const jan = document.querySelector("[name='jan']").value.trim();
   const lot = document.querySelector("[name='lot']").value.trim();
   if (!jan || !lot) {
-    alert("JANコードとLot番号は必須です。");
+    msgBox.textContent = "⚠️ JANコードとLot番号は必須です。";
+    msgBox.style.color = "red";
     return;
   }
   const adminCode = generateAdminCode(jan, lot);
@@ -39,18 +41,22 @@ async function applyAutoGenerate() {
   document.querySelector("[name='adminCode']").value = adminCode;
   document.querySelector("[name='controlId']").value = controlId;
 
-  alert("自動生成が適用されました");
+  msgBox.textContent = "✅ 管理番号を自動生成しました";
+  msgBox.style.color = "green";
 }
 
 // ✅ DOM構築後の一括処理
 document.addEventListener("DOMContentLoaded", () => {
+  const msgBox = document.getElementById("registerMessage");
+
   // 商品登録処理（資格による分岐）
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;
     const user = auth.currentUser;
     if (!user) {
-      alert("ログインが必要です");
+      msgBox.textContent = "⚠️ ログインが必要です";
+      msgBox.style.color = "red";
       return;
     }
 
@@ -102,7 +108,8 @@ document.addEventListener("DOMContentLoaded", () => {
           details: { status: data.status, name: data.name }
         });
 
-        alert("登録完了（即一覧反映）");
+        msgBox.textContent = "✅ 登録完了（即一覧反映）";
+        msgBox.style.color = "green";
       } else {
         // ✅ 責任者は pendingItems に保存
         const pendingRef = await db.collection("pendingItems").add(data);
@@ -125,7 +132,8 @@ document.addEventListener("DOMContentLoaded", () => {
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("登録完了（承認待ち・管理者に通知）");
+        msgBox.textContent = "✅ 登録完了（承認待ち・管理者に通知）";
+        msgBox.style.color = "orange";
       }
 
       form.reset();
@@ -134,7 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("photoPreview").style.display = "none";
     } catch (error) {
       console.error("登録エラー:", error);
-      alert("登録に失敗しました。もう一度お試しください。");
+      msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";
+      msgBox.style.color = "red";
     }
   });
 

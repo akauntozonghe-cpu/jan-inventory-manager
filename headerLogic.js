@@ -11,6 +11,21 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
 /* ===============================
+   トースト通知関数
+================================ */
+function showToast(message, type = "info") {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+
+  setTimeout(() => {
+    toast.className = "toast";
+  }, 3000);
+}
+
+/* ===============================
    通知アイコン判定
 ================================ */
 function getNotifIcon(type) {
@@ -59,12 +74,13 @@ async function initNotifications(uid, role) {
   onSnapshot(q, (snapshot) => {
     notifList.innerHTML = "";
     let unreadCount = 0;
+    let count = 0;
 
     snapshot.forEach(docSnap => {
+      if (count >= 10) return; // 最新10件だけ表示
       const notif = docSnap.data();
       const notifId = docSnap.id;
 
-      // 対象判定
       if (
         notif.target === "all" ||
         (notif.target === "admin" && role === "管理者") ||
@@ -75,7 +91,6 @@ async function initNotifications(uid, role) {
         li.classList.add("notificationItem");
         if (notif.type) li.classList.add(notif.type);
 
-        // 既読判定
         if (readMap[notifId]) {
           li.classList.add("read");
         } else {
@@ -90,8 +105,17 @@ async function initNotifications(uid, role) {
         `;
 
         notifList.appendChild(li);
+        count++;
       }
     });
+
+    // 「もっと見る」リンク
+    if (snapshot.size > 10) {
+      const moreLi = document.createElement("li");
+      moreLi.classList.add("notificationItem", "more-link");
+      moreLi.innerHTML = `<a href="notifications.html">📜 もっと見る</a>`;
+      notifList.appendChild(moreLi);
+    }
 
     notifCount.textContent = unreadCount;
   });
@@ -103,11 +127,9 @@ async function initNotifications(uid, role) {
       item.classList.remove("unread");
       item.classList.add("read");
 
-      // バッジ更新
       let count = parseInt(notifCount.textContent, 10);
       if (count > 0) notifCount.textContent = count - 1;
 
-      // Firestore に既読保存
       const notifId = item.dataset.notifId;
       await setDoc(doc(db, "userNotifications", `${uid}_${notifId}`), {
         uid,
@@ -128,17 +150,19 @@ export function initHeader() {
   const name = localStorage.getItem("name");
   const lastLogin = localStorage.getItem("lastLogin");
 
-  // ヘッダー要素
   const responsibleUser = document.getElementById("responsibleUser");
   const lastJudgment = document.getElementById("lastJudgment");
   const clock = document.getElementById("clock");
   const adminMenu = document.getElementById("adminMenu");
   const logoutBtn = document.getElementById("logoutBtn");
-  const header = document.getElementById("systemHeader");
 
-  // ユーザー表示
+  // ユーザー表示（役割バッジ付き）
   if (name && role) {
-    responsibleUser.textContent = `👑 ${name} さん（${role}）`;
+    let roleIcon = "👤";
+    if (role === "管理者") roleIcon = "🛡";
+    else if (role === "責任者") roleIcon = "📋";
+
+    responsibleUser.innerHTML = `👑 ${name} さん <span class="role-badge">${roleIcon} ${role}</span>`;
   } else {
     responsibleUser.textContent = "👑 未ログイン";
   }
@@ -161,29 +185,36 @@ export function initHeader() {
   // 管理者メニュー表示制御
   if (role === "管理者") {
     adminMenu.style.display = "block";
-    header.classList.add("admin");
   } else {
     adminMenu.style.display = "none";
-    header.classList.add("user");
   }
 
-  // ログアウト処理
+  // ログアウト処理（トースト通知に変更）
   if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
       localStorage.clear();
-      alert("ログアウトしました");
-      window.location.href = "index.html";
+      showToast("🚪 ログアウトしました", "info");
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1200);
     });
   }
 
-  // ハンバーガーメニュー開閉
+  // ハンバーガーメニュー開閉＋外クリックで閉じる
   const menuToggle = document.getElementById("menuToggle");
   const headerMenu = document.getElementById("headerMenu");
   if (menuToggle && headerMenu) {
-    menuToggle.addEventListener("click", () => {
+    menuToggle.addEventListener("click", (e) => {
+      e.stopPropagation();
       menuToggle.classList.toggle("open");
       headerMenu.classList.toggle("open");
+    });
+    document.addEventListener("click", (e) => {
+      if (!headerMenu.contains(e.target) && !menuToggle.contains(e.target)) {
+        menuToggle.classList.remove("open");
+        headerMenu.classList.remove("open");
+      }
     });
   }
 
@@ -195,7 +226,7 @@ export function initHeader() {
     });
   }
 
-  // 通知ベル開閉（範囲限定）
+  // 通知ベル開閉（外クリックで閉じる）
   const bell = document.getElementById("notificationBlock");
   const dropdown = document.getElementById("notificationDropdown");
   if (bell && dropdown) {
