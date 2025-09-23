@@ -23,6 +23,21 @@ function getNotifIcon(type) {
 }
 
 /* ===============================
+   日時フォーマット関数
+   → 〇月〇日（〇）hh:mm:ss
+================================ */
+function formatDateTime(date) {
+  const days = ["日","月","火","水","木","金","土"];
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const weekday = days[date.getDay()];
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  const ss = String(date.getSeconds()).padStart(2, "0");
+  return `${month}月${day}日（${weekday}）${hh}:${mm}:${ss}`;
+}
+
+/* ===============================
    通知購読＆既読管理
 ================================ */
 async function initNotifications(uid, role) {
@@ -57,7 +72,6 @@ async function initNotifications(uid, role) {
       ) {
         const li = document.createElement("li");
         li.dataset.notifId = notifId;
-
         li.classList.add("notificationItem");
         if (notif.type) li.classList.add(notif.type);
 
@@ -72,7 +86,7 @@ async function initNotifications(uid, role) {
         li.innerHTML = `
           <div class="notifTitle">${getNotifIcon(notif.type)} ${notif.title}</div>
           <div class="notifBody">${notif.body}</div>
-          <div class="notifTime">${notif.createdAt?.toDate().toLocaleString("ja-JP") || ""}</div>
+          <div class="notifTime">${notif.createdAt ? formatDateTime(notif.createdAt.toDate()) : ""}</div>
         `;
 
         notifList.appendChild(li);
@@ -120,6 +134,7 @@ export function initHeader() {
   const clock = document.getElementById("clock");
   const adminMenu = document.getElementById("adminMenu");
   const logoutBtn = document.getElementById("logoutBtn");
+  const header = document.getElementById("systemHeader");
 
   // ユーザー表示
   if (name && role) {
@@ -131,15 +146,14 @@ export function initHeader() {
   // 最終ログイン表示
   if (lastLogin) {
     const d = new Date(lastLogin);
-    lastJudgment.textContent = `🕒 最終：${d.toLocaleString("ja-JP")}`;
+    lastJudgment.textContent = `🕒 最終：${formatDateTime(d)}`;
   } else {
     lastJudgment.textContent = "🕒 最終：--";
   }
 
   // 現在時刻をリアルタイム更新
   function updateClock() {
-    const now = new Date();
-    clock.textContent = `⏱ 現在：${now.toLocaleTimeString("ja-JP")}`;
+    clock.textContent = `⏱ 現在：${formatDateTime(new Date())}`;
   }
   updateClock();
   setInterval(updateClock, 1000);
@@ -147,8 +161,10 @@ export function initHeader() {
   // 管理者メニュー表示制御
   if (role === "管理者") {
     adminMenu.style.display = "block";
+    header.classList.add("admin");
   } else {
     adminMenu.style.display = "none";
+    header.classList.add("user");
   }
 
   // ログアウト処理
@@ -179,11 +195,12 @@ export function initHeader() {
     });
   }
 
-  // 通知ベル開閉
+  // 通知ベル開閉（範囲限定）
   const bell = document.getElementById("notificationBlock");
   const dropdown = document.getElementById("notificationDropdown");
   if (bell && dropdown) {
-    bell.addEventListener("click", () => {
+    bell.addEventListener("click", (e) => {
+      e.stopPropagation();
       dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
     });
     document.addEventListener("click", (e) => {

@@ -16,15 +16,11 @@
 
   <div class="headerRight">
     <!-- 通知ブロック -->
-    <div id="notificationBlock" style="position:relative; margin-right:15px; cursor:pointer;">
+    <div id="notificationBlock" class="notification-block">
       <span id="notificationBell">🔔</span>
-      <span id="notificationCount"
-            style="background:red; color:white; border-radius:50%; padding:2px 6px; font-size:12px;
-                   position:absolute; top:-5px; right:-5px;">0</span>
-      <div id="notificationDropdown"
-           style="display:none; position:absolute; right:0; top:30px; background:#fff; border:1px solid #ccc;
-                  width:300px; max-height:400px; overflow-y:auto; z-index:1000;">
-        <ul id="notificationList" style="list-style:none; margin:0; padding:10px;"></ul>
+      <span id="notificationCount" class="notification-count">0</span>
+      <div id="notificationDropdown" class="notification-dropdown">
+        <ul id="notificationList"></ul>
       </div>
     </div>
 
@@ -46,7 +42,7 @@
     <li><a href="market.html">🛍 フリマ</a></li>
     <li><a href="inventory.html">📋 棚卸</a></li>
     <li><a href="report.html">📊 報告</a></li>
-    <li id="adminMenu" style="display:none;"><a href="admin.html">🛡 管理者</a></li>
+    <li id="adminMenu" class="hidden"><a href="admin.html">🛡 管理者</a></li>
     <li><a href="settings.html">⚙️ 設定</a></li>
     <li><a href="#" id="logoutBtn">🚪 ログアウト</a></li>
   </ul>
