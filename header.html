@@ -18,9 +18,9 @@
     <!-- 通知ブロック -->
     <div class="notification-block">
       <button id="notificationBlock" aria-label="通知を表示" aria-haspopup="true" aria-expanded="false">
-        🔔 <span id="notificationCount" class="notification-count">0</span>
+        🔔 <span id="notificationCount" class="notification-count" hidden></span>
       </button>
-      <div id="notificationDropdown" class="notification-dropdown" role="menu" hidden>
+      <div id="notificationDropdown" class="notification-dropdown" role="menu" aria-hidden="true">
         <ul id="notificationList"></ul>
       </div>
     </div>
@@ -35,7 +35,7 @@
 </header>
 
 <!-- メニュー（初期は閉じた状態、.open で展開） -->
-<nav id="headerMenu" aria-label="メインメニュー">
+<nav id="headerMenu" aria-label="メインメニュー" hidden>
   <ul class="menu">
     <li><a href="home.html">🏠 ホーム</a></li>
     <li><a href="register.html">📥 商品登録</a></li>
@@ -43,7 +43,7 @@
     <li><a href="market.html">🛍 フリマ</a></li>
     <li><a href="inventory.html">📋 棚卸</a></li>
     <li><a href="report.html">📊 報告</a></li>
-    <li id="adminMenu" class="hidden"><a href="admin.html">🛡 管理者</a></li>
+    <li id="adminMenu" hidden><a href="admin.html">🛡 管理者</a></li>
     <li><a href="settings.html">⚙️ 設定</a></li>
     <li><a href="#" id="logoutBtn">🚪 ログアウト</a></li>
   </ul>

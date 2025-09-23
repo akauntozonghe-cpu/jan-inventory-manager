@@ -56,9 +56,9 @@ export function initHeader() {
 
   // 管理者メニュー表示制御
   if (role === "管理者") {
-    adminMenu.style.display = "block";
+    adminMenu.removeAttribute("hidden");
   } else {
-    adminMenu.style.display = "none";
+    adminMenu.setAttribute("hidden", true);
   }
 
   // ログアウト処理（トースト通知に変更）
@@ -80,13 +80,19 @@ export function initHeader() {
   if (menuToggle && headerMenu) {
     menuToggle.addEventListener("click", (e) => {
       e.stopPropagation();
-      menuToggle.classList.toggle("open");
-      headerMenu.classList.toggle("open");
+      const isOpen = headerMenu.classList.toggle("open");
+      menuToggle.setAttribute("aria-expanded", isOpen);
+      if (isOpen) {
+        headerMenu.removeAttribute("hidden");
+      } else {
+        headerMenu.setAttribute("hidden", true);
+      }
     });
     document.addEventListener("click", (e) => {
       if (!headerMenu.contains(e.target) && !menuToggle.contains(e.target)) {
-        menuToggle.classList.remove("open");
         headerMenu.classList.remove("open");
+        headerMenu.setAttribute("hidden", true);
+        menuToggle.setAttribute("aria-expanded", false);
       }
     });
   }
@@ -105,17 +111,28 @@ export function initHeader() {
   if (bell && dropdown) {
     bell.addEventListener("click", (e) => {
       e.stopPropagation();
-      dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+      const isOpen = dropdown.style.display === "block";
+      if (isOpen) {
+        dropdown.style.display = "none";
+        dropdown.setAttribute("aria-hidden", true);
+        bell.setAttribute("aria-expanded", false);
+      } else {
+        dropdown.style.display = "block";
+        dropdown.setAttribute("aria-hidden", false);
+        bell.setAttribute("aria-expanded", true);
+      }
     });
     document.addEventListener("click", (e) => {
       if (!bell.contains(e.target)) {
         dropdown.style.display = "none";
+        dropdown.setAttribute("aria-hidden", true);
+        bell.setAttribute("aria-expanded", false);
       }
     });
   }
 
   // 通知購読開始
-  if (uid) {
+  if (uid && typeof initNotifications === "function") {
     initNotifications(uid, role);
   }
 }
