@@ -59,6 +59,20 @@ function renderForm(schema, containerId, isAdmin) {
       case "file":
         input = document.createElement("input");
         input.type = "file";
+        input.accept = "image/*";
+        // プレビュー
+        const preview = document.createElement("img");
+        preview.id = field.key + "Preview";
+        preview.style.display = "none";
+        preview.style.maxWidth = "100%";
+        input.onchange = e => {
+          const file = e.target.files[0];
+          if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+          }
+        };
+        wrapper.appendChild(preview);
         break;
       case "textarea":
         input = document.createElement("textarea");
@@ -194,11 +208,15 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       form.reset();
-      const preview = document.getElementById("photoPreview");
-      if (preview) {
-        preview.style.display = "none";
-        preview.src = "";
-      }
+      schema.forEach(field => {
+        if (field.type === "file") {
+          const preview = document.getElementById(field.key + "Preview");
+          if (preview) {
+            preview.style.display = "none";
+            preview.src = "";
+          }
+        }
+      });
     } catch (error) {
       console.error("登録エラー:", error);
       msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";
@@ -208,18 +226,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // === 管理者表示制御 ===
   const responsibleUser = document.getElementById("responsibleUser");
-  const adminOnlyField = document.getElementById("adminOnlyField");
-
-  if (adminOnlyField) adminOnlyField.style.display = "none";
+  const adminTools = document.getElementById("adminTools");
 
   onAuthStateChanged(auth, (user) => {
-    if (user && adminOnlyField) {
+    if (user) {
       if (responsibleUser) {
         responsibleUser.textContent = `👑 ${name}（${role}）`;
       }
-      adminOnlyField.style.display = role === "管理者" ? "block" : "none";
-    } else if (adminOnlyField) {
-      adminOnlyField.style.display = "none";
+      if (adminTools) {
+        adminTools.style.display = role === "管理者" ? "block" : "none";
+      }
+    } else {
+      if (adminTools) adminTools.style.display = "none";
     }
   });
 });

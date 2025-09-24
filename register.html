@@ -109,7 +109,7 @@
         <label for="categorySmall">小分類：</label>
         <input type="text" name="categorySmall" />
 
-        <!-- 備考（責任者も入力可能） -->
+        <!-- 備考 -->
         <label for="remarks">備考：</label>
         <textarea name="remarks" id="remarks" rows="3" placeholder="補足情報を入力してください"></textarea>
 
@@ -123,16 +123,15 @@
           <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
         </div>
 
-        <!-- 管理番号（全員表示） -->
+        <!-- 管理番号 -->
         <label for="controlId">管理番号：</label>
         <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
 
-        <!-- 管理者専用：管理区別番号 -->
+        <!-- 管理者専用 -->
         <div id="adminOnlyField" style="display:none;">
           <label for="adminCode">管理区別番号：</label>
           <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
 
-          <!-- 管理者専用：項目追加UI -->
           <h4>🛡 管理者専用設定</h4>
           <div id="extraFields"></div>
           <button type="button" id="addFieldBtn">＋ 項目追加</button>
@@ -146,6 +145,11 @@
     <!-- 登録結果表示 -->
     <div id="registerMessage" style="margin-top: 16px;"></div>
     <div id="responsibleUser" style="margin-top:8px; font-weight:bold;"></div>
+
+    <!-- 管理者専用リンク -->
+    <div id="adminTools" style="display:none; margin-top:20px;">
+      <a href="schema-editor.html" class="btn">⚙️ フォーム編集へ</a>
+    </div>
   </main>
 
   <!-- QR読み取りオーバーレイ -->
