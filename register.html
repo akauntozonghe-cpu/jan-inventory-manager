@@ -9,11 +9,6 @@
   <link rel="stylesheet" href="header.css" />
   <link rel="stylesheet" href="register.css" />
 
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
-
   <!-- バーコード読み取りライブラリ -->
   <script src="https://unpkg.com/html5-qrcode"></script>
 
@@ -104,17 +99,11 @@
 
         <!-- 保管場所 -->
         <label for="location">保管場所：</label>
-        <div class="input-with-scan">
-          <input type="text" name="location" id="location" />
-          <button type="button" id="scanLocationBtn">📷 読み取り</button>
-        </div>
+        <input type="text" name="location" id="location" />
 
         <!-- 大分類 -->
         <label for="categoryLarge">大分類：</label>
-        <div class="input-with-scan">
-          <input type="text" name="categoryLarge" id="categoryLarge" />
-          <button type="button" id="scanCategoryBtn">📷 読み取り</button>
-        </div>
+        <input type="text" name="categoryLarge" id="categoryLarge" />
 
         <!-- 小分類 -->
         <label for="categorySmall">小分類：</label>
@@ -152,6 +141,7 @@
 
     <!-- 登録結果表示 -->
     <div id="registerMessage" style="margin-top: 16px;"></div>
+    <div id="responsibleUser" style="margin-top:8px; font-weight:bold;"></div>
   </main>
 
   <!-- QR読み取りオーバーレイ -->
@@ -164,6 +154,6 @@
   <div id="toast" class="toast"></div>
 
   <!-- ページ固有JS -->
-  <script src="register.js" defer></script>
+  <script type="module" src="./register.js"></script>
 </body>
 </html>
