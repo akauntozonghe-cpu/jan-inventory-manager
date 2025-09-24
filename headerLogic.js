@@ -13,6 +13,21 @@ function formatDateTime(date) {
   return `${month}月${day}日（${weekday}）${hh}:${mm}:${ss}`;
 }
 
+/* ===============================
+   共通トースト通知関数
+================================ */
+function showToast(message, type = "info") {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.className = `toast ${type} show`;
+
+  setTimeout(() => {
+    toast.className = `toast ${type}`;
+  }, 3000);
+}
+
 export function initHeader() {
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
@@ -61,7 +76,7 @@ export function initHeader() {
     adminMenu.setAttribute("hidden", true);
   }
 
-  // ログアウト処理（トースト通知に変更）
+  // ログアウト処理（トースト通知付き）
   if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
       e.preventDefault();
