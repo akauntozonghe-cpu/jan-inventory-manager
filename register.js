@@ -39,7 +39,7 @@ async function loadSchema() {
   return snap.exists() ? snap.data().schema : [];
 }
 
-// === フォーム描画 ===
+// === フォーム描画（schema部分のみ） ===
 function renderForm(schema, containerId, isAdmin) {
   const container = document.getElementById(containerId);
   container.innerHTML = "";
@@ -98,25 +98,6 @@ function renderForm(schema, containerId, isAdmin) {
     wrapper.appendChild(label);
     wrapper.appendChild(input);
 
-    // 自動生成ボタン
-    if (field.autoGenerate) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.textContent = "🔧 自動生成";
-      btn.onclick = async () => {
-        const jan = document.getElementById("jan")?.value.trim();
-        const lot = document.getElementById("lot")?.value.trim();
-        if (jan && lot) {
-          const adminCode = generateAdminCode(jan, lot);
-          const count = await getExistingCount(adminCode);
-          input.value = generateControlId(adminCode, count);
-          const adminCodeInput = document.getElementById("adminCode");
-          if (adminCodeInput) adminCodeInput.value = adminCode;
-        }
-      };
-      wrapper.appendChild(btn);
-    }
-
     container.appendChild(wrapper);
   });
 }
@@ -130,17 +111,26 @@ async function handlePhotoUpload(file, controlId) {
 }
 
 // === 入力値収集 ===
-function collectFormData(schema, form, user, isAdmin, adminCode, controlId, photoUrl, name) {
+function collectFormData(schema, form, user, role, adminCode, controlId, photoUrl, name) {
   const data = {
+    // 固定フィールド
+    jan: form.jan?.value.trim(),
+    lot: form.lot?.value.trim(),
     adminCode,
     controlId,
-    status: isAdmin ? "承認済" : "保留",
+    status: role === "管理者" ? "承認済" : "承認待ち",
     createdBy: user.uid,
     createdByName: name,
     updatedAt: serverTimestamp(),
     timestamp: serverTimestamp()
   };
 
+  // 固定の写真フィールド
+  if (photoUrl) {
+    data.photo = photoUrl;
+  }
+
+  // schema フィールド
   schema.forEach(field => {
     const el = form.elements[field.key];
     if (!el) return;
@@ -177,6 +167,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    // 固定フィールドから adminCode/controlId を生成
     let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
     let controlId = form.controlId ? form.controlId.value.trim() : "";
     if (!adminCode || !controlId) {
@@ -187,24 +178,28 @@ document.addEventListener("DOMContentLoaded", async () => {
       controlId = generateControlId(adminCode, count);
     }
 
-    // 写真アップロード
+    // 写真アップロード（固定photo）
     const photoFile = form.photo?.files[0];
     let photoUrl = null;
     if (photoFile) {
       photoUrl = await handlePhotoUpload(photoFile, controlId);
     }
 
-    const data = collectFormData(schema, form, user, isAdmin, adminCode, controlId, photoUrl, name);
+    // データ収集
+    const data = collectFormData(schema, form, user, role, adminCode, controlId, photoUrl, name);
 
     try {
-      if (isAdmin) {
+      if (role === "管理者") {
         await addDoc(collection(db, "items"), data);
-        msgBox.textContent = "✅ 登録完了（即一覧反映）";
+        msgBox.textContent = "✅ 登録完了（即一覧に反映されました）";
         msgBox.style.color = "green";
-      } else {
+      } else if (role === "責任者") {
         await addDoc(collection(db, "pendingItems"), data);
-        msgBox.textContent = "✅ 登録完了（承認待ち・管理者に通知）";
+        msgBox.textContent = "✅ 登録完了（承認待ち：管理者に通知されます）";
         msgBox.style.color = "orange";
+      } else {
+        msgBox.textContent = "⚠️ 権限が不明のため登録できません";
+        msgBox.style.color = "red";
       }
 
       form.reset();
@@ -217,6 +212,11 @@ document.addEventListener("DOMContentLoaded", async () => {
           }
         }
       });
+      const photoPreview = document.getElementById("photoPreview");
+      if (photoPreview) {
+        photoPreview.style.display = "none";
+        photoPreview.src = "";
+      }
     } catch (error) {
       console.error("登録エラー:", error);
       msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";

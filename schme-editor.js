@@ -32,6 +32,14 @@ function renderEditor(schema) {
       <label>
         必須 <input type="checkbox" class="schemaRequired" ${field.required?"checked":""}/>
       </label>
+      <label>
+        表示対象：
+        <select class="schemaRole">
+          <option value="all" ${field.role==="all"?"selected":""}>全員</option>
+          <option value="admin" ${field.role==="admin"?"selected":""}>管理者のみ</option>
+          <option value="responsible" ${field.role==="responsible"?"selected":""}>責任者のみ</option>
+        </select>
+      </label>
       <input type="text" value="${(field.options||[]).join(",")}" 
              class="schemaOptions" placeholder="選択肢（カンマ区切り）"
              style="display:${field.type==="select"?"inline-block":"none"};" />
@@ -106,6 +114,7 @@ function collectRowData(row) {
     label: row.querySelector(".schemaLabel").value.trim(),
     type: row.querySelector(".schemaType").value,
     required: row.querySelector(".schemaRequired").checked,
+    role: row.querySelector(".schemaRole")?.value || "all",
     options: row.querySelector(".schemaType").value === "select"
       ? row.querySelector(".schemaOptions").value.split(",").map(s => s.trim()).filter(Boolean)
       : []
@@ -172,7 +181,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderEditor(schema);
 
   document.getElementById("addFieldBtn").onclick = () => {
-    schema.push({ key:"", label:"", type:"text", required:false, options:[] });
+    schema.push({ key:"", label:"", type:"text", required:false, role:"all", options:[] });
     renderEditor(schema);
   };
 });

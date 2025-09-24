@@ -58,74 +58,26 @@
     <section id="registerPanel">
       <h2>📥 商品登録</h2>
       <form id="registerForm">
-        <!-- JANコード -->
-        <label for="jan">JANコード：</label>
+        <!-- 固定フィールド -->
+        <label for="janInput">JANコード：</label>
         <div class="input-with-scan">
           <input type="text" name="jan" id="janInput" required />
           <button type="button" id="scanJanBtn">📷 読み取り</button>
         </div>
 
-        <!-- Lot番号 -->
-        <label for="lot">Lot番号 / 製造番号：</label>
+        <label for="lotInput">Lot番号 / 製造番号：</label>
         <input type="text" name="lot" id="lotInput" required />
-
-        <!-- 商品名 -->
-        <label for="name">商品名：</label>
-        <input type="text" name="name" required />
-
-        <!-- 数量 -->
-        <label for="quantity">数量：</label>
-        <input type="number" name="quantity" required />
-
-        <!-- 単位 -->
-        <label for="unit">数量単位：</label>
-        <select name="unit" required>
-          <option value="個">個</option>
-          <option value="本">本</option>
-          <option value="パック">パック</option>
-          <option value="セット">セット</option>
-          <option value="枚">枚</option>
-          <option value="箱">箱</option>
-          <option value="袋">袋</option>
-        </select>
-
-        <!-- 期限 -->
-        <label for="expiry">期限：</label>
-        <input type="date" name="expiry" />
-
-        <!-- メーカー -->
-        <label for="maker">メーカー名：</label>
-        <input type="text" name="maker" />
-
-        <!-- 保管場所 -->
-        <label for="location">保管場所：</label>
-        <input type="text" name="location" id="location" />
-
-        <!-- 大分類 -->
-        <label for="categoryLarge">大分類：</label>
-        <input type="text" name="categoryLarge" id="categoryLarge" />
-
-        <!-- 小分類 -->
-        <label for="categorySmall">小分類：</label>
-        <input type="text" name="categorySmall" />
-
-        <!-- 備考 -->
-        <label for="remarks">備考：</label>
-        <textarea name="remarks" id="remarks" rows="3" placeholder="補足情報を入力してください"></textarea>
-
-        <!-- 写真 -->
-        <label for="photo">商品写真：</label>
-        <input type="file" name="photo" id="photoInput" accept="image/*" />
-        <img id="photoPreview" style="margin-top: 8px; max-width: 100%; display: none;" />
 
         <!-- 管理番号自動生成 -->
         <div class="input-with-button">
           <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
         </div>
 
-        <!-- 管理番号 -->
         <label for="controlId">管理番号：</label>
         <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
+
+        <!-- 可変フィールド（schemaで描画） -->
+        <div id="dynamicFormContainer"></div>
 
         <!-- 管理者専用 -->
         <div id="adminOnlyField" style="display:none;">
