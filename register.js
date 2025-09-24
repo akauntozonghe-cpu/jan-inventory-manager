@@ -1,21 +1,9 @@
-// ✅ Firebase初期化（重複防止）
-if (!firebase.apps.length) {
-  const firebaseConfig = {
-    apiKey: "AIzaSyCqPckkK9FkDkeVrYjoZQA1Y3HuOGuUGwI",
-    authDomain: "inventory-app-312ca.firebaseapp.com",
-    projectId: "inventory-app-312ca",
-    storageBucket: "inventory-app-312ca.appspot.com",
-    messagingSenderId: "245219344089",
-    appId: "1:245219344089:web:e46105927c302e6a5788c8"
-  };
-  firebase.initializeApp(firebaseConfig);
-}
-
-// ✅ Firestore / Auth をグローバルに定義
-const db = firebase.firestore();
-const auth = firebase.auth();
-window.db = db;
-window.auth = auth; // ← これで他のファイルからも参照可能
+// register.js
+import { db, auth } from "./firebase.js";
+import { collection, addDoc, query, where, getDocs, serverTimestamp } 
+  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { onAuthStateChanged } 
+  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // ✅ 管理番号生成ロジック
 function generateAdminCode(jan, lot) {
@@ -25,7 +13,8 @@ function generateControlId(adminCode, count) {
   return `${adminCode}-${count + 1}`;
 }
 async function getExistingCount(adminCode) {
-  const snapshot = await db.collection("items").where("adminCode", "==", adminCode).get();
+  const q = query(collection(db, "items"), where("adminCode", "==", adminCode));
+  const snapshot = await getDocs(q);
   return snapshot.size;
 }
 async function applyAutoGenerate() {
@@ -53,14 +42,9 @@ async function applyAutoGenerate() {
 // ✅ DOM構築後の処理
 document.addEventListener("DOMContentLoaded", () => {
   const msgBox = document.getElementById("registerMessage");
-
-  // 管理番号自動生成ボタン
   const autoBtn = document.getElementById("autoGenerateBtn");
-  if (autoBtn) {
-    autoBtn.addEventListener("click", applyAutoGenerate);
-  }
+  if (autoBtn) autoBtn.addEventListener("click", applyAutoGenerate);
 
-  // 管理者専用：項目追加UI
   const addFieldBtn = document.getElementById("addFieldBtn");
   const extraFields = document.getElementById("extraFields");
   if (addFieldBtn && extraFields) {
@@ -88,13 +72,11 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // ✅ ヘッダーで取得済みのユーザー情報を利用
     const role = window.currentUserInfo?.role || "未設定";
     const name = window.currentUserInfo?.name || "不明";
     const isAdmin = role === "管理者";
 
-    // 管理番号が未入力なら自動生成
-    let adminCode = form.adminCode.value.trim();
+    let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
     let controlId = form.controlId.value.trim();
     if (!adminCode || !controlId) {
       const jan = form.jan.value.trim();
@@ -104,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
       controlId = generateControlId(adminCode, count);
     }
 
-    // 基本データ
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
@@ -122,11 +103,10 @@ document.addEventListener("DOMContentLoaded", () => {
       status: isAdmin ? "承認済" : "保留",
       createdBy: user.uid,
       createdByName: name,
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      updatedAt: serverTimestamp(),
+      timestamp: serverTimestamp()
     };
 
-    // 管理者なら追加項目も収集
     if (isAdmin && extraFields) {
       extraFields.querySelectorAll(".extraField").forEach(f => {
         const key = f.querySelector(".extraKey").value.trim();
@@ -137,44 +117,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
     try {
       if (isAdmin) {
-        // 管理者は items に即登録
-        const itemRef = await db.collection("items").add(data);
-        await db.collection("history").add({
-          type: "登録（即承認）",
-          actor: user.uid,
-          targetItem: itemRef.id,
-          controlId,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          details: { status: data.status, name: data.name }
-        });
+        await addDoc(collection(db, "items"), data);
         msgBox.textContent = "✅ 登録完了（即一覧反映）";
         msgBox.style.color = "green";
       } else {
-        // 責任者以下は pendingItems に保存
-        const pendingRef = await db.collection("pendingItems").add(data);
-        await db.collection("history").add({
-          type: "登録（保留）",
-          actor: user.uid,
-          targetItem: pendingRef.id,
-          controlId,
-          timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-          details: { status: data.status, name: data.name }
-        });
-        await db.collection("notificationLogs").add({
-          title: "承認依頼",
-          body: `${name} さんが ${data.name} を登録しました`,
-          type: "approval",
-          target: "admin",
-          pendingId: pendingRef.id,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
+        await addDoc(collection(db, "pendingItems"), data);
         msgBox.textContent = "✅ 登録完了（承認待ち・管理者に通知）";
         msgBox.style.color = "orange";
       }
 
       form.reset();
-      document.getElementById("adminCode").value = "";
-      document.getElementById("controlId").value = "";
+      if (form.adminCode) form.adminCode.value = "";
+      form.controlId.value = "";
       document.getElementById("photoPreview").style.display = "none";
       if (extraFields) extraFields.innerHTML = "";
     } catch (error) {
@@ -184,37 +138,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 写真プレビュー
-  const photoInput = document.getElementById("photoInput");
-  const photoPreview = document.getElementById("photoPreview");
-  if (photoInput && photoPreview) {
-    photoInput.addEventListener("change", () => {
-      const file = photoInput.files[0];
-      if (file && file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = () => {
-          photoPreview.src = reader.result;
-          photoPreview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      } else {
-        photoPreview.src = "";
-        photoPreview.style.display = "none";
-      }
-    });
-  }
-
-   // 管理者表示制御（ヘッダーの情報を利用）
+  // 管理者表示制御
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
-  auth.onAuthStateChanged((user) => {
+  onAuthStateChanged(auth, (user) => {
     if (user && adminOnlyField) {
       const role = window.currentUserInfo?.role || "未設定";
       const name = window.currentUserInfo?.name || "不明";
-
-      console.log("ログインユーザー:", name, "role:", role);
-
       if (responsibleUser) {
         responsibleUser.textContent = `👑 ${name}（${role}）`;
       }
