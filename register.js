@@ -5,7 +5,9 @@ import {
   query,
   where,
   getDocs,
-  serverTimestamp
+  serverTimestamp,
+  doc,
+  getDoc
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -30,27 +32,79 @@ async function getExistingCount(adminCode) {
   const snapshot = await getDocs(q);
   return snapshot.size;
 }
-async function applyAutoGenerate() {
-  const msgBox = document.getElementById("registerMessage");
-  const jan = document.getElementById("janInput").value.trim();
-  const lot = document.getElementById("lotInput").value.trim();
 
-  if (!jan || !lot) {
-    msgBox.textContent = "⚠️ JANコードとLot番号は必須です。";
-    msgBox.style.color = "red";
-    return;
-  }
+// === schema 読み込み ===
+async function loadSchema() {
+  const snap = await getDoc(doc(db, "config", "formSchema"));
+  return snap.exists() ? snap.data().schema : [];
+}
 
-  const adminCode = generateAdminCode(jan, lot);
-  const count = await getExistingCount(adminCode);
-  const controlId = generateControlId(adminCode, count);
+// === フォーム描画 ===
+function renderForm(schema, containerId, isAdmin) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
 
-  document.getElementById("controlId").value = controlId;
-  const adminCodeInput = document.getElementById("adminCode");
-  if (adminCodeInput) adminCodeInput.value = adminCode;
+  schema.forEach(field => {
+    if (field.adminOnly && !isAdmin) return;
 
-  msgBox.textContent = "✅ 管理番号を自動生成しました";
-  msgBox.style.color = "green";
+    const wrapper = document.createElement("div");
+    wrapper.className = "formField";
+
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    label.setAttribute("for", field.key);
+
+    let input;
+    switch (field.type) {
+      case "file":
+        input = document.createElement("input");
+        input.type = "file";
+        break;
+      case "textarea":
+        input = document.createElement("textarea");
+        break;
+      case "select":
+        input = document.createElement("select");
+        (field.options || []).forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          input.appendChild(option);
+        });
+        break;
+      default:
+        input = document.createElement("input");
+        input.type = field.type || "text";
+    }
+
+    input.name = field.key;
+    input.id = field.key;
+    if (field.required) input.required = true;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+
+    // 自動生成ボタン
+    if (field.autoGenerate) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = "🔧 自動生成";
+      btn.onclick = async () => {
+        const jan = document.getElementById("jan")?.value.trim();
+        const lot = document.getElementById("lot")?.value.trim();
+        if (jan && lot) {
+          const adminCode = generateAdminCode(jan, lot);
+          const count = await getExistingCount(adminCode);
+          input.value = generateControlId(adminCode, count);
+          const adminCodeInput = document.getElementById("adminCode");
+          if (adminCodeInput) adminCodeInput.value = adminCode;
+        }
+      };
+      wrapper.appendChild(btn);
+    }
+
+    container.appendChild(wrapper);
+  });
 }
 
 // === 写真アップロード処理 ===
@@ -61,30 +115,42 @@ async function handlePhotoUpload(file, controlId) {
   return await getDownloadURL(storageRef);
 }
 
+// === 入力値収集 ===
+function collectFormData(schema, form, user, isAdmin, adminCode, controlId, photoUrl, name) {
+  const data = {
+    adminCode,
+    controlId,
+    status: isAdmin ? "承認済" : "保留",
+    createdBy: user.uid,
+    createdByName: name,
+    updatedAt: serverTimestamp(),
+    timestamp: serverTimestamp()
+  };
+
+  schema.forEach(field => {
+    const el = form.elements[field.key];
+    if (!el) return;
+
+    if (field.type === "file") {
+      data[field.key] = photoUrl;
+    } else {
+      data[field.key] = el.value.trim();
+    }
+  });
+
+  return data;
+}
+
 // === DOM構築後の処理 ===
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const msgBox = document.getElementById("registerMessage");
+  const role = window.currentUserInfo?.role || "未設定";
+  const name = window.currentUserInfo?.name || "不明";
+  const isAdmin = role === "管理者";
 
-  // 管理番号自動生成ボタン
-  const autoBtn = document.getElementById("autoGenerateBtn");
-  if (autoBtn) autoBtn.addEventListener("click", applyAutoGenerate);
-
-  // 管理者専用：項目追加UI
-  const addFieldBtn = document.getElementById("addFieldBtn");
-  const extraFields = document.getElementById("extraFields");
-  if (addFieldBtn && extraFields) {
-    addFieldBtn.addEventListener("click", () => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "extraField";
-      wrapper.innerHTML = `
-        <input type="text" class="extraKey" placeholder="フィールド名" />
-        <input type="text" class="extraValue" placeholder="値" />
-        <button type="button" class="delBtn">削除</button>
-      `;
-      wrapper.querySelector(".delBtn").onclick = () => wrapper.remove();
-      extraFields.appendChild(wrapper);
-    });
-  }
+  // schema 読み込みとフォーム描画
+  const schema = await loadSchema();
+  renderForm(schema, "dynamicFormContainer", isAdmin);
 
   // === 商品登録処理 ===
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
@@ -97,56 +163,24 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const role = window.currentUserInfo?.role || "未設定";
-    const name = window.currentUserInfo?.name || "不明";
-    const isAdmin = role === "管理者";
-
     let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
-    let controlId = form.controlId.value.trim();
+    let controlId = form.controlId ? form.controlId.value.trim() : "";
     if (!adminCode || !controlId) {
-      const jan = form.jan.value.trim();
-      const lot = form.lot.value.trim();
+      const jan = form.jan?.value.trim();
+      const lot = form.lot?.value.trim();
       adminCode = generateAdminCode(jan, lot);
       const count = await getExistingCount(adminCode);
       controlId = generateControlId(adminCode, count);
     }
 
     // 写真アップロード
-    const photoFile = form.photo.files[0];
+    const photoFile = form.photo?.files[0];
     let photoUrl = null;
     if (photoFile) {
       photoUrl = await handlePhotoUpload(photoFile, controlId);
     }
 
-    const data = {
-      jan: form.jan.value.trim(),
-      lot: form.lot.value.trim(),
-      adminCode,
-      controlId,
-      name: form.name.value.trim(),
-      quantity: parseInt(form.quantity.value),
-      unit: form.unit.value,
-      expiry: form.expiry.value,
-      maker: form.maker.value.trim(),
-      location: form.location.value.trim(),
-      categoryLarge: form.categoryLarge.value.trim(),
-      categorySmall: form.categorySmall.value.trim(),
-      remarks: form.remarks?.value.trim() || "",
-      photo: photoUrl,
-      status: isAdmin ? "承認済" : "保留",
-      createdBy: user.uid,
-      createdByName: name,
-      updatedAt: serverTimestamp(),
-      timestamp: serverTimestamp()
-    };
-
-    if (isAdmin && extraFields) {
-      extraFields.querySelectorAll(".extraField").forEach(f => {
-        const key = f.querySelector(".extraKey").value.trim();
-        const val = f.querySelector(".extraValue").value.trim();
-        if (key) data[key] = val;
-      });
-    }
+    const data = collectFormData(schema, form, user, isAdmin, adminCode, controlId, photoUrl, name);
 
     try {
       if (isAdmin) {
@@ -160,12 +194,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       form.reset();
-      if (form.adminCode) form.adminCode.value = "";
-      form.controlId.value = "";
       const preview = document.getElementById("photoPreview");
-      preview.style.display = "none";
-      preview.src = "";
-      if (extraFields) extraFields.innerHTML = "";
+      if (preview) {
+        preview.style.display = "none";
+        preview.src = "";
+      }
     } catch (error) {
       console.error("登録エラー:", error);
       msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";
@@ -181,18 +214,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   onAuthStateChanged(auth, (user) => {
     if (user && adminOnlyField) {
-      const role = window.currentUserInfo?.role || "未設定";
-      const name = window.currentUserInfo?.name || "不明";
-
       if (responsibleUser) {
         responsibleUser.textContent = `👑 ${name}（${role}）`;
       }
-
-      if (role === "管理者") {
-        adminOnlyField.style.display = "block";
-      } else {
-        adminOnlyField.style.display = "none";
-      }
+      adminOnlyField.style.display = role === "管理者" ? "block" : "none";
     } else if (adminOnlyField) {
       adminOnlyField.style.display = "none";
     }
