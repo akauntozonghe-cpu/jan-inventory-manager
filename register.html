@@ -44,7 +44,7 @@
       .then(res => res.text())
       .then(html => {
         document.getElementById("headerContainer").innerHTML = html;
-        initHeader();
+        initHeader(); // 共通ヘッダー初期化
       })
       .catch(err => {
         console.error("ヘッダー読み込み失敗:", err);
