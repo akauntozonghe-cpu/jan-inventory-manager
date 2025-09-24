@@ -1,91 +1,169 @@
-<main aria-label="商品登録画面" style="margin-top: 80px; padding: 16px;">
-  <section id="registerPanel">
-    <h2>📥 商品登録</h2>
-    <form id="registerForm">
-      <!-- JANコード -->
-      <label for="jan">JANコード：</label>
-      <div class="input-with-scan">
-        <input type="text" name="jan" id="janInput" required />
-        <button type="button" id="scanJanBtn">📷 読み取り</button>
-      </div>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>商品登録 - 在庫管理</title>
 
-      <!-- Lot番号 -->
-      <label for="lot">Lot番号 / 製造番号：</label>
-      <input type="text" name="lot" id="lotInput" required />
+  <!-- 共通CSS -->
+  <link rel="stylesheet" href="header.css" />
+  <link rel="stylesheet" href="register.css" />
 
-      <!-- 商品名 -->
-      <label for="name">商品名：</label>
-      <input type="text" name="name" required />
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
 
-      <!-- 数量 -->
-      <label for="quantity">数量：</label>
-      <input type="number" name="quantity" required />
+  <!-- バーコード読み取りライブラリ -->
+  <script src="https://unpkg.com/html5-qrcode"></script>
 
-      <!-- 単位 -->
-      <label for="unit">数量単位：</label>
-      <select name="unit" required>
-        <option value="個">個</option>
-        <option value="本">本</option>
-        <option value="パック">パック</option>
-        <option value="セット">セット</option>
-        <option value="枚">枚</option>
-        <option value="箱">箱</option>
-        <option value="袋">袋</option>
-      </select>
+  <!-- トースト通知用CSS -->
+  <style>
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      min-width: 220px;
+      padding: 12px 16px;
+      border-radius: 6px;
+      color: #fff;
+      font-weight: bold;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease, transform 0.5s ease;
+      transform: translateY(20px);
+      z-index: 2000;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { background: #28a745; }
+    .toast.warning { background: #ff9800; }
+    .toast.error   { background: #f44336; }
+  </style>
+</head>
+<body>
+  <!-- 共通ヘッダー -->
+  <div id="headerContainer"></div>
+  <script type="module">
+    import { initHeader } from "./headerLogic.js";
+    fetch("header.html")
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("headerContainer").innerHTML = html;
+        initHeader();
+      })
+      .catch(err => {
+        console.error("ヘッダー読み込み失敗:", err);
+        document.getElementById("headerContainer").innerHTML =
+          "<div style='color:red; padding:10px;'>ヘッダー読み込みに失敗しました</div>";
+      });
+  </script>
 
-      <!-- 期限 -->
-      <label for="expiry">期限：</label>
-      <input type="date" name="expiry" />
+  <!-- 商品登録フォーム -->
+  <main aria-label="商品登録画面" style="margin-top: 80px; padding: 16px;">
+    <section id="registerPanel">
+      <h2>📥 商品登録</h2>
+      <form id="registerForm">
+        <!-- JANコード -->
+        <label for="jan">JANコード：</label>
+        <div class="input-with-scan">
+          <input type="text" name="jan" id="janInput" required />
+          <button type="button" id="scanJanBtn">📷 読み取り</button>
+        </div>
 
-      <!-- メーカー -->
-      <label for="maker">メーカー名：</label>
-      <input type="text" name="maker" />
+        <!-- Lot番号 -->
+        <label for="lot">Lot番号 / 製造番号：</label>
+        <input type="text" name="lot" id="lotInput" required />
 
-      <!-- 保管場所 -->
-      <label for="location">保管場所：</label>
-      <input type="text" name="location" id="location" />
+        <!-- 商品名 -->
+        <label for="name">商品名：</label>
+        <input type="text" name="name" required />
 
-      <!-- 大分類 -->
-      <label for="categoryLarge">大分類：</label>
-      <input type="text" name="categoryLarge" id="categoryLarge" />
+        <!-- 数量 -->
+        <label for="quantity">数量：</label>
+        <input type="number" name="quantity" required />
 
-      <!-- 小分類 -->
-      <label for="categorySmall">小分類：</label>
-      <input type="text" name="categorySmall" />
+        <!-- 単位 -->
+        <label for="unit">数量単位：</label>
+        <select name="unit" required>
+          <option value="個">個</option>
+          <option value="本">本</option>
+          <option value="パック">パック</option>
+          <option value="セット">セット</option>
+          <option value="枚">枚</option>
+          <option value="箱">箱</option>
+          <option value="袋">袋</option>
+        </select>
 
-      <!-- 写真 -->
-      <label for="photo">商品写真：</label>
-      <input type="file" name="photo" id="photoInput" accept="image/*" />
-      <img id="photoPreview" style="margin-top: 8px; max-width: 100%; display: none;" />
+        <!-- 期限 -->
+        <label for="expiry">期限：</label>
+        <input type="date" name="expiry" />
 
-      <!-- 管理番号自動生成 -->
-      <div class="input-with-button">
-        <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
-      </div>
+        <!-- メーカー -->
+        <label for="maker">メーカー名：</label>
+        <input type="text" name="maker" />
 
-      <!-- 管理番号（全員表示） -->
-      <label for="controlId">管理番号：</label>
-      <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
+        <!-- 保管場所 -->
+        <label for="location">保管場所：</label>
+        <div class="input-with-scan">
+          <input type="text" name="location" id="location" />
+          <button type="button" id="scanLocationBtn">📷 読み取り</button>
+        </div>
 
-      <!-- 管理者専用：管理区別番号 -->
-      <div id="adminOnlyField" style="display:none;">
-        <label for="adminCode">管理区別番号：</label>
-        <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
+        <!-- 大分類 -->
+        <label for="categoryLarge">大分類：</label>
+        <div class="input-with-scan">
+          <input type="text" name="categoryLarge" id="categoryLarge" />
+          <button type="button" id="scanCategoryBtn">📷 読み取り</button>
+        </div>
 
-        <!-- 管理者専用：項目追加UI -->
-        <h4>🛡 管理者専用設定</h4>
-        <div id="extraFields"></div>
-        <button type="button" id="addFieldBtn">＋ 項目追加</button>
-      </div>
+        <!-- 小分類 -->
+        <label for="categorySmall">小分類：</label>
+        <input type="text" name="categorySmall" />
 
-      <!-- 登録ボタン -->
-      <button type="submit">✅ 登録</button>
-    </form>
-  </section>
+        <!-- 写真 -->
+        <label for="photo">商品写真：</label>
+        <input type="file" name="photo" id="photoInput" accept="image/*" />
+        <img id="photoPreview" style="margin-top: 8px; max-width: 100%; display: none;" />
 
-  <!-- 登録結果表示 -->
-  <div id="registerMessage" style="margin-top: 16px;"></div>
+        <!-- 管理番号自動生成 -->
+        <div class="input-with-button">
+          <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
+        </div>
 
-  <!-- ユーザー情報表示 -->
-  <div id="responsibleUser" style="margin-top:8px; font-weight:bold;"></div>
-</main>
+        <!-- 管理番号（全員表示） -->
+        <label for="controlId">管理番号：</label>
+        <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
+
+        <!-- 管理者専用：管理区別番号 -->
+        <div id="adminOnlyField" style="display:none;">
+          <label for="adminCode">管理区別番号：</label>
+          <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
+
+          <!-- 管理者専用：項目追加UI -->
+          <h4>🛡 管理者専用設定</h4>
+          <div id="extraFields"></div>
+          <button type="button" id="addFieldBtn">＋ 項目追加</button>
+        </div>
+
+        <!-- 登録ボタン -->
+        <button type="submit">✅ 登録</button>
+      </form>
+    </section>
+
+    <!-- 登録結果表示 -->
+    <div id="registerMessage" style="margin-top: 16px;"></div>
+  </main>
+
+  <!-- QR読み取りオーバーレイ -->
+  <div id="qrOverlay" style="display:none;">
+    <div id="qr-reader"></div>
+    <button id="closeQrBtn">閉じる</button>
+  </div>
+
+  <!-- トースト通知エリア -->
+  <div id="toast" class="toast"></div>
+
+  <!-- ページ固有JS -->
+  <script src="register.js" defer></script>
+</body>
+</html>
