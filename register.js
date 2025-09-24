@@ -109,6 +109,7 @@ document.addEventListener("DOMContentLoaded", () => {
       location: form.location.value.trim(),
       categoryLarge: form.categoryLarge.value.trim(),
       categorySmall: form.categorySmall.value.trim(),
+      remarks: form.remarks?.value.trim() || "", // ✅ 備考を追加
       photo: null,
       status: isAdmin ? "承認済" : "保留",
       createdBy: user.uid,
