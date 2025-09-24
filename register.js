@@ -32,8 +32,11 @@ async function applyAutoGenerate() {
   const count = await getExistingCount(adminCode);
   const controlId = generateControlId(adminCode, count);
 
-  document.getElementById("adminCode").value = adminCode;
+  // 管理番号（全員表示）
   document.getElementById("controlId").value = controlId;
+  // 管理区別番号（管理者のみ）
+  const adminCodeInput = document.getElementById("adminCode");
+  if (adminCodeInput) adminCodeInput.value = adminCode;
 
   msgBox.textContent = "✅ 管理番号を自動生成しました";
   msgBox.style.color = "green";
@@ -42,9 +45,12 @@ async function applyAutoGenerate() {
 // ✅ DOM構築後の処理
 document.addEventListener("DOMContentLoaded", () => {
   const msgBox = document.getElementById("registerMessage");
+
+  // 管理番号自動生成ボタン
   const autoBtn = document.getElementById("autoGenerateBtn");
   if (autoBtn) autoBtn.addEventListener("click", applyAutoGenerate);
 
+  // 管理者専用：項目追加UI
   const addFieldBtn = document.getElementById("addFieldBtn");
   const extraFields = document.getElementById("extraFields");
   if (addFieldBtn && extraFields) {
@@ -76,6 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = window.currentUserInfo?.name || "不明";
     const isAdmin = role === "管理者";
 
+    // 管理番号／管理区別番号
     let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
     let controlId = form.controlId.value.trim();
     if (!adminCode || !controlId) {
@@ -86,6 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
       controlId = generateControlId(adminCode, count);
     }
 
+    // 基本データ
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
@@ -107,6 +115,7 @@ document.addEventListener("DOMContentLoaded", () => {
       timestamp: serverTimestamp()
     };
 
+    // 追加項目（管理者のみ）
     if (isAdmin && extraFields) {
       extraFields.querySelectorAll(".extraField").forEach(f => {
         const key = f.querySelector(".extraKey").value.trim();
