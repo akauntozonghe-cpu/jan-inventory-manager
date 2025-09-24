@@ -34,9 +34,11 @@ function generateControlId(adminCode, count) {
   return `${adminCode}-${count + 1}`;
 }
 async function getExistingCount(adminCode) {
-  const q = query(collection(db, "items"), where("adminCode", "==", adminCode));
-  const snapshot = await getDocs(q);
-  return snapshot.size;
+  // items と pendingItems 両方をカウント
+  const q1 = query(collection(db, "items"), where("adminCode", "==", adminCode));
+  const q2 = query(collection(db, "pendingItems"), where("adminCode", "==", adminCode));
+  const [snap1, snap2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+  return snap1.size + snap2.size;
 }
 
 // === フォーム描画（schema部分のみ） ===
@@ -51,7 +53,7 @@ function renderForm(schema, containerId, isAdmin) {
     wrapper.className = "formField";
 
     const label = document.createElement("label");
-    label.textContent = field.label;
+    label.textContent = field.label || field.key; // ラベルが空ならキーを表示
     label.setAttribute("for", field.key);
 
     let input;
@@ -96,8 +98,37 @@ function renderForm(schema, containerId, isAdmin) {
 
     wrapper.appendChild(label);
     wrapper.appendChild(input);
+
+    // QR読み取りボタンを追加（JAN, 保管場所, 大分類, 小分類など）
+    if (["jan", "location", "category", "subcategory"].includes(field.key)) {
+      const scanBtn = document.createElement("button");
+      scanBtn.type = "button";
+      scanBtn.textContent = "📷 読み取り";
+      scanBtn.onclick = () => startQrScan(field.key);
+      wrapper.appendChild(scanBtn);
+    }
+
     container.appendChild(wrapper);
   });
+}
+
+// === QRコード読み取り処理 ===
+function startQrScan(targetId) {
+  document.getElementById("qrOverlay").style.display = "block";
+  const html5QrCode = new Html5Qrcode("qr-reader");
+  html5QrCode.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 250 },
+    (decodedText) => {
+      document.getElementById(targetId).value = decodedText;
+      html5QrCode.stop();
+      document.getElementById("qrOverlay").style.display = "none";
+    }
+  );
+  document.getElementById("closeQrBtn").onclick = () => {
+    html5QrCode.stop();
+    document.getElementById("qrOverlay").style.display = "none";
+  };
 }
 
 // === 写真アップロード処理 ===
@@ -147,6 +178,21 @@ document.addEventListener("DOMContentLoaded", async () => {
   // 初期描画（role確定前は adminOnly を非表示）
   renderForm(schema, "dynamicFormContainer", false);
 
+  // === 管理番号自動生成ボタン ===
+  document.getElementById("autoGenerateBtn").onclick = async () => {
+    const jan = document.getElementById("janInput").value.trim();
+    const lot = document.getElementById("lotInput").value.trim();
+    if (!jan || !lot) {
+      alert("JANとLotを入力してください");
+      return;
+    }
+    const adminCode = generateAdminCode(jan, lot);
+    const count = await getExistingCount(adminCode);
+    const controlId = generateControlId(adminCode, count);
+    document.getElementById("adminCode").value = adminCode;
+    document.getElementById("controlId").value = controlId;
+  };
+
   // === 商品登録処理 ===
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -171,6 +217,16 @@ document.addEventListener("DOMContentLoaded", async () => {
       controlId = generateControlId(adminCode, count);
     }
 
+    // JAN重複チェック
+    const jan = form.jan?.value.trim();
+    const dupQ = query(collection(db, "items"), where("jan", "==", jan));
+    const dupSnap = await getDocs(dupQ);
+    if (!dupSnap.empty) {
+      msgBox.textContent = "⚠️ このJANコードは既に登録されています";
+      msgBox.style.color = "red";
+      return;
+    }
+
     const photoFile = form.photo?.files[0];
     let photoUrl = null;
     if (photoFile) {
@@ -179,7 +235,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const data = collectFormData(schema, form, user, role, adminCode, controlId, photoUrl, name);
 
-    try {
+        try {
       if (role === "管理者") {
         await addDoc(collection(db, "items"), data);
         msgBox.textContent = "✅ 登録完了（即一覧に反映されました）";
@@ -193,6 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         msgBox.style.color = "red";
       }
 
+      // フォームリセット & プレビュー非表示
       form.reset();
       schema.forEach(field => {
         if (field.type === "file") {
@@ -231,7 +288,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         adminTools.style.display = role === "管理者" ? "block" : "none";
       }
 
-      // role が確定したので再描画
+      // role が確定したので再描画（管理者なら adminOnly 項目を表示）
       renderForm(schema, "dynamicFormContainer", role === "管理者");
 
     } else {
