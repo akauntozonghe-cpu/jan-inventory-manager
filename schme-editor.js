@@ -16,7 +16,7 @@ function renderEditor(schema) {
   schema.forEach((field, index) => {
     const row = document.createElement("div");
     row.className = "schemaRow";
-    row.draggable = true; // ドラッグ可能に
+    row.draggable = true;
 
     row.innerHTML = `
       <input type="text" value="${field.key}" class="schemaKey" placeholder="キー" />
@@ -57,20 +57,13 @@ function renderEditor(schema) {
     const typeSelect = row.querySelector(".schemaType");
     const optionsInput = row.querySelector(".schemaOptions");
     typeSelect.addEventListener("change", () => {
-      if (typeSelect.value === "select") {
-        optionsInput.style.display = "inline-block";
-      } else {
-        optionsInput.style.display = "none";
-      }
+      optionsInput.style.display = typeSelect.value === "select" ? "inline-block" : "none";
     });
 
     // ドラッグイベント
-    row.addEventListener("dragstart", () => {
-      row.classList.add("dragging");
-    });
+    row.addEventListener("dragstart", () => row.classList.add("dragging"));
     row.addEventListener("dragend", () => {
       row.classList.remove("dragging");
-      // 並び替え後に schema を更新
       const newOrder = [];
       editor.querySelectorAll(".schemaRow").forEach(r => {
         newOrder.push(collectRowData(r));
@@ -94,11 +87,32 @@ function renderEditor(schema) {
   // 保存ボタン
   document.getElementById("saveSchemaBtn").onclick = async () => {
     const newSchema = [];
+    const keys = new Set();
+    let valid = true;
+
     editor.querySelectorAll(".schemaRow").forEach(row => {
-      newSchema.push(collectRowData(row));
+      const field = collectRowData(row);
+      if (!field.key) {
+        alert("キーが空のフィールドがあります");
+        valid = false;
+        return;
+      }
+      if (keys.has(field.key)) {
+        alert(`キー "${field.key}" が重複しています`);
+        valid = false;
+        return;
+      }
+      keys.add(field.key);
+      newSchema.push(field);
     });
+
+    if (!valid) return;
+
     await setDoc(doc(db, "config", "formSchema"), { schema: newSchema });
-    document.getElementById("editorMessage").textContent = "✅ 保存しました";
+    const msg = document.getElementById("editorMessage");
+    msg.textContent = "✅ 保存しました";
+    msg.style.color = "green";
+    setTimeout(() => msg.textContent = "", 3000);
   };
 
   // プレビュー

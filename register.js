@@ -1,9 +1,150 @@
+import { db, auth } from "./firebase.js";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  serverTimestamp,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+const storage = getStorage();
+
+// === schema 読み込み ===
+async function loadSchema() {
+  const snap = await getDoc(doc(db, "config", "formSchema"));
+  return snap.exists() ? snap.data().schema : [];
+}
+
+// === 管理番号生成ロジック ===
+function generateAdminCode(jan, lot) {
+  return `${jan}-${lot}`;
+}
+function generateControlId(adminCode, count) {
+  return `${adminCode}-${count + 1}`;
+}
+async function getExistingCount(adminCode) {
+  const q = query(collection(db, "items"), where("adminCode", "==", adminCode));
+  const snapshot = await getDocs(q);
+  return snapshot.size;
+}
+
+// === フォーム描画（schema部分のみ） ===
+function renderForm(schema, containerId, isAdmin) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  schema.forEach(field => {
+    if (field.adminOnly && !isAdmin) return;
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "formField";
+
+    const label = document.createElement("label");
+    label.textContent = field.label;
+    label.setAttribute("for", field.key);
+
+    let input;
+    switch (field.type) {
+      case "file":
+        input = document.createElement("input");
+        input.type = "file";
+        input.accept = "image/*";
+        const preview = document.createElement("img");
+        preview.id = field.key + "Preview";
+        preview.style.display = "none";
+        preview.style.maxWidth = "100%";
+        input.onchange = e => {
+          const file = e.target.files[0];
+          if (file) {
+            preview.src = URL.createObjectURL(file);
+            preview.style.display = "block";
+          }
+        };
+        wrapper.appendChild(preview);
+        break;
+      case "textarea":
+        input = document.createElement("textarea");
+        break;
+      case "select":
+        input = document.createElement("select");
+        (field.options || []).forEach(opt => {
+          const option = document.createElement("option");
+          option.value = opt;
+          option.textContent = opt;
+          input.appendChild(option);
+        });
+        break;
+      default:
+        input = document.createElement("input");
+        input.type = field.type || "text";
+    }
+
+    input.name = field.key;
+    input.id = field.key;
+    if (field.required) input.required = true;
+
+    wrapper.appendChild(label);
+    wrapper.appendChild(input);
+    container.appendChild(wrapper);
+  });
+}
+
+// === 写真アップロード処理 ===
+async function handlePhotoUpload(file, controlId) {
+  if (!file) return null;
+  const storageRef = ref(storage, `photos/${controlId}/${file.name}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
+}
+
+// === 入力値収集 ===
+function collectFormData(schema, form, user, role, adminCode, controlId, photoUrl, name) {
+  const data = {
+    jan: form.jan?.value.trim(),
+    lot: form.lot?.value.trim(),
+    adminCode,
+    controlId,
+    status: role === "管理者" ? "承認済" : "承認待ち",
+    createdBy: user.uid,
+    createdByName: name,
+    updatedAt: serverTimestamp(),
+    timestamp: serverTimestamp()
+  };
+
+  if (photoUrl) {
+    data.photo = photoUrl;
+  }
+
+  schema.forEach(field => {
+    const el = form.elements[field.key];
+    if (!el) return;
+    if (field.type === "file") {
+      data[field.key] = photoUrl;
+    } else {
+      data[field.key] = el.value.trim();
+    }
+  });
+
+  return data;
+}
+
 // === DOM構築後の処理 ===
 document.addEventListener("DOMContentLoaded", async () => {
   const msgBox = document.getElementById("registerMessage");
-
-  // schema 読み込みとフォーム描画（管理者かどうかは後で判定）
   const schema = await loadSchema();
+
+  // 初期描画（role確定前は adminOnly を非表示）
   renderForm(schema, "dynamicFormContainer", false);
 
   // === 商品登録処理 ===
@@ -17,11 +158,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    // 最新の role / name を取得
     const role = window.currentUserInfo?.role || "未設定";
     const name = window.currentUserInfo?.name || user.displayName || "不明";
 
-    // 固定フィールドから adminCode/controlId を生成
     let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
     let controlId = form.controlId ? form.controlId.value.trim() : "";
     if (!adminCode || !controlId) {
@@ -32,14 +171,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       controlId = generateControlId(adminCode, count);
     }
 
-    // 写真アップロード（固定photo）
     const photoFile = form.photo?.files[0];
     let photoUrl = null;
     if (photoFile) {
       photoUrl = await handlePhotoUpload(photoFile, controlId);
     }
 
-    // データ収集
     const data = collectFormData(schema, form, user, role, adminCode, controlId, photoUrl, name);
 
     try {
@@ -94,7 +231,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         adminTools.style.display = role === "管理者" ? "block" : "none";
       }
 
-      // 管理者ならフォーム再描画（adminOnly項目を表示）
+      // role が確定したので再描画
       renderForm(schema, "dynamicFormContainer", role === "管理者");
 
     } else {
