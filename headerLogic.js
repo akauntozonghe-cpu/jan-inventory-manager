@@ -28,7 +28,7 @@ function showToast(message, type = "info") {
   }, 3000);
 }
 
-export function initHeader() {
+export function initHeader({ requireLogin = false } = {}) {
   const uid = localStorage.getItem("uid");
   const role = localStorage.getItem("role");
   const name = localStorage.getItem("name");
@@ -40,40 +40,57 @@ export function initHeader() {
   const adminMenu = document.getElementById("adminMenu");
   const logoutBtn = document.getElementById("logoutBtn");
 
+  // ✅ 未ログイン時のリダイレクト（オプション）
+  if (requireLogin && !uid) {
+    showToast("⚠️ ログインが必要です", "warning");
+    setTimeout(() => {
+      window.location.href = "index.html";
+    }, 1000);
+    return;
+  }
+
   // ✅ グローバルに保持（register.js から参照可能にする）
   window.currentUserInfo = { uid, role, name, lastLogin };
 
   // ユーザー表示（役割バッジ付き）
-  if (name && role) {
-    let roleIcon = "👤";
-    if (role === "管理者") roleIcon = "🛡";
-    else if (role === "責任者") roleIcon = "📋";
+  if (responsibleUser) {
+    if (name && role) {
+      let roleIcon = "👤";
+      if (role === "管理者") roleIcon = "🛡";
+      else if (role === "責任者") roleIcon = "📋";
 
-    responsibleUser.innerHTML = `👑 ${name} さん <span class="role-badge">${roleIcon} ${role}</span>`;
-  } else {
-    responsibleUser.textContent = "👑 未ログイン";
+      responsibleUser.innerHTML = `👑 ${name} さん <span class="role-badge">${roleIcon} ${role}</span>`;
+    } else {
+      responsibleUser.textContent = "👑 未ログイン";
+    }
   }
 
   // 最終ログイン表示
-  if (lastLogin) {
-    const d = new Date(lastLogin);
-    lastJudgment.textContent = `🕒 最終：${formatDateTime(d)}`;
-  } else {
-    lastJudgment.textContent = "🕒 最終：--";
+  if (lastJudgment) {
+    if (lastLogin) {
+      const d = new Date(lastLogin);
+      lastJudgment.textContent = `🕒 最終：${formatDateTime(d)}`;
+    } else {
+      lastJudgment.textContent = "🕒 最終：--";
+    }
   }
 
   // 現在時刻をリアルタイム更新
-  function updateClock() {
-    clock.textContent = `⏱ 現在：${formatDateTime(new Date())}`;
+  if (clock) {
+    function updateClock() {
+      clock.textContent = `⏱ 現在：${formatDateTime(new Date())}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
   }
-  updateClock();
-  setInterval(updateClock, 1000);
 
   // 管理者メニュー表示制御
-  if (role === "管理者") {
-    adminMenu.removeAttribute("hidden");
-  } else {
-    adminMenu.setAttribute("hidden", true);
+  if (adminMenu) {
+    if (role === "管理者") {
+      adminMenu.removeAttribute("hidden");
+    } else {
+      adminMenu.setAttribute("hidden", true);
+    }
   }
 
   // ログアウト処理（トースト通知付き）

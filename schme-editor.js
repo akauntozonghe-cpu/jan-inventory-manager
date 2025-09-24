@@ -16,10 +16,11 @@ function renderEditor(schema) {
   schema.forEach((field, index) => {
     const row = document.createElement("div");
     row.className = "schemaRow";
-    row.draggable = true; // ← ドラッグ可能に
+    row.draggable = true; // ドラッグ可能に
+
     row.innerHTML = `
-      <input type="text" value="${field.key}" class="schemaKey" />
-      <input type="text" value="${field.label}" class="schemaLabel" />
+      <input type="text" value="${field.key}" class="schemaKey" placeholder="キー" />
+      <input type="text" value="${field.label}" class="schemaLabel" placeholder="ラベル" />
       <select class="schemaType">
         <option ${field.type==="text"?"selected":""}>text</option>
         <option ${field.type==="number"?"selected":""}>number</option>
@@ -31,6 +32,9 @@ function renderEditor(schema) {
       <label>
         必須 <input type="checkbox" class="schemaRequired" ${field.required?"checked":""}/>
       </label>
+      <input type="text" value="${(field.options||[]).join(",")}" 
+             class="schemaOptions" placeholder="選択肢（カンマ区切り）"
+             style="display:${field.type==="select"?"inline-block":"none"};" />
       <button type="button" class="delBtn">削除</button>
     `;
     editor.appendChild(row);
@@ -41,6 +45,17 @@ function renderEditor(schema) {
       renderEditor(schema);
     };
 
+    // type が select のときだけ options 入力欄を表示
+    const typeSelect = row.querySelector(".schemaType");
+    const optionsInput = row.querySelector(".schemaOptions");
+    typeSelect.addEventListener("change", () => {
+      if (typeSelect.value === "select") {
+        optionsInput.style.display = "inline-block";
+      } else {
+        optionsInput.style.display = "none";
+      }
+    });
+
     // ドラッグイベント
     row.addEventListener("dragstart", () => {
       row.classList.add("dragging");
@@ -50,12 +65,7 @@ function renderEditor(schema) {
       // 並び替え後に schema を更新
       const newOrder = [];
       editor.querySelectorAll(".schemaRow").forEach(r => {
-        newOrder.push({
-          key: r.querySelector(".schemaKey").value.trim(),
-          label: r.querySelector(".schemaLabel").value.trim(),
-          type: r.querySelector(".schemaType").value,
-          required: r.querySelector(".schemaRequired").checked
-        });
+        newOrder.push(collectRowData(r));
       });
       schema.splice(0, schema.length, ...newOrder);
     });
@@ -77,12 +87,7 @@ function renderEditor(schema) {
   document.getElementById("saveSchemaBtn").onclick = async () => {
     const newSchema = [];
     editor.querySelectorAll(".schemaRow").forEach(row => {
-      newSchema.push({
-        key: row.querySelector(".schemaKey").value.trim(),
-        label: row.querySelector(".schemaLabel").value.trim(),
-        type: row.querySelector(".schemaType").value,
-        required: row.querySelector(".schemaRequired").checked
-      });
+      newSchema.push(collectRowData(row));
     });
     await setDoc(doc(db, "config", "formSchema"), { schema: newSchema });
     document.getElementById("editorMessage").textContent = "✅ 保存しました";
@@ -91,6 +96,19 @@ function renderEditor(schema) {
   // プレビュー
   document.getElementById("previewBtn").onclick = () => {
     renderPreview(schema);
+  };
+}
+
+// === 1行分のデータ収集 ===
+function collectRowData(row) {
+  return {
+    key: row.querySelector(".schemaKey").value.trim(),
+    label: row.querySelector(".schemaLabel").value.trim(),
+    type: row.querySelector(".schemaType").value,
+    required: row.querySelector(".schemaRequired").checked,
+    options: row.querySelector(".schemaType").value === "select"
+      ? row.querySelector(".schemaOptions").value.split(",").map(s => s.trim()).filter(Boolean)
+      : []
   };
 }
 
@@ -154,7 +172,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderEditor(schema);
 
   document.getElementById("addFieldBtn").onclick = () => {
-    schema.push({ key:"", label:"", type:"text", required:false });
+    schema.push({ key:"", label:"", type:"text", required:false, options:[] });
     renderEditor(schema);
   };
 });
