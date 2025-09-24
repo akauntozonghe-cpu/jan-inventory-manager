@@ -1,11 +1,17 @@
 // register.js
 import { db, auth } from "./firebase.js";
-import { collection, addDoc, query, where, getDocs, serverTimestamp } 
-  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { onAuthStateChanged } 
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+import { onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
-// ✅ 管理番号生成ロジック
+// === 管理番号生成ロジック ===
 function generateAdminCode(jan, lot) {
   return `${jan}-${lot}`;
 }
@@ -32,9 +38,7 @@ async function applyAutoGenerate() {
   const count = await getExistingCount(adminCode);
   const controlId = generateControlId(adminCode, count);
 
-  // 管理番号（全員表示）
   document.getElementById("controlId").value = controlId;
-  // 管理区別番号（管理者のみ）
   const adminCodeInput = document.getElementById("adminCode");
   if (adminCodeInput) adminCodeInput.value = adminCode;
 
@@ -42,7 +46,7 @@ async function applyAutoGenerate() {
   msgBox.style.color = "green";
 }
 
-// ✅ DOM構築後の処理
+// === DOM構築後の処理 ===
 document.addEventListener("DOMContentLoaded", () => {
   const msgBox = document.getElementById("registerMessage");
 
@@ -67,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // 商品登録処理
+  // === 商品登録処理 ===
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const form = e.target;
@@ -82,7 +86,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = window.currentUserInfo?.name || "不明";
     const isAdmin = role === "管理者";
 
-    // 管理番号／管理区別番号
     let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
     let controlId = form.controlId.value.trim();
     if (!adminCode || !controlId) {
@@ -93,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
       controlId = generateControlId(adminCode, count);
     }
 
-    // 基本データ
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
@@ -115,7 +117,6 @@ document.addEventListener("DOMContentLoaded", () => {
       timestamp: serverTimestamp()
     };
 
-    // 追加項目（管理者のみ）
     if (isAdmin && extraFields) {
       extraFields.querySelectorAll(".extraField").forEach(f => {
         const key = f.querySelector(".extraKey").value.trim();
@@ -147,18 +148,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 管理者表示制御
+  // === 管理者表示制御 ===
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
+
+  // 初期状態は必ず非表示
+  if (adminOnlyField) adminOnlyField.style.display = "none";
 
   onAuthStateChanged(auth, (user) => {
     if (user && adminOnlyField) {
       const role = window.currentUserInfo?.role || "未設定";
       const name = window.currentUserInfo?.name || "不明";
+
       if (responsibleUser) {
         responsibleUser.textContent = `👑 ${name}（${role}）`;
       }
-      adminOnlyField.style.display = role === "管理者" ? "block" : "none";
+
+      if (role === "管理者") {
+        adminOnlyField.style.display = "block";
+      } else {
+        adminOnlyField.style.display = "none";
+      }
     } else if (adminOnlyField) {
       adminOnlyField.style.display = "none";
     }

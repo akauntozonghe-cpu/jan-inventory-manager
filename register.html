@@ -1,167 +1,91 @@
-// register.js
-import { db, auth } from "./firebase.js";
-import {
-  collection,
-  addDoc,
-  query,
-  where,
-  getDocs,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
-import { onAuthStateChanged }
-  from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+<main aria-label="商品登録画面" style="margin-top: 80px; padding: 16px;">
+  <section id="registerPanel">
+    <h2>📥 商品登録</h2>
+    <form id="registerForm">
+      <!-- JANコード -->
+      <label for="jan">JANコード：</label>
+      <div class="input-with-scan">
+        <input type="text" name="jan" id="janInput" required />
+        <button type="button" id="scanJanBtn">📷 読み取り</button>
+      </div>
 
-// ✅ 管理番号生成ロジック
-function generateAdminCode(jan, lot) {
-  return `${jan}-${lot}`;
-}
-function generateControlId(adminCode, count) {
-  return `${adminCode}-${count + 1}`;
-}
-async function getExistingCount(adminCode) {
-  const q = query(collection(db, "items"), where("adminCode", "==", adminCode));
-  const snapshot = await getDocs(q);
-  return snapshot.size;
-}
-async function applyAutoGenerate() {
-  const msgBox = document.getElementById("registerMessage");
-  const jan = document.getElementById("janInput").value.trim();
-  const lot = document.getElementById("lotInput").value.trim();
+      <!-- Lot番号 -->
+      <label for="lot">Lot番号 / 製造番号：</label>
+      <input type="text" name="lot" id="lotInput" required />
 
-  if (!jan || !lot) {
-    msgBox.textContent = "⚠️ JANコードとLot番号は必須です。";
-    msgBox.style.color = "red";
-    return;
-  }
+      <!-- 商品名 -->
+      <label for="name">商品名：</label>
+      <input type="text" name="name" required />
 
-  const adminCode = generateAdminCode(jan, lot);
-  const count = await getExistingCount(adminCode);
-  const controlId = generateControlId(adminCode, count);
+      <!-- 数量 -->
+      <label for="quantity">数量：</label>
+      <input type="number" name="quantity" required />
 
-  document.getElementById("controlId").value = controlId;
-  const adminCodeInput = document.getElementById("adminCode");
-  if (adminCodeInput) adminCodeInput.value = adminCode;
+      <!-- 単位 -->
+      <label for="unit">数量単位：</label>
+      <select name="unit" required>
+        <option value="個">個</option>
+        <option value="本">本</option>
+        <option value="パック">パック</option>
+        <option value="セット">セット</option>
+        <option value="枚">枚</option>
+        <option value="箱">箱</option>
+        <option value="袋">袋</option>
+      </select>
 
-  msgBox.textContent = "✅ 管理番号を自動生成しました";
-  msgBox.style.color = "green";
-}
+      <!-- 期限 -->
+      <label for="expiry">期限：</label>
+      <input type="date" name="expiry" />
 
-// ✅ DOM構築後の処理
-document.addEventListener("DOMContentLoaded", () => {
-  const msgBox = document.getElementById("registerMessage");
+      <!-- メーカー -->
+      <label for="maker">メーカー名：</label>
+      <input type="text" name="maker" />
 
-  // 管理番号自動生成ボタン
-  const autoBtn = document.getElementById("autoGenerateBtn");
-  if (autoBtn) autoBtn.addEventListener("click", applyAutoGenerate);
+      <!-- 保管場所 -->
+      <label for="location">保管場所：</label>
+      <input type="text" name="location" id="location" />
 
-  // 管理者専用：項目追加UI
-  const addFieldBtn = document.getElementById("addFieldBtn");
-  const extraFields = document.getElementById("extraFields");
-  if (addFieldBtn && extraFields) {
-    addFieldBtn.addEventListener("click", () => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "extraField";
-      wrapper.innerHTML = `
-        <input type="text" class="extraKey" placeholder="フィールド名" />
-        <input type="text" class="extraValue" placeholder="値" />
-        <button type="button" class="delBtn">削除</button>
-      `;
-      wrapper.querySelector(".delBtn").onclick = () => wrapper.remove();
-      extraFields.appendChild(wrapper);
-    });
-  }
+      <!-- 大分類 -->
+      <label for="categoryLarge">大分類：</label>
+      <input type="text" name="categoryLarge" id="categoryLarge" />
 
-  // 商品登録処理
-  document.getElementById("registerForm").addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const user = auth.currentUser;
-    if (!user) {
-      msgBox.textContent = "⚠️ ログインが必要です";
-      msgBox.style.color = "red";
-      return;
-    }
+      <!-- 小分類 -->
+      <label for="categorySmall">小分類：</label>
+      <input type="text" name="categorySmall" />
 
-    const role = window.currentUserInfo?.role || "未設定";
-    const name = window.currentUserInfo?.name || "不明";
-    const isAdmin = role === "管理者";
+      <!-- 写真 -->
+      <label for="photo">商品写真：</label>
+      <input type="file" name="photo" id="photoInput" accept="image/*" />
+      <img id="photoPreview" style="margin-top: 8px; max-width: 100%; display: none;" />
 
-    let adminCode = form.adminCode ? form.adminCode.value.trim() : "";
-    let controlId = form.controlId.value.trim();
-    if (!adminCode || !controlId) {
-      const jan = form.jan.value.trim();
-      const lot = form.lot.value.trim();
-      adminCode = generateAdminCode(jan, lot);
-      const count = await getExistingCount(adminCode);
-      controlId = generateControlId(adminCode, count);
-    }
+      <!-- 管理番号自動生成 -->
+      <div class="input-with-button">
+        <button type="button" id="autoGenerateBtn">🔧 管理番号自動生成</button>
+      </div>
 
-    const data = {
-      jan: form.jan.value.trim(),
-      lot: form.lot.value.trim(),
-      adminCode,
-      controlId,
-      name: form.name.value.trim(),
-      quantity: parseInt(form.quantity.value),
-      unit: form.unit.value,
-      expiry: form.expiry.value,
-      maker: form.maker.value.trim(),
-      location: form.location.value.trim(),
-      categoryLarge: form.categoryLarge.value.trim(),
-      categorySmall: form.categorySmall.value.trim(),
-      photo: null,
-      status: isAdmin ? "承認済" : "保留",
-      createdBy: user.uid,
-      createdByName: name,
-      updatedAt: serverTimestamp(),
-      timestamp: serverTimestamp()
-    };
+      <!-- 管理番号（全員表示） -->
+      <label for="controlId">管理番号：</label>
+      <input type="text" name="controlId" id="controlId" placeholder="自動生成されます" />
 
-    if (isAdmin && extraFields) {
-      extraFields.querySelectorAll(".extraField").forEach(f => {
-        const key = f.querySelector(".extraKey").value.trim();
-        const val = f.querySelector(".extraValue").value.trim();
-        if (key) data[key] = val;
-      });
-    }
+      <!-- 管理者専用：管理区別番号 -->
+      <div id="adminOnlyField" style="display:none;">
+        <label for="adminCode">管理区別番号：</label>
+        <input type="text" name="adminCode" id="adminCode" placeholder="JAN+Lotで自動生成" />
 
-    try {
-      if (isAdmin) {
-        await addDoc(collection(db, "items"), data);
-        msgBox.textContent = "✅ 登録完了（即一覧反映）";
-        msgBox.style.color = "green";
-      } else {
-        await addDoc(collection(db, "pendingItems"), data);
-        msgBox.textContent = "✅ 登録完了（承認待ち・管理者に通知）";
-        msgBox.style.color = "orange";
-      }
+        <!-- 管理者専用：項目追加UI -->
+        <h4>🛡 管理者専用設定</h4>
+        <div id="extraFields"></div>
+        <button type="button" id="addFieldBtn">＋ 項目追加</button>
+      </div>
 
-      form.reset();
-      if (form.adminCode) form.adminCode.value = "";
-      form.controlId.value = "";
-      document.getElementById("photoPreview").style.display = "none";
-      if (extraFields) extraFields.innerHTML = "";
-    } catch (error) {
-      console.error("登録エラー:", error);
-      msgBox.textContent = "❌ 登録に失敗しました。もう一度お試しください。";
-      msgBox.style.color = "red";
-    }
-  });
+      <!-- 登録ボタン -->
+      <button type="submit">✅ 登録</button>
+    </form>
+  </section>
 
-  // 管理者表示制御
-  const responsibleUser = document.getElementById("responsibleUser");
-  const adminOnlyField = document.getElementById("adminOnlyField");
+  <!-- 登録結果表示 -->
+  <div id="registerMessage" style="margin-top: 16px;"></div>
 
-  onAuthStateChanged(auth, (user) => {
-    if (user && adminOnlyField) {
-      const role = window.currentUserInfo?.role || "未設定";
-      const name = window.currentUserInfo?.name || "不明";
-      if (responsibleUser) {
-        responsibleUser.textContent = `👑 ${name}（${role}）`;
-      }
-      adminOnlyField.style.display = role === "管理者" ? "block" : "none";
-    } else if (adminOnlyField) {
-      adminOnlyField.style.display = "none";
-    }
-  });
-});
+  <!-- ユーザー情報表示 -->
+  <div id="responsibleUser" style="margin-top:8px; font-weight:bold;"></div>
+</main>
