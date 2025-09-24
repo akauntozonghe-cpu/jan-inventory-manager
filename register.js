@@ -1,4 +1,3 @@
-// register.js
 import { db, auth } from "./firebase.js";
 import {
   collection,
@@ -10,6 +9,14 @@ import {
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 import { onAuthStateChanged }
   from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+const storage = getStorage();
 
 // === 管理番号生成ロジック ===
 function generateAdminCode(jan, lot) {
@@ -44,6 +51,14 @@ async function applyAutoGenerate() {
 
   msgBox.textContent = "✅ 管理番号を自動生成しました";
   msgBox.style.color = "green";
+}
+
+// === 写真アップロード処理 ===
+async function handlePhotoUpload(file, controlId) {
+  if (!file) return null;
+  const storageRef = ref(storage, `photos/${controlId}/${file.name}`);
+  await uploadBytes(storageRef, file);
+  return await getDownloadURL(storageRef);
 }
 
 // === DOM構築後の処理 ===
@@ -96,6 +111,13 @@ document.addEventListener("DOMContentLoaded", () => {
       controlId = generateControlId(adminCode, count);
     }
 
+    // 写真アップロード
+    const photoFile = form.photo.files[0];
+    let photoUrl = null;
+    if (photoFile) {
+      photoUrl = await handlePhotoUpload(photoFile, controlId);
+    }
+
     const data = {
       jan: form.jan.value.trim(),
       lot: form.lot.value.trim(),
@@ -109,8 +131,8 @@ document.addEventListener("DOMContentLoaded", () => {
       location: form.location.value.trim(),
       categoryLarge: form.categoryLarge.value.trim(),
       categorySmall: form.categorySmall.value.trim(),
-      remarks: form.remarks?.value.trim() || "", // ✅ 備考を追加
-      photo: null,
+      remarks: form.remarks?.value.trim() || "",
+      photo: photoUrl,
       status: isAdmin ? "承認済" : "保留",
       createdBy: user.uid,
       createdByName: name,
@@ -140,7 +162,9 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       if (form.adminCode) form.adminCode.value = "";
       form.controlId.value = "";
-      document.getElementById("photoPreview").style.display = "none";
+      const preview = document.getElementById("photoPreview");
+      preview.style.display = "none";
+      preview.src = "";
       if (extraFields) extraFields.innerHTML = "";
     } catch (error) {
       console.error("登録エラー:", error);
@@ -153,7 +177,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const responsibleUser = document.getElementById("responsibleUser");
   const adminOnlyField = document.getElementById("adminOnlyField");
 
-  // 初期状態は必ず非表示
   if (adminOnlyField) adminOnlyField.style.display = "none";
 
   onAuthStateChanged(auth, (user) => {
